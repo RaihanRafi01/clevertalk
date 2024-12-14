@@ -6,15 +6,23 @@ import 'package:get/get.dart';
 
 import '../../../../common/appColors.dart';
 import '../../../../common/customFont.dart';
+import '../../../../common/widgets/customAppBar.dart';
 
 class ConvertView extends GetView {
   const ConvertView({super.key});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('ConvertView'),
-        centerTitle: true,
+      appBar: CustomAppBar(
+        title: "CLEVERTALK",
+        onFirstIconPressed: () {
+          // Action for the first button
+          print("First icon pressed");
+        },
+        onSecondIconPressed: () {
+          // Action for the second button
+          print("Second icon pressed");
+        },
       ),
       body: Center(
         child: Padding(

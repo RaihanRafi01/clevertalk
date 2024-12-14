@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 
 import '../../../../common/appColors.dart';
 import '../../../../common/customFont.dart';
+import '../../../../common/widgets/customAppBar.dart';
 import '../../../../common/widgets/svgIcon.dart';
 
 class AudioPlayerView extends GetView {
@@ -14,9 +15,16 @@ class AudioPlayerView extends GetView {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('AudioPlayerView'),
-        centerTitle: true,
+      appBar: CustomAppBar(
+        title: "CLEVERTALK",
+        onFirstIconPressed: () {
+          // Action for the first button
+          print("First icon pressed");
+        },
+        onSecondIconPressed: () {
+          // Action for the second button
+          print("Second icon pressed");
+        },
       ),
       body: Center(
         child: SingleChildScrollView(

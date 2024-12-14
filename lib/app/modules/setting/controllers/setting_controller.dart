@@ -1,23 +1,16 @@
 import 'package:get/get.dart';
 
 class SettingController extends GetxController {
-  //TODO: Implement SettingController
+  var isWritingReminderOn = false.obs;
+  var selectedLanguage = 'English'.obs;
 
-  final count = 0.obs;
-  @override
-  void onInit() {
-    super.onInit();
+  // Toggle method for the Writing Reminder
+  void toggleWritingReminder(bool value) {
+    isWritingReminderOn.value = value;
   }
 
-  @override
-  void onReady() {
-    super.onReady();
+  // Change the language
+  void changeLanguage(String newLanguage) {
+    selectedLanguage.value = newLanguage;
   }
-
-  @override
-  void onClose() {
-    super.onClose();
-  }
-
-  void increment() => count.value++;
 }

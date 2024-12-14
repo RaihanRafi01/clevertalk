@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
 import '../../../../common/appColors.dart';
+import '../../../../common/widgets/customAppBar.dart';
 import '../../../../common/widgets/home/audioPlayerCard.dart';
 import '../../../../common/widgets/home/customPopUp.dart';
 import '../../../../common/widgets/svgIcon.dart';
@@ -68,6 +69,17 @@ class RecordView extends GetView<RecordController> {
     final RecordController controller = Get.put(RecordController());
 
     return Scaffold(
+      appBar: CustomAppBar(
+        title: "CLEVERTALK",
+        onFirstIconPressed: () {
+          // Action for the first button
+          print("First icon pressed");
+        },
+        onSecondIconPressed: () {
+          // Action for the second button
+          print("Second icon pressed");
+        },
+      ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../common/widgets/audio_text/customListTile.dart';
 import '../../../../common/customFont.dart';
+import '../../../../common/widgets/customAppBar.dart';
 
 class AudioView extends StatelessWidget {
   const AudioView({super.key});
@@ -8,9 +9,17 @@ class AudioView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('AudioView'),
-        centerTitle: true,
+      appBar: CustomAppBar(
+        isSearch: true,
+        title: "CLEVERTALK",
+        onFirstIconPressed: () {
+          // Action for the first button
+          print("First icon pressed");
+        },
+        onSecondIconPressed: () {
+          // Action for the second button
+          print("Second icon pressed");
+        },
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 5),
@@ -43,6 +52,7 @@ class AudioView extends StatelessWidget {
                 },
               ),
             ),
+            SizedBox(height: 58,)
           ],
         ),
       ),

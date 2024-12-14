@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 
 import '../../../../common/appColors.dart';
 import '../../../../common/customFont.dart';
+import '../../../../common/widgets/customAppBar.dart';
 import '../../../../common/widgets/home/audioPlayerCard.dart';
 import '../../../../common/widgets/home/videoCard.dart';
 import '../controllers/home_controller.dart';
@@ -15,9 +16,17 @@ class HomeView extends GetView<HomeController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('HomeView'),
-        centerTitle: true,
+      appBar: CustomAppBar(
+        isSearch: true,
+        title: "CLEVERTALK",
+        onFirstIconPressed: () {
+          // Action for the first button
+          print("First icon pressed");
+        },
+        onSecondIconPressed: () {
+          // Action for the second button
+          print("Second icon pressed");
+        },
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -114,7 +123,7 @@ class HomeView extends GetView<HomeController> {
               AudioPlayerCard(),
               SizedBox(height: 20,),
               CustomButton(width: 190,borderRadius: 5,text: 'Start Record', onPressed: () => Get.to(() => RecordView()),),
-              SizedBox(height: 20,),
+              SizedBox(height: 70,)
             ],
           ),
         ),

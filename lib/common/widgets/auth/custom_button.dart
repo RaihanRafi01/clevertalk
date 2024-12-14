@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../appColors.dart';
+import '../../customFont.dart';
 
 class CustomButton extends StatelessWidget {
   final String text;
+  final bool isGem;
   final VoidCallback onPressed;
   final Color backgroundColor;
   final Color textColor;
@@ -13,10 +16,12 @@ class CustomButton extends StatelessWidget {
   final bool isEditPage;
   final double width;
   final double height;
+  final String svgAsset;
 
   const CustomButton({
     super.key,
     required this.text,
+    this.isGem = false,
     required this.onPressed,
     this.backgroundColor = AppColors.appColor,
     this.borderColor = AppColors.appColor,
@@ -25,15 +30,17 @@ class CustomButton extends StatelessWidget {
     this.padding = const EdgeInsets.symmetric(vertical: 5),
     this.isEditPage = false,
     this.width = double.maxFinite,
-    this.height = 45
+    this.height = 45,
+    this.svgAsset = 'assets/images/profile/gem.svg',
   });
 
   @override
   Widget build(BuildContext context) {
-    return  SizedBox(
+    return SizedBox(
       height: height,
       width: width, // Full-width button
-      child: !isEditPage ? ElevatedButton(
+      child: !isEditPage
+          ? ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundColor,
@@ -42,12 +49,13 @@ class CustomButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(borderRadius),
           ),
         ),
-        child: Text(
-          textAlign: TextAlign.center,
+        child: isGem ? textWithIcon() : Text(
           text,
+          textAlign: TextAlign.center,
           style: TextStyle(fontSize: 16, color: textColor),
         ),
-      ) : OutlinedButton(
+      )
+          : OutlinedButton(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
           side: BorderSide(color: borderColor), // Border color
@@ -55,14 +63,39 @@ class CustomButton extends StatelessWidget {
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Text(
-            textAlign: TextAlign.center,
+          child: isGem ? textWithIcon() : Text(
             text.toUpperCase(),
+            textAlign: TextAlign.center,
             style: TextStyle(fontSize: 16, color: textColor),
           ),
         ),
-      )
-      ,
+      ),
+    );
+  }
+
+  Widget textWithIcon() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (isGem && svgAsset.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(right: 3),
+            child: SvgPicture.asset(
+              svgAsset, // SVG asset path
+              width: 20.0, // Adjust the size as needed
+              height: 20.0, // Adjust the size as needed
+            ),
+          ),
+        Text(
+          text,
+          textAlign: TextAlign.center,
+          style: h4.copyWith(
+            fontSize: 16,
+            color: textColor,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
     );
   }
 }

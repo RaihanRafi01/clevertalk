@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../common/customFont.dart';
+import '../../../../common/widgets/customAppBar.dart';
 
 class SummaryKeyPointView extends GetView {
   final bool isKey;
@@ -10,9 +11,16 @@ class SummaryKeyPointView extends GetView {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('SummaryKeyPointView'),
-        centerTitle: true,
+      appBar: CustomAppBar(
+        title: "CLEVERTALK",
+        onFirstIconPressed: () {
+          // Action for the first button
+          print("First icon pressed");
+        },
+        onSecondIconPressed: () {
+          // Action for the second button
+          print("Second icon pressed");
+        },
       ),
       body: Center(
         child: Padding(
