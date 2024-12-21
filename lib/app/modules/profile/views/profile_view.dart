@@ -8,6 +8,7 @@ import '../../../../common/customFont.dart';
 import '../../../../common/widgets/auth/custom_button.dart';
 import '../../../../common/widgets/auth/custom_textField.dart';
 import '../../../../common/widgets/customAppBar.dart';
+import '../../../data/services/api_services.dart';
 import '../../home/controllers/home_controller.dart';
 import '../controllers/profile_controller.dart';
 
@@ -23,18 +24,36 @@ class _EditProfileViewState extends State<ProfileView> {
   final ProfileController profileController = Get.put(ProfileController());
   final HomeController homeController = Get.put(HomeController());
 
-  // Declare the TextEditingControllers
-  late final TextEditingController _nameController;
-  late final TextEditingController _emailController;
-  late final TextEditingController _aboutYouController;
+  // Initialize the TextEditingControllers directly with values
+  late final TextEditingController _nameController =
+  TextEditingController(text: homeController.name.value);
+  late final TextEditingController _emailController =
+  TextEditingController(text: homeController.email.value);
+  late final TextEditingController _addressController =
+  TextEditingController(text: homeController.address.value);
+  late final TextEditingController _phoneController =
+  TextEditingController(text: homeController.phone.value);
+  late final TextEditingController _genderController =
+  TextEditingController(text: homeController.gender.value);
+
+  String baseUrl = ApiService().baseUrl.endsWith('/')
+      ? ApiService().baseUrl.substring(0, ApiService().baseUrl.length - 1)
+      : ApiService().baseUrl;
 
   @override
   void initState() {
     super.initState();
-    // Initialize the controllers
-    _nameController = TextEditingController();
-    _emailController = TextEditingController();
-    _aboutYouController = TextEditingController();
+
+    // Fetch profile data and update controllers
+    homeController.fetchProfileData().then((_) {
+      setState(() {
+        _phoneController.text = homeController.phone.value;
+        _nameController.text = homeController.name.value;
+        _emailController.text = homeController.email.value;
+        _addressController.text = homeController.address.value;
+        _genderController.text = homeController.gender.value;
+      });
+    });
   }
 
   Future<void> _pickImage() async {
@@ -50,9 +69,12 @@ class _EditProfileViewState extends State<ProfileView> {
   @override
   void dispose() {
     // Dispose controllers to free up resources
+    _phoneController.dispose();
     _nameController.dispose();
     _emailController.dispose();
-    _aboutYouController.dispose();
+    _addressController.dispose();
+    _genderController.dispose();
+
     super.dispose();
   }
 
@@ -62,11 +84,9 @@ class _EditProfileViewState extends State<ProfileView> {
       appBar: CustomAppBar(
         title: "CLEVERTALK",
         onFirstIconPressed: () {
-          // Action for the first button
           print("First icon pressed");
         },
         onSecondIconPressed: () {
-          // Action for the second button
           print("Second icon pressed");
         },
       ),
@@ -84,6 +104,8 @@ class _EditProfileViewState extends State<ProfileView> {
                       radius: 50,
                       backgroundImage: _pickedImage != null
                           ? FileImage(File(_pickedImage!.path))
+                          : homeController.profilePicUrl.value.isNotEmpty
+                          ? NetworkImage('$baseUrl${homeController.profilePicUrl.value}')
                           : const AssetImage('assets/images/profile/profile_avatar.png') as ImageProvider,
                     ),
                     Positioned(
@@ -99,20 +121,20 @@ class _EditProfileViewState extends State<ProfileView> {
                     ),
                   ],
                 ),
-                const SizedBox(width: 20), // Add some spacing between the avatar and the column
+                const SizedBox(width: 20),
                 Expanded(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start, // Align items to the start (left)
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(
-                        'UserName', // Replace with actual username from your controller
+                      Obx(() => Text(
+                        homeController.username.value,
                         style: h1.copyWith(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
+                      )),
                       const SizedBox(height: 10),
                       CustomButton(
                         backgroundColor: AppColors.appColor2,
                         isGem: true,
-                        width: 210, // Adjust the width to fill available space
+                        width: 210,
                         text: 'Standard Account',
                         onPressed: () {},
                       ),
@@ -127,50 +149,105 @@ class _EditProfileViewState extends State<ProfileView> {
               controller: _nameController,
               prefixIcon: Icons.person_outline_rounded,
               onChanged: (value) {
-                // Update ProfileController whenever the text changes
+                profileController.updateName(value);
               },
               hint: 'Enter Your Name',
             ),
+            SizedBox(height: 12),
             CustomTextField(
+              readOnly: true,
               label: 'Email',
               controller: _emailController,
               prefixIcon: Icons.email_outlined,
               keyboardType: TextInputType.emailAddress,
               hint: 'Enter Your Email',
             ),
+            SizedBox(height: 12),
             CustomTextField(
               phone: true,
               label: 'Phone Number',
-              controller: _emailController,
+              controller: _phoneController,
               keyboardType: TextInputType.phone,
               hint: 'Enter Phone Number',
+              onChanged: (value) {
+                profileController.updatePhone(value);
+              },
             ),
             CustomTextField(
               label: 'Address',
-              controller: _emailController,
+              controller: _addressController,
               prefixIcon: Icons.location_on_outlined,
               keyboardType: TextInputType.emailAddress,
               hint: 'Enter Your Address',
+              onChanged: (value) {
+                profileController.updateAddress(value);
+              },
             ),
-            CustomTextField(
-              label: 'Gender',
-              controller: _emailController,
-              prefixIcon: Icons.male_rounded,
-              keyboardType: TextInputType.emailAddress,
-              hint: 'Enter Your Gender',
-            ),
+            SizedBox(height: 12),
+            Align(alignment: Alignment.centerLeft,child: Text('Gender', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.blurtext,))),
+            SizedBox(height: 10,),
+            Obx(() => DropdownButtonFormField<String>(
+              decoration: InputDecoration(
+                labelStyle: h4,
+                helperStyle: h4,
+                floatingLabelStyle: h4,
+                hintText: 'Select Your Gender',
+                prefixIcon: Icon(Icons.male_rounded),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: const BorderSide(color: Colors.grey),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: const BorderSide(color: AppColors.appColor2, width: 2),
+                ),
+              ),
+              value: homeController.gender.value.isNotEmpty ? homeController.gender.value : null,
+              items: ['Male', 'Female', 'Other']
+                  .map((gender) => DropdownMenuItem<String>(
+                value: gender,
+                child: Text(gender,style: h4,),
+              ))
+                  .toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  profileController.updateGender(value);
+                  homeController.gender.value = value;
+                }
+              },
+            )),
             const SizedBox(height: 20),
             CustomButton(
               text: 'Save',
               onPressed: () async {
-                // Implement save logic here
+                print('::::::::edit:::::::::::::NAME:::::::::::${homeController.name.value}');
+               // print('::::::::::edit:::::::::::aboutYou:::::::::::${homeController.aboutYou.value}');
+
+                // Set editing flag to true when saving
+                //homeController.isEditingProfile.value = true;
+
+                // Handle the profile picture
+                File? profilePic;
+                if (_pickedImage != null) {
+                  profilePic = File(_pickedImage!.path);
+                }
+
+                // Call the updateData method
+                await profileController.updateData(
+                  homeController.name.value,
+                  homeController.phone.value,
+                  homeController.address.value,
+                  homeController.gender.value,
+                  profilePic,
+                );
               },
             ),
-            SizedBox(height: 58,)
+            const SizedBox(height: 58),
           ],
         ),
       ),
     );
   }
 }
+
 

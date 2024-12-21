@@ -47,10 +47,6 @@ class ResetPasswordView extends GetView {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('ResetPasswordView'),
-        centerTitle: true,
-      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

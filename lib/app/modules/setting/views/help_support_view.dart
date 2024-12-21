@@ -5,27 +5,23 @@ import '../../../../common/customFont.dart';
 import '../../../../common/widgets/auth/custom_button.dart';
 import '../../../../common/widgets/auth/custom_textField.dart';
 import '../../../../common/widgets/customAppBar.dart';
+import '../controllers/setting_controller.dart';
 
-class HelpSupportView extends GetView {
-  const HelpSupportView({super.key});
+class HelpSupportView extends GetView<SettingController> {
+  HelpSupportView({super.key});
+
+  final emailController = TextEditingController(); // Text controllers
+  final problemController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    // Controllers for the text fields
-    final emailController = TextEditingController();
-    final problemController = TextEditingController();
+    final SettingController settingController = Get.put(SettingController());
 
     return Scaffold(
       appBar: CustomAppBar(
         title: "CLEVERTALK",
-        onFirstIconPressed: () {
-          // Action for the first button
-          print("First icon pressed");
-        },
-        onSecondIconPressed: () {
-          // Action for the second button
-          print("Second icon pressed");
-        },
+        onFirstIconPressed: () => print("First icon pressed"),
+        onSecondIconPressed: () => print("Second icon pressed"),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -34,52 +30,46 @@ class HelpSupportView extends GetView {
             CustomTextField(
               label: 'Email',
               prefixIcon: Icons.email_outlined,
-              controller: emailController, hint: 'Enter Email', // Attach controller
+              controller: emailController,
+              hint: 'Enter Email',
             ),
             const SizedBox(height: 20),
             CustomTextField(
               label: 'Description',
-              controller: problemController, hint: 'Write Your Problem', // Attach controller
+              controller: problemController,
+              hint: 'Write Your Problem',
             ),
             const Spacer(),
-            CustomButton(
-              text: 'Send',
-              onPressed: () {
-                _validateAndSend(context, emailController, problemController);
-              },
-            ),
+            Obx(() {
+              return settingController.isLoading.value
+                  ? const CircularProgressIndicator()
+                  : CustomButton(
+                text: 'Send',
+                onPressed: _validateAndSend,
+              );
+            }),
           ],
         ),
       ),
     );
   }
 
-  void _validateAndSend(BuildContext context, TextEditingController emailController, TextEditingController problemController) {
+  void _validateAndSend() {
     final email = emailController.text.trim();
     final problem = problemController.text.trim();
 
     if (email.isEmpty || problem.isEmpty) {
-      // Show a snackbar or dialog if fields are empty
-      Get.snackbar(
-        'Error',
-        'Please fill out all fields',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-    } else if (!_isValidEmail(email)) {
-      // Show an error if email is invalid
-      Get.snackbar(
-        'Error',
-        'Please enter a valid email address',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-    } else {
-      // If validation passes, show the confirmation dialog
-      _showConfirmationDialog(context);
+      _showSnackbar('Error', 'Please fill out all fields');
+      return;
     }
+
+    if (!_isValidEmail(email)) {
+      _showSnackbar('Error', 'Please enter a valid email address');
+      return;
+    }
+
+    // Call helpAndSupport method in the controller
+    Get.find<SettingController>().helpAndSupport(email, problem);
   }
 
   bool _isValidEmail(String email) {
@@ -87,40 +77,14 @@ class HelpSupportView extends GetView {
     return emailRegex.hasMatch(email);
   }
 
-  void _showConfirmationDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          contentPadding: const EdgeInsets.all(20),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          title: Column(
-            children: [
-              Text(
-                'Help!',
-                textAlign: TextAlign.center,
-                style: h1.copyWith(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'Our team will contact you within 24 hours',
-                textAlign: TextAlign.center,
-                style: h4.copyWith(fontSize: 16),
-              ),
-              const SizedBox(height: 20),
-              CustomButton(
-                text: 'OK',
-                onPressed: () {
-                  Navigator.pop(context); // Close the dialog
-                },
-                isEditPage: true,
-                textColor: AppColors.textColor,
-                backgroundColor: Colors.white,
-              ),
-            ],
-          ),
-        );
-      },
+  void _showSnackbar(String title, String message) {
+    Get.snackbar(
+      title,
+      message,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.red,
+      colorText: Colors.white,
+      duration: const Duration(seconds: 3),
     );
   }
 }

@@ -64,10 +64,6 @@ class _VerifyOTPViewState extends State<VerifyOTPView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Verify OTP'),
-        centerTitle: true,
-      ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 50),
         child: Column(

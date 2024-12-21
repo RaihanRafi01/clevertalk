@@ -38,12 +38,12 @@ class AppPages {
   static final routes = [
     GetPage(
       name: _Paths.HOME,
-      page: () => DashboardView(),
+      page: () => SplashView(),
       binding: HomeBinding(),
     ),
     GetPage(
       name: _Paths.AUTHENTICATION,
-      page: () => const SplashView(),
+      page: () => AuthenticationView(),
       binding: AuthenticationBinding(),
     ),
     GetPage(

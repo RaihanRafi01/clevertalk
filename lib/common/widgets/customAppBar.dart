@@ -1,6 +1,10 @@
+import 'package:clevertalk/app/modules/notification_subscription/views/notification_subscription_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 
+import '../../app/modules/authentication/views/forgot_password_view.dart';
 import '../customFont.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -46,7 +50,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
         // Second SVG Icon Button
         IconButton(
-          onPressed: onSecondIconPressed,
+          onPressed: (){
+            Get.to(() => NotificationSubscriptionView());
+          },
           icon: SvgPicture.asset(
             secondIcon,
             height: 24,

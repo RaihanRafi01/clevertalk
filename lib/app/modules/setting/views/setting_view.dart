@@ -2,11 +2,16 @@ import 'package:clevertalk/app/modules/notification_subscription/views/subscript
 import 'package:clevertalk/app/modules/setting/views/terms_privacy_view.dart';
 import 'package:clevertalk/common/widgets/settings/settingsList.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../common/appColors.dart';
 import '../../../../common/customFont.dart';
 import '../../../../common/widgets/customAppBar.dart';
 import '../../../../common/widgets/home/customDeletePopUp.dart';
+import '../../authentication/views/authentication_view.dart';
 import '../controllers/setting_controller.dart';
 import 'help_support_view.dart';
 
@@ -16,6 +21,19 @@ class SettingView extends GetView<SettingController> {
   @override
   Widget build(BuildContext context) {
     Get.put(SettingController());
+
+    final FlutterSecureStorage _storage = FlutterSecureStorage();
+    Future<void> logout() async {
+      await _storage.delete(key: 'access_token');
+      await _storage.delete(key: 'refresh_token');
+
+      // SharedPreferences
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', false); // User is logged out
+
+      Get.offAll(() => AuthenticationView()); // Navigate to the login screen
+    }
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -166,7 +184,32 @@ class SettingView extends GetView<SettingController> {
                 ),
               );
             }),
-            SizedBox(height: 58,)
+            SizedBox(height: 20,),
+            GestureDetector(
+              onTap: (){
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text('Log Out',style: h2,),
+                    content: Text('Are you sure you want to log out?',style: h3),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text('Cancel',style: h2.copyWith(color: AppColors.appColor),),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          // Add your logout logic here
+                          logout();
+                        },
+                        child: Text('Log Out',style: h2.copyWith(color: Colors.red)),
+                      ),
+                    ],
+                  ),
+                );
+              },
+                child: SvgPicture.asset('assets/images/auth/logout_logo.svg')),
           ],
         ),
       ),

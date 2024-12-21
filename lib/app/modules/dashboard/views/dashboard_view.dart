@@ -1,3 +1,4 @@
+import 'package:clevertalk/app/modules/home/controllers/home_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:clevertalk/app/modules/audio/views/audio_view.dart';
 import 'package:clevertalk/app/modules/profile/views/profile_view.dart';
@@ -17,11 +18,12 @@ class DashboardView extends StatefulWidget {
 }
 
 class _DashboardViewState extends State<DashboardView> {
-
   @override
   Widget build(BuildContext context) {
     // Initialize the DashboardController
     final controller = Get.put(DashboardController());
+    final homeController = Get.put(HomeController());
+    homeController.fetchProfileData();
 
     // List of pages for navigation
     final List<Widget> _screens = [
@@ -33,7 +35,8 @@ class _DashboardViewState extends State<DashboardView> {
     ];
 
     return Scaffold(
-      backgroundColor: AppColors.appColor, // Set the background color for the scaffold
+      backgroundColor: AppColors.appColor,
+      // Set the background color for the scaffold
       body: Stack(
         children: [
           // The main content of the screen inside SafeArea to avoid overlap with bottom nav

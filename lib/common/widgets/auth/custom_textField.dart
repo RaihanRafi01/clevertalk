@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl_phone_field/intl_phone_field.dart'; // Ensure you have this package in your `pubspec.yaml`
+import '../../../app/modules/home/controllers/home_controller.dart';
 import '../../appColors.dart';
 
 class CustomTextField extends StatefulWidget {
@@ -41,6 +43,8 @@ class CustomTextField extends StatefulWidget {
 class _CustomTextFieldState extends State<CustomTextField> {
   bool _obscureText = true;
 
+  final HomeController homeController = Get.put(HomeController());
+
   @override
   void initState() {
     super.initState();
@@ -64,6 +68,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
         const SizedBox(height: 8),
         widget.phone
             ? IntlPhoneField(
+          initialCountryCode: 'BD', // Set your default country code
+          initialValue: homeController.phone.value, // Dynamically set the value
           decoration: InputDecoration(
             hintText: widget.hint,
             hintStyle: TextStyle(color: AppColors.appColor),
@@ -80,11 +86,13 @@ class _CustomTextFieldState extends State<CustomTextField> {
               borderSide: const BorderSide(color: AppColors.appColor, width: 2),
             ),
           ),
-          initialCountryCode: 'BD',
           onChanged: (phone) {
             if (widget.onChanged != null) {
               widget.onChanged!(phone.completeNumber);
             }
+
+            // Update the phone number in the controller
+            homeController.phone.value = phone.completeNumber;
           },
         )
             : TextField(
@@ -126,7 +134,6 @@ class _CustomTextFieldState extends State<CustomTextField> {
             ),
           ),
         ),
-        const SizedBox(height: 12),
       ],
     );
   }

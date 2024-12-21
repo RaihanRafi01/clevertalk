@@ -1,18 +1,26 @@
-import 'package:clevertalk/app/modules/authentication/views/authentication_view.dart';
+import 'package:clevertalk/app/modules/dashboard/views/dashboard_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../common/appColors.dart';
-import 'forgot_password_view.dart';
+import '../../home/views/home_view.dart';
+import 'authentication_view.dart';
 
 class SplashView extends GetView {
   const SplashView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Schedule a delay for 3 seconds and navigate to the next screen
-    Future.delayed(const Duration(seconds: 3), () {
-      Get.off(()=> AuthenticationView()); // Replace '/home' with your desired route name
+    // Check login status and navigate accordingly
+    Future.delayed(const Duration(seconds: 3), () async {
+      final prefs = await SharedPreferences.getInstance();
+      final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+
+      if (isLoggedIn) {
+        Get.off(() => const DashboardView()); // Navigate to the Home screen if logged in
+      } else {
+        Get.off(() => AuthenticationView()); // Navigate to the Authentication screen if not logged in
+      }
     });
 
     return Scaffold(

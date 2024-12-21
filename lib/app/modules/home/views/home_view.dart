@@ -35,12 +35,12 @@ class HomeView extends GetView<HomeController> {
             children: [
               Row(
                 children: [
-                  CustomButton(text: 'Connect Devices', onPressed: (){},width: 160,borderRadius: 5),
+                  CustomButton(text: 'Connect Device', onPressed: (){},width: 160,borderRadius: 5),
                   Spacer(),
                   CustomButton(text: 'Get A Plan', onPressed: (){},width: 160,borderRadius: 5,backgroundColor: AppColors.appColor2,),
                 ],
               ),
-              SizedBox(height: 20,),
+              /*SizedBox(height: 20,),
               Container(
                 width: double.maxFinite,
                 padding: const EdgeInsets.all(12.0),
@@ -66,7 +66,7 @@ class HomeView extends GetView<HomeController> {
                     ),
                   ],
                 ),
-              ),
+              ),*/
               SizedBox(height: 10,),
               VideoCard(
                 videoUrl: 'https://pixabay.com/videos/ocean-sea-beach-sunset-sand-204565/',
@@ -88,8 +88,8 @@ class HomeView extends GetView<HomeController> {
                   ),
                   // Positioned text
                   Positioned(
-                    right: 20, // Distance from the right edge of the image
-                    top: 10,   // Distance from the top edge of the image
+                    right: 10, // Distance from the right edge of the image
+                    top: 5,   // Distance from the top edge of the image
                     child: Container(
                       padding: EdgeInsets.all(8), // Padding inside the container
                       child: Column(
@@ -102,7 +102,7 @@ class HomeView extends GetView<HomeController> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          SizedBox(height: 20,),
+                          SizedBox(height: 10,),
                           Text(
                             'Mega Power in mini size',
                             style: h4.copyWith(
@@ -111,7 +111,7 @@ class HomeView extends GetView<HomeController> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          SizedBox(height: 20,),
+                          SizedBox(height: 10,),
                           CustomButton(text: 'Shop Now', onPressed: (){},width: 160,backgroundColor: AppColors.appColor2,)
                         ],
                       ),
