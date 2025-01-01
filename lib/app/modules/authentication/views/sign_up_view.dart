@@ -20,7 +20,7 @@ class SignUpView extends StatefulWidget {
 
 class _SignUpViewState extends State<SignUpView> {
   final AuthenticationController _controller = Get.put(AuthenticationController());
-  //final HomeController homeController = Get.put(HomeController());
+  final HomeController homeController = Get.put(HomeController());
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
@@ -56,9 +56,9 @@ class _SignUpViewState extends State<SignUpView> {
       return;
     }
 
-    //homeController.usernameOBS.value = _usernameController.text.trim();
+    homeController.usernameOBS.value = _usernameController.text.trim();
 
-   // print(':::::::::::::usernameOBS:::::::::::::::::${homeController.usernameOBS.value}');
+   print(':::::::::::::usernameOBS:::::::::::::::::${homeController.usernameOBS.value}');
 
     // Proceed with sign-up logic if validations pass
     _controller.signUp(

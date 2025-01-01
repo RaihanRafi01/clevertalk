@@ -9,13 +9,14 @@ import '../../../../common/appColors.dart';
 import '../../../../common/widgets/auth/custom_HeaderText.dart';
 import '../../../../common/widgets/auth/signupWithOther.dart';
 import '../../dashboard/views/dashboard_view.dart';
+import '../../home/controllers/home_controller.dart';
 import '../controllers/authentication_controller.dart';
 
 class AuthenticationView extends GetView<AuthenticationController> {
    AuthenticationView({super.key});
 
   final AuthenticationController _controller = Get.put(AuthenticationController());
-  //final HomeController homeController = Get.put(HomeController());
+  final HomeController homeController = Get.put(HomeController());
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -32,9 +33,9 @@ class AuthenticationView extends GetView<AuthenticationController> {
        );
        return;
      }
-     //homeController.usernameOBS.value = _usernameController.text.trim();
+     homeController.usernameOBS.value = _usernameController.text.trim();
 
-     //print(':::::::::::::usernameOBS:::::::::::::::::${homeController.usernameOBS.value}');
+     print(':::::::::::::usernameOBS:::::::::::::::::${homeController.usernameOBS.value}');
 
      // Proceed with login logic if validations pass
      _controller.login(

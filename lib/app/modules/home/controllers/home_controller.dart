@@ -1,7 +1,10 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import '../../../data/services/api_services.dart';
+import '../../authentication/views/verify_o_t_p_view.dart';
+import '../../dashboard/views/dashboard_view.dart';
 
 class HomeController extends GetxController {
   final ApiService _service = ApiService();
@@ -21,6 +24,7 @@ class HomeController extends GetxController {
   var subscriptionStatus = ''.obs;
   RxBool isExpired = false.obs;
   RxBool isFree = false.obs;
+  RxBool isVerified = false.obs;
 
 
 
@@ -45,6 +49,7 @@ class HomeController extends GetxController {
       String? _name = responseData['full_name'];
       String? _gender = responseData['gender'];
       String? _user_type = responseData['user_type'];
+      bool? _is_verified = responseData['is_verified']; // Corrected type
       String? _device_id_number = responseData['device_id_number'];
 
 
@@ -56,19 +61,45 @@ class HomeController extends GetxController {
       name.value = _name ?? '';
       gender.value = _gender ?? '';
       user_type.value = _user_type ?? '';
+      isVerified.value = _is_verified ?? false; // Corrected assignment
       device_id_number.value = _device_id_number ?? '';
 
       //subscriptionStatus.value = _subscriptionStatus ?? '';
       //subscriptionExpireDate.value = _subscriptionExpireDate ?? '';
       //isExpired.value = _isExpired ?? false;
 
-     // print('::::::::::::::::::::subscriptionStatus:::::::::::::::::::::::::::$subscriptionStatus');
+      print('::::::::::::::::::::EMAIL:::::::::::::::::::::::::::$email');
 
 
       //isFree.value = subscriptionStatus.value != 'not_subscribed';
 
     } else {
-      Get.snackbar('Error', 'Verification status check failed');
+      //Get.snackbar('Error', 'Verification status check failed');
+    }
+  }
+
+  Future<void> checkVerified(String username) async {
+    // Check if the account is verified
+    final http.Response verificationResponse = await _service.getProfileInformation();
+
+    if (verificationResponse.statusCode == 200) {
+      final responseData = jsonDecode(verificationResponse.body);
+
+      bool isVerified = responseData['is_verified'];
+
+
+      if (isVerified) {
+        // Navigate to the Dashboard if verified
+        //Get.snackbar('Success', 'Account verified!');
+        Get.offAll(() => DashboardView()); // Navigate to DashboardView
+      } else {
+        // Show a page to request further action if not verified
+        Get.snackbar('Verification', 'Account not verified. Please check your email.');
+        Get.off(() => VerifyOTPView(username: username));
+      }
+
+    } else {
+      //Get.snackbar('Error', 'Verification status check failed');
     }
   }
 

@@ -8,7 +8,7 @@ class ApiService {
 
   final FlutterSecureStorage _storage = FlutterSecureStorage(); // For secure storage
   // Base URL for the API
-  final String baseUrl = 'https://charming-willingly-starfish.ngrok-free.app/'; // https://apparently-intense-toad.ngrok-free.app/     //     https://agcourt.pythonanywhere.com/   // https://charming-willingly-starfish.ngrok-free.app/
+  final String baseUrl = 'http://192.168.20.201:8000/'; // https://apparently-intense-toad.ngrok-free.app/     //     https://agcourt.pythonanywhere.com/   // https://charming-willingly-starfish.ngrok-free.app/
 
   // Sign-up method
   Future<http.Response> signUp(String email, String password, String username) async {
@@ -63,9 +63,13 @@ class ApiService {
     // Construct the endpoint URL
     final Uri url = Uri.parse('${baseUrl}email_support/email_support/');
 
-    // Headers for the HTTP request
+
+    String? accessToken = await _storage.read(key: 'access_token');
+
+    // Headers for the HTTP request with Bearer token
     final Map<String, String> headers = {
       "Content-Type": "application/json",
+      "Authorization": "Bearer $accessToken", // Add the Bearer token
     };
 
     // Request body
@@ -108,7 +112,7 @@ class ApiService {
 
   Future<http.Response> verifyForgotOTP(String username, String otp) async {
     // Construct the endpoint URL
-    final Uri url = Uri.parse('${baseUrl}authentication_app/verify_forget_password_otp/');
+    final Uri url = Uri.parse('${baseUrl}authentication_app/verify_email/');
 
     // Headers for the HTTP request
     final Map<String, String> headers = {
@@ -129,7 +133,7 @@ class ApiService {
     );
   }
 
-  Future<http.Response> resendOTP() async {
+  /*Future<http.Response> resendOTP(String username) async {
     // Construct the endpoint URL
     final Uri url = Uri.parse('${baseUrl}authentication_app/resend_otp/');
 
@@ -148,12 +152,12 @@ class ApiService {
       url,
       headers: headers
     );
-  }
+  }*/
 
 
-  Future<http.Response> sendResetOTP(String username) async {
+  Future<http.Response> sendOTP(String username) async {
     // Construct the endpoint URL
-    final Uri url = Uri.parse('${baseUrl}authentication_app/forgot_password/');
+    final Uri url = Uri.parse('${baseUrl}authentication_app/resend_otp/');
 
     // Headers for the HTTP request
     final Map<String, String> headers = {

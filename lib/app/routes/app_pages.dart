@@ -14,6 +14,7 @@ import '../modules/authentication/views/verify_o_t_p_view.dart';
 import '../modules/dashboard/bindings/dashboard_binding.dart';
 import '../modules/dashboard/views/dashboard_view.dart';
 import '../modules/home/bindings/home_binding.dart';
+import '../modules/home/controllers/home_controller.dart';
 import '../modules/home/views/home_splash_view.dart';
 import '../modules/home/views/home_view.dart';
 import '../modules/home/views/record_view.dart';
