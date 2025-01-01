@@ -63,9 +63,13 @@ class ApiService {
     // Construct the endpoint URL
     final Uri url = Uri.parse('${baseUrl}email_support/email_support/');
 
-    // Headers for the HTTP request
+
+    String? accessToken = await _storage.read(key: 'access_token');
+
+    // Headers for the HTTP request with Bearer token
     final Map<String, String> headers = {
       "Content-Type": "application/json",
+      "Authorization": "Bearer $accessToken", // Add the Bearer token
     };
 
     // Request body

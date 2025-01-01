@@ -12,10 +12,10 @@ class HelpSupportView extends GetView<SettingController> {
 
   final emailController = TextEditingController(); // Text controllers
   final problemController = TextEditingController();
+  final SettingController settingController = Get.put(SettingController());
 
   @override
   Widget build(BuildContext context) {
-    final SettingController settingController = Get.put(SettingController());
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -68,8 +68,7 @@ class HelpSupportView extends GetView<SettingController> {
       return;
     }
 
-    // Call helpAndSupport method in the controller
-    Get.find<SettingController>().helpAndSupport(email, problem);
+    settingController.helpAndSupport(email, problem);
   }
 
   bool _isValidEmail(String email) {
