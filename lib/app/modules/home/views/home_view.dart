@@ -10,6 +10,7 @@ import '../../../../common/widgets/customAppBar.dart';
 import '../../../../common/widgets/home/audioPlayerCard.dart';
 import '../../../../common/widgets/home/videoCard.dart';
 import '../controllers/home_controller.dart';
+import 'usbFilePicker.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
@@ -35,7 +36,9 @@ class HomeView extends GetView<HomeController> {
             children: [
               Row(
                 children: [
-                  CustomButton(text: 'Connect Device', onPressed: (){},width: 160,borderRadius: 5),
+                  CustomButton(text: 'Connect Device', onPressed: (){
+                    Get.to(UsbFilePicker());
+                  },width: 160,borderRadius: 5),
                   Spacer(),
                   CustomButton(text: 'Get A Plan', onPressed: (){},width: 160,borderRadius: 5,backgroundColor: AppColors.appColor2,),
                 ],

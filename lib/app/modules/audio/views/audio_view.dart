@@ -1,10 +1,36 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import '../../../../common/widgets/audio_text/customListTile.dart';
 import '../../../../common/customFont.dart';
 import '../../../../common/widgets/customAppBar.dart';
+import '../../../data/database_helper.dart';
+import 'package:intl/intl.dart';
 
-class AudioView extends StatelessWidget {
+class AudioView extends StatefulWidget {
   const AudioView({super.key});
+
+  @override
+  _AudioViewState createState() => _AudioViewState();
+}
+
+class _AudioViewState extends State<AudioView> {
+  List<Map<String, dynamic>> _audioFiles = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchAudioFiles();
+  }
+
+  Future<void> _fetchAudioFiles() async {
+    final dbHelper = DatabaseHelper();
+    final audioFiles = await dbHelper.fetchAudioFiles(context);
+
+    setState(() {
+      _audioFiles = audioFiles;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,11 +39,9 @@ class AudioView extends StatelessWidget {
         isSearch: true,
         title: "CLEVERTALK",
         onFirstIconPressed: () {
-          // Action for the first button
           print("First icon pressed");
         },
         onSecondIconPressed: () {
-          // Action for the second button
           print("Second icon pressed");
         },
       ),
@@ -34,8 +58,15 @@ class AudioView extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Expanded(
-              child: ListView.separated(
-                itemCount: 15, // Static count for now
+              child: _audioFiles.isEmpty
+                  ? Center(
+                child: Text(
+                  'No audio files available',
+                  style: TextStyle(fontSize: 16),
+                ),
+              )
+                  : ListView.separated(
+                itemCount: _audioFiles.length,
                 separatorBuilder: (context, index) => const Divider(
                   color: Colors.grey,
                   thickness: 1,
@@ -43,19 +74,69 @@ class AudioView extends StatelessWidget {
                   endIndent: 16,
                 ),
                 itemBuilder: (context, index) {
-                  // Example usage with conditional `showPlayIcon`
+                  final audioFile = _audioFiles[index];
+                  final fileName = audioFile['file_name'] ?? 'Unknown Title';
+                  final parsedDate = parseFileNameToDate(fileName);
+
                   return CustomListTile(
-                    title: 'Customer Feedback',
-                    subtitle: '11/20/24 8:00 PM',
-                    duration: '00:09:00',
+                    title: fileName,
+                    subtitle: parsedDate,
+                    duration: audioFile['duration'] ?? '00:00:00',
+                    /*onPlayPressed: () {
+      _playAudio(audioFile); // Play audio
+    },*/
                   );
                 },
               ),
             ),
-            SizedBox(height: 58,)
+            SizedBox(height: 58),
           ],
         ),
       ),
     );
   }
+
+
+
+  String parseFileNameToDate(String fileName) {
+    try {
+      // Extract the date and time part from the file name
+      final dateTimePart = fileName.substring(1, fileName.indexOf('.'));
+      final datePart = dateTimePart.split('-')[0]; // 20250112
+      final timePart = dateTimePart.split('-')[1]; // 142010
+
+      // Parse date and time components
+      final year = int.parse(datePart.substring(0, 4));
+      final month = int.parse(datePart.substring(4, 6));
+      final day = int.parse(datePart.substring(6, 8));
+      final hour = int.parse(timePart.substring(0, 2));
+      final minute = int.parse(timePart.substring(2, 4));
+      final second = int.parse(timePart.substring(4, 6));
+
+      // Create a DateTime object
+      final dateTime = DateTime(year, month, day, hour, minute, second);
+
+      // Format the DateTime object
+      return DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime);
+    } catch (e) {
+      return 'Unknown Date'; // Default fallback
+    }
+  }
+
+
+/*void _playAudio(Map<String, dynamic> audioFile) async {
+    final dbHelper = DatabaseHelper();
+    try {
+      final fileData = await dbHelper.getAudioFile(audioFile['file_name']);
+      final tempDir = Directory.systemTemp;
+      final tempFile = File('${tempDir.path}/${audioFile['file_name']}');
+      await tempFile.writeAsBytes(fileData);
+
+      print('Playing: ${tempFile.path}');
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+  }*/
 }
