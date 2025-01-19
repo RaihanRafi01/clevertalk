@@ -9,7 +9,8 @@ import '../../../../common/customFont.dart';
 import '../../../../common/widgets/customAppBar.dart';
 
 class ConvertView extends GetView {
-  const ConvertView({super.key});
+  final String text;
+  const ConvertView({super.key,required this.text});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,7 +38,7 @@ class ConvertView extends GetView {
                 ),
                 SizedBox(height: 20),
                 Text(
-                  'The goal of this project is to develop an innovative platform that combines audio recording and transcription with multilingual support. Designed to cater to individual users and professionals, the platform integrates seamlessly with a dedicated audio recorder device and offers tools for efficient file management, transcription, and content summarization. This user-friendly application supports English, French, Spanish, German, and Italian, ensuring accessibility for a global audience.',
+                  text,
                   style: h4.copyWith(fontSize: 20),
                 ),
                 SizedBox(height: 20), // Replace Spacer with fixed height

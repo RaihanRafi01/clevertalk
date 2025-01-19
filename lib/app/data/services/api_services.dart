@@ -296,266 +296,6 @@ class ApiService {
     return await http.post(url, headers: headers);
   }
 
-  Future<http.Response> createFreeChat(String text_content) async {
-    final Uri url = Uri.parse('${baseUrl}chat_app/send_temporary_chat/');
-
-    // Retrieve the stored access token
-    String? accessToken = await _storage.read(key: 'access_token');
-
-    // Headers for the HTTP request with Bearer token
-    final Map<String, String> headers = {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer $accessToken", // Add the Bearer token
-    };
-
-    // Request body
-    final Map<String, String> body = {
-      "text_content": text_content
-    };
-
-    // Make the POST request
-    return await http.post(
-      url,
-      headers: headers,
-      body: jsonEncode(body),
-    );
-  }
-
-
-
-  Future<http.Response> createChat(String text_content) async {
-    final Uri url = Uri.parse('${baseUrl}chat_app/create_chat/');
-
-    // Retrieve the stored access token
-    String? accessToken = await _storage.read(key: 'access_token');
-
-    // Headers for the HTTP request with Bearer token
-    final Map<String, String> headers = {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer $accessToken", // Add the Bearer token
-    };
-
-    // Request body
-    final Map<String, String> body = {
-      "text_content": text_content
-    };
-
-    // Make the POST request
-    return await http.post(
-      url,
-      headers: headers,
-      body: jsonEncode(body),
-    );
-  }
-
-  Future<http.Response> chat(String text_content,int id) async {
-    final Uri url = Uri.parse('${baseUrl}chat_app/add_message_to_chat/$id/');
-
-    // Retrieve the stored access token
-    String? accessToken = await _storage.read(key: 'access_token');
-
-    // Headers for the HTTP request with Bearer token
-    final Map<String, String> headers = {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer $accessToken", // Add the Bearer token
-    };
-
-    // Request body
-    final Map<String, String> body = {
-      "text_content": text_content
-    };
-
-    // Make the POST request
-    return await http.post(
-      url,
-      headers: headers,
-      body: jsonEncode(body),
-    );
-  }
-
-
-  Future<http.Response> getChatList() async {
-    final Uri url = Uri.parse('${baseUrl}chat_app/get_all_chat_list_of_user/');
-
-    // Retrieve the stored access token
-    String? accessToken = await _storage.read(key: 'access_token');
-
-    // Headers for the HTTP request with Bearer token
-    final Map<String, String> headers = {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer $accessToken", // Add the Bearer token
-    };
-
-    // Make the GET request
-    return await http.get(url, headers: headers);
-  }
-
-  Future<http.Response> getPinChatList() async {
-    final Uri url = Uri.parse('${baseUrl}chat_app/get_pinned_chat_list/');
-
-    // Retrieve the stored access token
-    String? accessToken = await _storage.read(key: 'access_token');
-
-    // Headers for the HTTP request with Bearer token
-    final Map<String, String> headers = {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer $accessToken", // Add the Bearer token
-    };
-
-    // Make the GET request
-    return await http.get(url, headers: headers);
-  }
-
-  Future<http.Response> getSaveChatList() async {
-    final Uri url = Uri.parse('${baseUrl}chat_app/get_saved_chats/');
-
-    // Retrieve the stored access token
-    String? accessToken = await _storage.read(key: 'access_token');
-
-    // Headers for the HTTP request with Bearer token
-    final Map<String, String> headers = {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer $accessToken", // Add the Bearer token
-    };
-
-    // Make the GET request
-    return await http.get(url, headers: headers);
-  }
-
-
-  Future<http.Response> updateChatTitle(int ChatId, String title) async {
-    final Uri url = Uri.parse('${baseUrl}chat_app/update_chat_title/$ChatId/');
-
-    // Retrieve the stored access token
-    String? accessToken = await _storage.read(key: 'access_token');
-
-    // Headers for the HTTP request with Bearer token
-    final Map<String, String> headers = {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer $accessToken", // Add the Bearer token
-    };
-
-    // Request body
-    final Map<String, String> body = {
-      "chat_title": title
-    };
-
-    // Make the POST request
-    return await http.post(
-      url,
-      headers: headers,
-      body: jsonEncode(body),
-    );
-  }
-
-  Future<http.Response> pinChat(int ChatId, DateTime pinDate) async {
-    final Uri url = Uri.parse('${baseUrl}chat_app/pin_a_chat/$ChatId/');
-
-    // Retrieve the stored access token
-    String? accessToken = await _storage.read(key: 'access_token');
-
-    // Headers for the HTTP request with Bearer token
-    final Map<String, String> headers = {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer $accessToken", // Add the Bearer token
-    };
-
-    // Request body
-    final Map<String, String> body = {
-      "pin_date": pinDate.toIso8601String()
-    };
-
-    // Make the POST request
-    return await http.post(
-      url,
-      headers: headers,
-      body: jsonEncode(body),
-    );
-  }
-
-  Future<http.Response> unpinChat(int ChatId) async {
-    final Uri url = Uri.parse('${baseUrl}chat_app/unpin_a_chat/$ChatId/');
-
-    // Retrieve the stored access token
-    String? accessToken = await _storage.read(key: 'access_token');
-
-    // Headers for the HTTP request with Bearer token
-    final Map<String, String> headers = {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer $accessToken", // Add the Bearer token
-    };
-
-
-    // Make the POST request
-    return await http.post(
-      url,
-      headers: headers
-    );
-  }
-
-  Future<http.Response> saveChat(int ChatId) async {
-    final Uri url = Uri.parse('${baseUrl}chat_app/save_a_chat/$ChatId/');
-
-    // Retrieve the stored access token
-    String? accessToken = await _storage.read(key: 'access_token');
-
-    // Headers for the HTTP request with Bearer token
-    final Map<String, String> headers = {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer $accessToken", // Add the Bearer token
-    };
-
-
-    // Make the POST request
-    return await http.post(
-        url,
-        headers: headers
-    );
-  }
-
-  Future<http.Response> deleteChat(int ChatId) async {
-    final Uri url = Uri.parse('${baseUrl}chat_app/delete_a_chat/$ChatId/');
-
-    // Retrieve the stored access token
-    String? accessToken = await _storage.read(key: 'access_token');
-
-    // Headers for the HTTP request with Bearer token
-    final Map<String, String> headers = {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer $accessToken", // Add the Bearer token
-    };
-
-    // Make the DELETE request
-    return await http.delete(
-      url,
-      headers: headers,
-    );
-  }
-
-  Future<http.Response> editBotMessage(int ChatId, String textContent) async {
-    final Uri url = Uri.parse('${baseUrl}chat_app/edit_bot_message/$ChatId/');
-
-    // Retrieve the stored access token
-    String? accessToken = await _storage.read(key: 'access_token');
-
-    // Headers for the HTTP request with Bearer token
-    final Map<String, String> headers = {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer $accessToken", // Add the Bearer token
-    };
-
-    // Request body
-    final Map<String, String> body = {
-      "text_content": textContent
-    };
-
-    // Make the POST request
-    return await http.post(
-      url,
-      headers: headers,
-      body: jsonEncode(body),
-    );
-  }
 
   Future<http.Response> resetPassword(String userName,String password) async {
     final Uri url = Uri.parse('${baseUrl}authentication_app/reset_password/');
@@ -579,6 +319,38 @@ class ApiService {
     );
   }
 
+///////////////////////////////////////////////////////////// AUDIO ///////////////////////////
+
+
+  Future<http.Response> convertToText(String filePath, String fileName) async {
+    final Uri url = Uri.parse('${baseUrl}handle_recording_stuff/speech_to_text/');
+
+    // Retrieve the stored access token
+    String? accessToken = await _storage.read(key: 'access_token');
+    if (accessToken == null) {
+      throw Exception('Access token not found');
+    }
+
+    // Read the audio file bytes
+    final file = File(filePath);
+    if (!file.existsSync()) {
+      throw Exception('File does not exist on the disk');
+    }
+    final fileData = await file.readAsBytes();
+
+    // Prepare the multipart request
+    final request = http.MultipartRequest('GET', url)
+      ..headers['Authorization'] = 'Bearer $accessToken'
+      ..files.add(http.MultipartFile.fromBytes(
+        'recording_file',
+        fileData,
+        filename: fileName,
+      ));
+
+    // Send the request and return the response
+    final response = await request.send();
+    return http.Response.fromStream(response);
+  }
 
 
 

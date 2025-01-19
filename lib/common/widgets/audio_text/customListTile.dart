@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../common/appColors.dart';
@@ -71,7 +73,7 @@ class CustomListTile extends StatelessWidget {
               SvgIcon(
                 height: 24,
                 svgPath: 'assets/images/audio/play_icon.svg',
-                onTap: () => Get.to(() => AudioPlayerView()),
+                onTap: () => Get.to(() => AudioPlayerView(fileName: title)), // Pass the file name
               ),
             if (showPlayIcon) const SizedBox(width: 10), // Spacing only if play_icon exists
             SvgIcon(

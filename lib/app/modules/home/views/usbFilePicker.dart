@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'dart:async';
@@ -18,7 +19,6 @@ class _UsbFilePickerState extends State<UsbFilePicker> {
   List<String> _audioFiles = [];
   AudioPlayer _audioPlayer = AudioPlayer();
   bool _isUsbConnected = false;
-  Timer? _timer;
 
   @override
   void initState() {
@@ -26,13 +26,6 @@ class _UsbFilePickerState extends State<UsbFilePicker> {
     _requestPermissions();
     _fetchSavedFiles();
     _checkUsbConnection();
-    //_startUsbConnectionCheck();
-  }
-
-  void _startUsbConnectionCheck() {
-    _timer = Timer.periodic(Duration(seconds: 1), (_) {
-      _checkUsbConnection();
-    });
   }
 
   void _checkUsbConnection() async {
@@ -71,24 +64,26 @@ class _UsbFilePickerState extends State<UsbFilePicker> {
         // Save to database
         final dbHelper = DatabaseHelper();
         await dbHelper.deleteAllAudioFiles(context);
+
         for (var file in audioFiles) {
-          final filePath = file.path;
-          final fileData = await File(filePath).readAsBytes();
-          final duration = await _getAudioDuration(filePath);
+          final originalFilePath = file.path;
+          final localFilePath = await _copyFileToLocal(originalFilePath);
+          final duration = await _getAudioDuration(localFilePath);
 
           await dbHelper.insertAudioFile(
             context,
-            filePath.split('/').last,
-            fileData,
+            localFilePath.split('/').last, // File name
+            localFilePath,                // Local file path
             duration,
           );
         }
 
         setState(() {
-          _audioFiles = audioFiles.map((file) => file.path.split('/').last).toList();
+          _audioFiles =
+              audioFiles.map((file) => file.path.split('/').last).toList();
         });
 
-        _showSnackbar(context, 'Audio files saved: ${audioFiles.length}');
+        _showSnackbar(context, 'Audio files saved locally: ${audioFiles.length}');
       } else {
         _showSnackbar(context, 'Directory does not exist!');
       }
@@ -97,18 +92,38 @@ class _UsbFilePickerState extends State<UsbFilePicker> {
     }
   }
 
+  Future<String> _copyFileToLocal(String filePath) async {
+    try {
+      // Get the app's local directory
+      final directory = await getApplicationDocumentsDirectory();
+      final localPath = '${directory.path}/${filePath.split('/').last}';
+
+      // Copy the file to the local directory
+      final sourceFile = File(filePath);
+      final destinationFile = File(localPath);
+      if (await sourceFile.exists()) {
+        await sourceFile.copy(localPath);
+        return localPath; // Return the local path for database storage
+      } else {
+        throw Exception('Source file does not exist!');
+      }
+    } catch (e) {
+      throw Exception('Error copying file: $e');
+    }
+  }
+
   Future<String> _getAudioDuration(String filePath) async {
     final audioPlayer = AudioPlayer();
     Duration? duration;
 
     try {
-      // Play the audio but immediately stop it to get the duration
       await audioPlayer.play(DeviceFileSource(filePath));
-      await Future.delayed(Duration(milliseconds: 5000)); // Ensure enough time to fetch metadata
+      await Future.delayed(Duration(milliseconds: 1000)); // Short delay to get duration
       duration = await audioPlayer.getDuration();
-      await audioPlayer.stop(); // Stop the audio
+      await audioPlayer.stop();
     } catch (e) {
-      return '0:00'; // Return default duration on error
+      print('Error fetching duration for $filePath: $e');
+      return '0:00'; // Default duration on error
     }
 
     if (duration != null) {
@@ -116,8 +131,6 @@ class _UsbFilePickerState extends State<UsbFilePicker> {
     }
     return '0:00';
   }
-
-
 
   void _fetchSavedFiles() async {
     final dbHelper = DatabaseHelper();
@@ -135,25 +148,21 @@ class _UsbFilePickerState extends State<UsbFilePicker> {
     _showSnackbar(context, 'Fetched ${_audioFiles.length} saved audio files.');
   }
 
-
   Future<void> _playAudioFromDatabase(String fileName) async {
     final dbHelper = DatabaseHelper();
     final savedFiles = await dbHelper.fetchAudioFiles(context);
-    final fileData = savedFiles.firstWhere((file) => file['file_name'] == fileName)['file_data'];
+    final filePath = savedFiles.firstWhere(
+            (file) => file['file_name'] == fileName)['file_path'];
 
     try {
-      // Write the file data to a temporary file
-      final tempDir = Directory.systemTemp;
-      final tempFile = File('${tempDir.path}/$fileName');
-      await tempFile.writeAsBytes(fileData);
-
-      // Play the audio
-      await _audioPlayer.play(DeviceFileSource(tempFile.path));
+      // Play the audio from the local path
+      await _audioPlayer.play(DeviceFileSource(filePath));
       _showSnackbar(context, 'Playing $fileName');
     } catch (e) {
       _showSnackbar(context, 'Error playing audio: $e');
     }
   }
+
 
   void _showSnackbar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -163,7 +172,6 @@ class _UsbFilePickerState extends State<UsbFilePicker> {
 
   @override
   void dispose() {
-    _timer?.cancel();
     _audioPlayer.dispose();
     super.dispose();
   }
