@@ -7,6 +7,7 @@ import 'package:just_audio/just_audio.dart';
 import '../../../data/database_helper.dart';
 import '../../../data/services/api_services.dart';
 import '../views/convert_view.dart';
+import '../views/summary_key_point_view.dart';
 
 class AudioPlayerController extends GetxController {
   final ApiService _apiService = ApiService();
@@ -113,7 +114,7 @@ class AudioPlayerController extends GetxController {
       if (response.statusCode == 200) {
         final result = json.decode(response.body);
         final extractedData = result['Data'];
-        Get.to(() => ConvertView(text: extractedData));
+        Get.to(() => ConvertView(text: extractedData, filePath: filePath, fileName: fileName,));
 
         Get.snackbar('Success', 'Text Conversion Success');
       } else {
@@ -123,6 +124,49 @@ class AudioPlayerController extends GetxController {
       Get.snackbar('Error', 'Error: $e');
     }
     finally {
+      isLoading.value = false; // Stop loading
+    }
+  }
+
+  Future<void> fetchSummary(String filePath, String fileName) async {
+    try {
+      isLoading.value = true; // Start loading
+      final response = await _apiService.fetchSummary(filePath, fileName);
+
+      if (response.statusCode == 200) {
+        final result = json.decode(response.body);
+
+        // Extract the "content" field from the "Data" object
+        final summaryText = result['Data']['content'];
+
+        // Navigate to SummaryKeyPointView with the extracted summary
+        Get.to(() => SummaryKeyPointView(summary: summaryText, keyPoints: ''));
+      } else {
+        Get.snackbar('Error', 'Failed to fetch summary: ${response.body}');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Error: $e');
+    } finally {
+      isLoading.value = false; // Stop loading
+    }
+  }
+
+
+  Future<void> fetchKeyPoints(String filePath, String fileName) async {
+    try {
+      isLoading.value = true; // Start loading
+      final response = await _apiService.fetchKeyPoints(filePath, fileName);
+
+      if (response.statusCode == 200) {
+        final result = json.decode(response.body);
+        final keyPointsText = result['Data']['content'];
+        Get.to(() => SummaryKeyPointView(isKey: true, keyPoints: keyPointsText, summary: '',));
+      } else {
+        Get.snackbar('Error', 'Failed to fetch key points: ${response.body}');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Error: $e');
+    } finally {
       isLoading.value = false; // Stop loading
     }
   }

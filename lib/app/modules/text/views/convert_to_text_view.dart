@@ -231,13 +231,13 @@ class ConvertToTextView extends GetView {
                 CustomButton(
                   backgroundColor: AppColors.appColor2,
                   text: 'Summary',
-                  onPressed: () => Get.to(() => SummaryKeyPointView()),
+                  onPressed: () => Get.to(() => SummaryKeyPointView(summary: '', keyPoints: '',)),
                 ),
                 SizedBox(height: 10),
                 CustomButton(
                   backgroundColor: AppColors.appColor3,
                   text: 'Key Point',
-                  onPressed: () => Get.to(() => SummaryKeyPointView(isKey: true)),
+                  onPressed: () => Get.to(() => SummaryKeyPointView(isKey: true, summary: '', keyPoints: '',)),
                 ),
               ],
             ),
