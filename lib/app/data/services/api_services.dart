@@ -408,6 +408,31 @@ class ApiService {
     return http.Response.fromStream(response);
   }
 
+  Future<http.Response> fetchTranscription(String filePath, String fileName) async {
+    final Uri url = Uri.parse('${baseUrl}handle_recording_stuff/generate_transcription/');
 
+    String? accessToken = await _storage.read(key: 'access_token');
+
+    if (accessToken == null) {
+      throw Exception('Access token not found');
+    }
+
+    final file = File(filePath);
+    if (!file.existsSync()) {
+      throw Exception('File does not exist');
+    }
+    final fileData = await file.readAsBytes();
+
+    final request = http.MultipartRequest('GET', url)
+      ..headers['Authorization'] = 'Bearer $accessToken'
+      ..files.add(http.MultipartFile.fromBytes(
+        'recording_file',
+        fileData,
+        filename: fileName,
+      ));
+
+    final response = await request.send();
+    return http.Response.fromStream(response);
+  }
 
 }

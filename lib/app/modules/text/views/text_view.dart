@@ -1,14 +1,38 @@
-import 'package:clevertalk/app/modules/text/views/convert_to_text_view.dart';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
+import 'package:intl/intl.dart';
 import '../../../../common/widgets/audio_text/customListTile.dart';
 import '../../../../common/customFont.dart';
 import '../../../../common/widgets/customAppBar.dart';
-import '../../audio/views/summary_key_point_view.dart';
+import '../../../data/database_helper.dart';
+import 'convert_to_text_view.dart';
 
-class TextView extends StatelessWidget {
+class TextView extends StatefulWidget {
   const TextView({super.key});
+
+  @override
+  _TextViewState createState() => _TextViewState();
+}
+
+class _TextViewState extends State<TextView> {
+  List<Map<String, dynamic>> _textFiles = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchTextFiles();
+  }
+
+  Future<void> _fetchTextFiles() async {
+    final dbHelper = DatabaseHelper();
+    final textFiles = await dbHelper.fetchAudioFiles(context);
+
+    setState(() {
+      _textFiles = textFiles;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,11 +41,9 @@ class TextView extends StatelessWidget {
         isSearch: true,
         title: "CLEVERTALK",
         onFirstIconPressed: () {
-          // Action for the first button
           print("First icon pressed");
         },
         onSecondIconPressed: () {
-          // Action for the second button
           print("Second icon pressed");
         },
       ),
@@ -38,8 +60,15 @@ class TextView extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Expanded(
-              child: ListView.separated(
-                itemCount: 15, // Static count for now
+              child: _textFiles.isEmpty
+                  ? Center(
+                child: Text(
+                  'No text files available',
+                  style: TextStyle(fontSize: 16),
+                ),
+              )
+                  : ListView.separated(
+                itemCount: _textFiles.length,
                 separatorBuilder: (context, index) => const Divider(
                   color: Colors.grey,
                   thickness: 1,
@@ -47,23 +76,48 @@ class TextView extends StatelessWidget {
                   endIndent: 16,
                 ),
                 itemBuilder: (context, index) {
-                  // Example usage with conditional `showPlayIcon`
+                  final textFile = _textFiles[index];
+                  final fileName = textFile['file_name'] ?? 'Unknown Title';
+                  final parsedDate = parseFileNameToDate(fileName);
+                  final filePath = textFile['file_path'];
+
                   return GestureDetector(
-                    onTap: () => Get.to(() => ConvertToTextView()),
+                    onTap: () => Get.to(() => ConvertToTextView(fileName: fileName, filePath: filePath,)),
                     child: CustomListTile(
-                      title: 'Customer Feedback',
-                      subtitle: '11/20/24 8:00 PM',
-                      duration: '00:09:00',
+                      title: fileName,
+                      subtitle: parsedDate,
+                      duration: textFile['duration'] ?? '00:00:00',
                       showPlayIcon: false,
                     ),
                   );
                 },
               ),
             ),
-            SizedBox(height: 58,)
+            const SizedBox(height: 58),
           ],
         ),
       ),
     );
+  }
+
+  String parseFileNameToDate(String fileName) {
+    try {
+      final dateTimePart = fileName.substring(1, fileName.indexOf('.'));
+      final datePart = dateTimePart.split('-')[0]; // e.g., 20250112
+      final timePart = dateTimePart.split('-')[1]; // e.g., 142010
+
+      final year = int.parse(datePart.substring(0, 4));
+      final month = int.parse(datePart.substring(4, 6));
+      final day = int.parse(datePart.substring(6, 8));
+      final hour = int.parse(timePart.substring(0, 2));
+      final minute = int.parse(timePart.substring(2, 4));
+      final second = int.parse(timePart.substring(4, 6));
+
+      final dateTime = DateTime(year, month, day, hour, minute, second);
+
+      return DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime);
+    } catch (e) {
+      return 'Unknown Date';
+    }
   }
 }
