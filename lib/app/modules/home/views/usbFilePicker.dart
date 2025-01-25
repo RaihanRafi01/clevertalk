@@ -16,6 +16,11 @@ class _UsbFilePickerState extends State<UsbFilePicker> {
   static const platform = MethodChannel('usb_path_reader/usb');
   String? _selectedPath = '/RECORD';
   String? _usbPath;
+  String? _usbDeviceUUID;
+  String? _usbProductId;
+  String? _usbVendorId;
+  String? _usbDeviceName;
+
   List<String> _audioFiles = [];
   AudioPlayer _audioPlayer = AudioPlayer();
   bool _isUsbConnected = false;
@@ -25,22 +30,39 @@ class _UsbFilePickerState extends State<UsbFilePicker> {
     super.initState();
     _requestPermissions();
     _fetchSavedFiles();
-    _checkUsbConnection();
+    _checkUsbDeviceConnection();
   }
 
-  void _checkUsbConnection() async {
+  void _checkUsbDeviceConnection() async {
     try {
-      String? usbPath = await platform.invokeMethod('getUsbPath');
-      setState(() {
-        _usbPath = usbPath;
-        _isUsbConnected = usbPath != null;
-      });
-      _showSnackbar(context,
-          _isUsbConnected ? 'USB connected: $usbPath' : 'USB not connected');
+      final Map<dynamic, dynamic>? usbDeviceDetails =
+      await platform.invokeMethod('getUsbDeviceDetails');
+
+      if (usbDeviceDetails != null) {
+        setState(() {
+          _usbDeviceName = usbDeviceDetails['deviceName'];
+          _usbVendorId = usbDeviceDetails['vendorId'];
+          _usbProductId = usbDeviceDetails['productId'];
+          _usbDeviceUUID = usbDeviceDetails['deviceUUID'];
+          _isUsbConnected = true;
+        });
+
+        _showSnackbar(
+          context,
+          'USB connected: Name=${_usbDeviceName}, UUID=${_usbDeviceUUID}, _usbVendorId=${_usbVendorId}, _usbProductId=${_usbProductId}',
+        );
+      } else {
+        setState(() {
+          _isUsbConnected = false;
+        });
+        _showSnackbar(context, 'No USB devices connected');
+      }
     } on PlatformException catch (e) {
-      _showSnackbar(context, 'Failed to get USB path: ${e.message}');
+      _showSnackbar(context, 'Failed to get USB device details: ${e.message}');
     }
   }
+
+
 
   Future<void> _requestPermissions() async {
     if (await Permission.storage.request().isDenied) {
@@ -75,6 +97,8 @@ class _UsbFilePickerState extends State<UsbFilePicker> {
             localFilePath.split('/').last, // File name
             localFilePath,                // Local file path
             duration,
+            false,
+            ''
           );
         }
 
@@ -215,6 +239,25 @@ class _UsbFilePickerState extends State<UsbFilePicker> {
               ],
             ),
           ),
+          if (_isUsbConnected) // Show details only if USB is connected
+            Container(
+              padding: EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'USB Device Details:',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 5),
+                  SelectableText('Path: $_usbPath', style: TextStyle(fontSize: 16)),
+                  SelectableText('Device Name: $_usbDeviceName', style: TextStyle(fontSize: 16)),
+                  SelectableText('Vendor ID: $_usbVendorId', style: TextStyle(fontSize: 16)),
+                  SelectableText('Product ID: $_usbProductId', style: TextStyle(fontSize: 16)),
+                  SelectableText('Device UUID: $_usbDeviceUUID', style: TextStyle(fontSize: 16)),
+                ],
+              ),
+            ),
           Expanded(
             child: _audioFiles.isEmpty
                 ? Center(child: Text('No audio files found.'))

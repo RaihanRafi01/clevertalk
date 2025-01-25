@@ -41,10 +41,14 @@ class DatabaseHelper {
   }
 
   Future<void> insertAudioFile(
-      BuildContext context, String fileName, String filePath, String duration) async {
+      BuildContext context, String fileName, String filePath, String duration, bool isLocal , String localParsedDate) async {
     final db = await database;
     final date = DateTime.now().toIso8601String();
-    final parsedDate = parseFileNameToDate(fileName); // Parse date from file name
+    //final parsedDate = parseFileNameToDate(fileName); // Parse date from file name
+
+    final parsedDate = isLocal ? localParsedDate : parseFileNameToDate(fileName);
+
+
     await db.insert('audio_files', {
       'file_name': fileName,
       'file_path': filePath,

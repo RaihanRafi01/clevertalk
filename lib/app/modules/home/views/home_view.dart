@@ -9,6 +9,7 @@ import '../../../../common/customFont.dart';
 import '../../../../common/widgets/customAppBar.dart';
 import '../../../../common/widgets/home/audioPlayerCard.dart';
 import '../../../../common/widgets/home/videoCard.dart';
+import '../../notification_subscription/views/subscription_view.dart';
 import '../controllers/home_controller.dart';
 import 'usbFilePicker.dart';
 
@@ -40,7 +41,9 @@ class HomeView extends GetView<HomeController> {
                     Get.to(UsbFilePicker());
                   },width: 160,borderRadius: 5),
                   Spacer(),
-                  CustomButton(text: 'Get A Plan', onPressed: (){},width: 160,borderRadius: 5,backgroundColor: AppColors.appColor2,),
+                  CustomButton(text: 'Get A Plan', onPressed: (){
+                    Get.to(SubscriptionView());
+                  },width: 160,borderRadius: 5,backgroundColor: AppColors.appColor2,),
                 ],
               ),
               /*SizedBox(height: 20,),

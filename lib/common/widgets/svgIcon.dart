@@ -13,8 +13,8 @@ class SvgIcon extends StatelessWidget {
     required this.onTap,
     required this.height,
     this.color,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

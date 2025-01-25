@@ -54,6 +54,7 @@ dependencies:
   just_audio: ^0.9.42
   intl: ^0.20.1
   mime: ^2.0.0
+  flutter_sound: ^9.6.0
 
 dev_dependencies:
   flutter_test:

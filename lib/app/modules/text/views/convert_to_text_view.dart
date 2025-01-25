@@ -62,7 +62,7 @@ class ConvertToTextView extends StatelessWidget {
                     return CustomUserText(
                       name: msg['name']!,
                       time: msg['time']!,
-                      UserColor: msg['name'] == 'Pial' ? AppColors.green : AppColors.textUserColor,
+                      UserColor: msg['name'] == 'l' ? AppColors.green : AppColors.textUserColor,
                       description: msg['description']!,
                       isHighlighted: isHighlighted,
                     );
