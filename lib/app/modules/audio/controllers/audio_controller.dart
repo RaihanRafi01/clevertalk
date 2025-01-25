@@ -107,9 +107,16 @@ class AudioPlayerController extends GetxController {
       final filePath = audioFile['file_path'];
       final fileName = audioFile['file_name'];
 
+
+      print('::::::::::::::::::::::::::::::::::::filePath: $filePath');
+      print('::::::::::::::::::::::::::::::::::::fileName: $fileName');
+
       isLoading.value = true; // Start loading
 
-      final response = await _apiService.convertToText(filePath, fileName);
+      final response = await _apiService.convertToText(filePath);
+
+      print('::::::::::::::::::::::::::::::::::::CODE: ${response.statusCode}');
+      print('::::::::::::::::::::::::::::::::::::body: ${response.body}');
 
       if (response.statusCode == 200) {
         final result = json.decode(response.body);

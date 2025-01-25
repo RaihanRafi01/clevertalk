@@ -80,14 +80,20 @@ class _TextViewState extends State<TextView> {
                   final fileName = textFile['file_name'] ?? 'Unknown Title';
                   final parsedDate = parseFileNameToDate(fileName);
                   final filePath = textFile['file_path'];
+                  final id = textFile['id']; // Add ID
 
                   return GestureDetector(
-                    onTap: () => Get.to(() => ConvertToTextView(fileName: fileName, filePath: filePath,)),
+                    onTap: () {
+                      print(':::::::::::::::::::::::::id: $id');
+                      Get.to(() => ConvertToTextView(fileName: fileName, filePath: filePath,));
+                    },
                     child: CustomListTile(
                       title: fileName,
                       subtitle: parsedDate,
                       duration: textFile['duration'] ?? '00:00:00',
                       showPlayIcon: false,
+                      id: id,
+                      onUpdate: _fetchTextFiles, // Pass the refresh callback
                     ),
                   );
                 },

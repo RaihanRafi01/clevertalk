@@ -322,7 +322,7 @@ class ApiService {
 ///////////////////////////////////////////////////////////// AUDIO ///////////////////////////
 
 
-  Future<http.Response> convertToText(String filePath, String fileName) async {
+  Future<http.Response> convertToText(String filePath) async {
     final Uri url = Uri.parse('${baseUrl}handle_recording_stuff/speech_to_text/');
 
     // Retrieve the stored access token
@@ -344,7 +344,7 @@ class ApiService {
       ..files.add(http.MultipartFile.fromBytes(
         'recording_file',
         fileData,
-        filename: fileName,
+        filename: 'file.WAV',
       ));
 
     // Send the request and return the response
@@ -374,7 +374,7 @@ class ApiService {
       ..files.add(http.MultipartFile.fromBytes(
         'recording_file',
         fileData,
-        filename: fileName,
+        filename: 'file.WAV',
       ));
 
     final response = await request.send();
@@ -401,7 +401,7 @@ class ApiService {
       ..files.add(http.MultipartFile.fromBytes(
         'recording_file',
         fileData,
-        filename: fileName,
+        filename: 'file.WAV',
       ));
 
     final response = await request.send();
@@ -428,7 +428,7 @@ class ApiService {
       ..files.add(http.MultipartFile.fromBytes(
         'recording_file',
         fileData,
-        filename: fileName,
+        filename: 'file.WAV',
       ));
 
     final response = await request.send();

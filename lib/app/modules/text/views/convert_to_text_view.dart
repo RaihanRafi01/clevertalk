@@ -171,8 +171,8 @@ class ConvertToTextView extends StatelessWidget {
                     Obx(
                           () => Text(
                         textController.messages.isNotEmpty
-                            ? 'Transcription Data Available'
-                            : 'No Transcription Data',
+                            ? audioController.audioFiles[audioController.currentIndex.value]['file_name']
+                            : 'Please wait for a while...',
                         style: h1.copyWith(fontSize: 20, color: AppColors.textHeader),
                       ),
                     ),
@@ -185,6 +185,7 @@ class ConvertToTextView extends StatelessWidget {
                           barrierDismissible: false,
                           builder: (BuildContext context) {
                             return CustomPopup(
+                              controller: TextEditingController(),
                               title: 'Edit',
                               isSecondInput: true,
                               hint1: 'Speaker 01',

@@ -13,6 +13,7 @@ class CustomPopup extends StatefulWidget {
   final String hint2;
   final String btnText;
   final String fieldName;
+  final TextEditingController controller; // Accept controller here
 
   const CustomPopup({
     super.key,
@@ -23,6 +24,7 @@ class CustomPopup extends StatefulWidget {
     this.hint2 = 'Untitled',
     this.btnText = 'Save',
     this.fieldName = 'Set a name',
+    required this.controller, // Initialize controller
   });
 
   @override
@@ -31,7 +33,7 @@ class CustomPopup extends StatefulWidget {
 
 class _CustomPopupState extends State<CustomPopup> {
   // Controllers for the text fields
-  final TextEditingController _controller1 = TextEditingController();
+  //final TextEditingController _controller1 = TextEditingController();
   final TextEditingController _controller2 = TextEditingController();
 
   @override
@@ -67,7 +69,7 @@ class _CustomPopupState extends State<CustomPopup> {
                 SizedBox(height: 20),
                 // First TextField (Optional)
                 TextField(
-                  controller: _controller1,
+                  controller: widget.controller, // Use the passed controller
                   decoration: InputDecoration(
                     hintText: widget.hint1,
                     contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
@@ -103,7 +105,10 @@ class _CustomPopupState extends State<CustomPopup> {
                 SizedBox(height: 20),
 
                 // Button to trigger action
-                CustomButton(text: widget.btnText, onPressed: widget.onButtonPressed)
+                CustomButton(
+                  text: widget.btnText,
+                  onPressed: widget.onButtonPressed,
+                ),
               ],
             ),
           ),

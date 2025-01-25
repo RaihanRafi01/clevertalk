@@ -69,4 +69,31 @@ class DatabaseHelper {
       SnackBar(content: Text('All audio files deleted successfully!')),
     );
   }
+
+  Future<void> deleteAudioFile(BuildContext context, int id) async {
+    final db = await database;
+    await db.delete(
+      'audio_files',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Audio file deleted successfully!')),
+    );
+  }
+
+  Future<void> renameAudioFile(BuildContext context, int id, String newFileName) async {
+    final db = await database;
+    await db.update(
+      'audio_files',
+      {'file_name': newFileName},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Audio file renamed successfully!')),
+    );
+  }
+
+
 }

@@ -177,6 +177,7 @@ class RecordView extends GetView<RecordController> {
                     barrierDismissible: false, // Prevents closing by tapping outside
                     builder: (BuildContext context) {
                       return CustomPopup(
+                        controller: TextEditingController(),
                         title: 'Edit',
                         onButtonPressed: () {
                           // Handle button press, for example, retrieve input data:

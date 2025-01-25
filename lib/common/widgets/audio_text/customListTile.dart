@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../../common/appColors.dart';
 import '../../../../common/customFont.dart';
 import '../../../../common/widgets/svgIcon.dart';
+import '../../../app/data/database_helper.dart';
 import '../../../app/modules/audio/views/audio_player_view.dart';
 import '../home/customDeletePopUp.dart';
 import '../home/customPopUp.dart';
@@ -14,6 +15,8 @@ class CustomListTile extends StatelessWidget {
   final String subtitle;
   final String duration;
   final bool showPlayIcon;
+  final int id;
+  final VoidCallback onUpdate; // Callback to refresh the list
 
   const CustomListTile({
     Key? key,
@@ -21,6 +24,8 @@ class CustomListTile extends StatelessWidget {
     required this.subtitle,
     required this.duration,
     this.showPlayIcon = true, // Default to true
+    required this.id,
+    required this.onUpdate, // Accept the callback
   }) : super(key: key);
 
   @override
@@ -80,15 +85,30 @@ class CustomListTile extends StatelessWidget {
               height: 24,
               svgPath: 'assets/images/audio/edit_icon.svg',
               onTap: () {
+                TextEditingController controller = TextEditingController(text: title); // Pre-fill the controller with the file name
+
                 showDialog(
                   context: context,
-                  barrierDismissible: false, // Prevents closing by tapping outside
+                  barrierDismissible: false,
                   builder: (BuildContext context) {
                     return CustomPopup(
                       title: 'Edit',
-                      onButtonPressed: () {
-                        Navigator.of(context).pop(); // Close the dialog
+                      controller: controller, // Pass the controller
+                      onButtonPressed: () async {
+                        String newFileName = controller.text.trim(); // Get the updated file name
+                        if (newFileName.isNotEmpty) {
+                          final dbHelper = DatabaseHelper();
+                          await dbHelper.renameAudioFile(context, id, newFileName); // Update the file name in the database
+                          Navigator.of(context).pop(); // Close the dialog
+                          onUpdate(); // Refresh the list
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('File name cannot be empty!')),
+                          );
+                        }
                       },
+                      hint1: 'Enter new file name', // Provide hint text
+                      fieldName: 'Rename File', // Provide label text
                     );
                   },
                 );
@@ -104,8 +124,12 @@ class CustomListTile extends StatelessWidget {
                   barrierDismissible: false, // Prevents closing by tapping outside
                   builder: (BuildContext context) {
                     return CustomDeletePopup(
-                      onButtonPressed1: () {
+                      onButtonPressed1: () async {
                         // Delete
+                        final dbHelper = DatabaseHelper();
+                        await dbHelper.deleteAudioFile(context, id);
+                        Navigator.of(context).pop();
+                        onUpdate();
                       },
                       onButtonPressed2: () {
                         Navigator.of(context).pop(); // Close the dialog

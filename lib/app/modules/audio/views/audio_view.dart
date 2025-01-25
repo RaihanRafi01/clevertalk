@@ -77,11 +77,13 @@ class _AudioViewState extends State<AudioView> {
                   final audioFile = _audioFiles[index];
                   final fileName = audioFile['file_name'] ?? 'Unknown Title';
                   final parsedDate = parseFileNameToDate(fileName);
-
+                  final id = audioFile['id'];
                   return CustomListTile(
                     title: fileName,
                     subtitle: parsedDate,
                     duration: audioFile['duration'] ?? '00:00:00',
+                    id: id,
+                    onUpdate: _fetchAudioFiles, // Pass the refresh callback
                     /*onPlayPressed: () {
       _playAudio(audioFile); // Play audio
     },*/
