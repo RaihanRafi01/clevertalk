@@ -19,15 +19,22 @@ class ConvertToTextView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(AudioPlayerController(), permanent: true);
+    final audioController = Get.put(AudioPlayerController(), permanent: true);
     final textController = Get.put(ConvertToTextController());
 
-    controller.fetchAudioFiles().then((_) {
-      final index = controller.audioFiles.indexWhere((file) => file['file_name'] == fileName);
+    // Start transcription fetching and audio playback
+    audioController.fetchAudioFiles().then((_) {
+      final index = audioController.audioFiles.indexWhere((file) => file['file_name'] == fileName);
       if (index != -1) {
-        controller.currentIndex.value = index;
-        controller.playAudio();
-        textController.fetchMessages(filePath, fileName);
+        audioController.currentIndex.value = index;
+
+        // Start playing audio and fetch transcription
+        textController.fetchMessages(filePath, fileName).then((_) {
+          audioController.playAudio(filePath: filePath);
+
+          // Synchronize scrolling with audio
+          textController.syncScrollingWithAudio(audioController);
+        });
       }
     });
 
@@ -43,6 +50,7 @@ class ConvertToTextView extends StatelessWidget {
               ? Center(child: CircularProgressIndicator())
               : Positioned.fill(
             top: 260,
+            bottom: 100,
             child: SingleChildScrollView(
               controller: textController.scrollController,
               padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -51,14 +59,6 @@ class ConvertToTextView extends StatelessWidget {
                   final msg = textController.messages[index];
                   return Obx(() {
                     bool isHighlighted = index == textController.currentHighlightedIndex.value;
-                    if (isHighlighted) {
-                      final position = index * 80.0;
-                      textController.scrollController.animateTo(
-                        position,
-                        duration: const Duration(milliseconds: 500),
-                        curve: Curves.easeInOut,
-                      );
-                    }
                     return CustomUserText(
                       name: msg['name']!,
                       time: msg['time']!,
@@ -95,8 +95,8 @@ class ConvertToTextView extends StatelessWidget {
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 10),
                             child: Text(
-                              controller.audioFiles.isNotEmpty && controller.currentIndex.value >= 0
-                                  ? controller.audioFiles[controller.currentIndex.value]['file_name']
+                              audioController.audioFiles.isNotEmpty && audioController.currentIndex.value >= 0
+                                  ? audioController.audioFiles[audioController.currentIndex.value]['file_name']
                                   : 'No File Selected',
                               style: h1.copyWith(fontSize: 20, color: AppColors.textHeader),
                             ),
@@ -104,11 +104,11 @@ class ConvertToTextView extends StatelessWidget {
                         ),
                         const SizedBox(height: 10),
                         Slider(
-                          value: controller.currentPosition.value,
+                          value: audioController.currentPosition.value,
                           min: 0,
-                          max: controller.totalDuration.value,
+                          max: audioController.totalDuration.value,
                           onChanged: (value) async {
-                            await controller.seekAudio(Duration(seconds: value.toInt()));
+                            await audioController.seekAudio(Duration(seconds: value.toInt()));
                           },
                           activeColor: AppColors.appColor,
                           inactiveColor: Colors.grey,
@@ -119,28 +119,28 @@ class ConvertToTextView extends StatelessWidget {
                             SvgIcon(
                               height: 22,
                               svgPath: 'assets/images/audio/previous_icon.svg',
-                              onTap: controller.playPrevious,
+                              onTap: audioController.playPrevious,
                             ),
                             SvgIcon(
                               height: 22,
                               svgPath: 'assets/images/audio/previous_10_icon.svg',
                               onTap: () async {
-                                final newPosition = (controller.currentAudioPosition.inSeconds - 10)
-                                    .clamp(0, controller.totalDuration.value.toInt());
-                                await controller.seekAudio(Duration(seconds: newPosition));
+                                final newPosition = (audioController.currentAudioPosition.inSeconds - 10)
+                                    .clamp(0, audioController.totalDuration.value.toInt());
+                                await audioController.seekAudio(Duration(seconds: newPosition));
                               },
                             ),
                             SvgIcon(
                               height: 54,
-                              svgPath: controller.isPlaying.value
+                              svgPath: audioController.isPlaying.value
                                   ? 'assets/images/audio/pause_icon.svg'
                                   : 'assets/images/audio/play_icon.svg',
-                              color: controller.isPlaying.value ? null : AppColors.appColor,
+                              color: audioController.isPlaying.value ? null : AppColors.appColor,
                               onTap: () async {
-                                if (controller.isPlaying.value) {
-                                  await controller.pauseAudio();
+                                if (audioController.isPlaying.value) {
+                                  await audioController.pauseAudio();
                                 } else {
-                                  await controller.playAudio();
+                                  await audioController.playAudio();
                                 }
                               },
                             ),
@@ -148,15 +148,15 @@ class ConvertToTextView extends StatelessWidget {
                               height: 22,
                               svgPath: 'assets/images/audio/next_10_icon.svg',
                               onTap: () async {
-                                final newPosition = (controller.currentAudioPosition.inSeconds + 10)
-                                    .clamp(0, controller.totalDuration.value.toInt());
-                                await controller.seekAudio(Duration(seconds: newPosition));
+                                final newPosition = (audioController.currentAudioPosition.inSeconds + 10)
+                                    .clamp(0, audioController.totalDuration.value.toInt());
+                                await audioController.seekAudio(Duration(seconds: newPosition));
                               },
                             ),
                             SvgIcon(
                               height: 22,
                               svgPath: 'assets/images/audio/next_icon.svg',
-                              onTap: controller.playNext,
+                              onTap: audioController.playNext,
                             ),
                           ],
                         ),
@@ -215,13 +215,13 @@ class ConvertToTextView extends StatelessWidget {
                 CustomButton(
                   backgroundColor: AppColors.appColor2,
                   text: 'Summary',
-                  onPressed: () => controller.fetchSummary(filePath, fileName),
+                  onPressed: () => audioController.fetchSummary(filePath, fileName),
                 ),
                 const SizedBox(height: 10),
                 CustomButton(
                   backgroundColor: AppColors.appColor3,
                   text: 'Key Point',
-                  onPressed: () => controller.fetchKeyPoints(filePath, fileName),
+                  onPressed: () => audioController.fetchKeyPoints(filePath, fileName),
                 ),
               ],
             ),
@@ -232,7 +232,7 @@ class ConvertToTextView extends StatelessWidget {
             top: 0,
             bottom: 0,
             child: Obx(() {
-              if (controller.isLoading.value) {
+              if (audioController.isLoading.value) {
                 return const Center(
                   child: CircularProgressIndicator(color: AppColors.appColor),
                 );

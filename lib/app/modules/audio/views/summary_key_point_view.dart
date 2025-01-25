@@ -26,7 +26,7 @@ class SummaryKeyPointView extends GetView {
       ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 30),
           child: SingleChildScrollView(
             child: Column(
               children: [
