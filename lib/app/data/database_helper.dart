@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:intl/intl.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -21,16 +22,17 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'audio_files.db');
     return await openDatabase(
       path,
-      version: 1,
-      onCreate: (db, version) {
-        return db.execute(
+      version: 1, // Start with version 1 since the app will be reinstalled
+      onCreate: (db, version) async {
+        await db.execute(
           '''
           CREATE TABLE audio_files (
             id INTEGER PRIMARY KEY,
             file_name TEXT,
             file_path TEXT,
             duration TEXT,
-            saved_date TEXT
+            saved_date TEXT,
+            parsed_date TEXT
           )
           ''',
         );
@@ -42,11 +44,13 @@ class DatabaseHelper {
       BuildContext context, String fileName, String filePath, String duration) async {
     final db = await database;
     final date = DateTime.now().toIso8601String();
+    final parsedDate = parseFileNameToDate(fileName); // Parse date from file name
     await db.insert('audio_files', {
       'file_name': fileName,
       'file_path': filePath,
       'duration': duration,
       'saved_date': date,
+      'parsed_date': parsedDate, // Save parsed date
     });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Audio file "$fileName" inserted successfully!')),
@@ -86,7 +90,9 @@ class DatabaseHelper {
     final db = await database;
     await db.update(
       'audio_files',
-      {'file_name': newFileName},
+      {
+        'file_name': newFileName,
+      },
       where: 'id = ?',
       whereArgs: [id],
     );
@@ -95,5 +101,33 @@ class DatabaseHelper {
     );
   }
 
+  Future<void> updateFileParsedDate(int id, String parsedDate) async {
+    final db = await database;
+    await db.update(
+      'audio_files',
+      {'parsed_date': parsedDate},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
 
+  String parseFileNameToDate(String fileName) {
+    try {
+      final dateTimePart = fileName.substring(1, fileName.indexOf('.'));
+      final datePart = dateTimePart.split('-')[0]; // e.g., 20250112
+      final timePart = dateTimePart.split('-')[1]; // e.g., 142010
+
+      final year = int.parse(datePart.substring(0, 4));
+      final month = int.parse(datePart.substring(4, 6));
+      final day = int.parse(datePart.substring(6, 8));
+      final hour = int.parse(timePart.substring(0, 2));
+      final minute = int.parse(timePart.substring(2, 4));
+      final second = int.parse(timePart.substring(4, 6));
+
+      final dateTime = DateTime(year, month, day, hour, minute, second);
+      return DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime);
+    } catch (e) {
+      return 'Unknown Date';
+    }
+  }
 }

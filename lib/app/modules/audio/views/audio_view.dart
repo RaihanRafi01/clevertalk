@@ -76,7 +76,7 @@ class _AudioViewState extends State<AudioView> {
                 itemBuilder: (context, index) {
                   final audioFile = _audioFiles[index];
                   final fileName = audioFile['file_name'] ?? 'Unknown Title';
-                  final parsedDate = parseFileNameToDate(fileName);
+                  final parsedDate = audioFile['parsed_date'] ?? 'Unknown Date';
                   final id = audioFile['id'];
                   return CustomListTile(
                     title: fileName,

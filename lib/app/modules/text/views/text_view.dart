@@ -78,7 +78,7 @@ class _TextViewState extends State<TextView> {
                 itemBuilder: (context, index) {
                   final textFile = _textFiles[index];
                   final fileName = textFile['file_name'] ?? 'Unknown Title';
-                  final parsedDate = parseFileNameToDate(fileName);
+                  final parsedDate = textFile['parsed_date'] ?? 'Unknown Date';
                   final filePath = textFile['file_path'];
                   final id = textFile['id']; // Add ID
 
@@ -106,7 +106,7 @@ class _TextViewState extends State<TextView> {
     );
   }
 
-  String parseFileNameToDate(String fileName) {
+  /*String parseFileNameToDate(String fileName) {
     try {
       final dateTimePart = fileName.substring(1, fileName.indexOf('.'));
       final datePart = dateTimePart.split('-')[0]; // e.g., 20250112
@@ -125,5 +125,5 @@ class _TextViewState extends State<TextView> {
     } catch (e) {
       return 'Unknown Date';
     }
-  }
+  }*/
 }
