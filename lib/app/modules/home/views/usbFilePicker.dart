@@ -33,13 +33,16 @@ class _UsbFilePickerState extends State<UsbFilePicker> {
     _checkUsbDeviceConnection();
   }
 
+  // part 1
+
   void _checkUsbDeviceConnection() async {
     try {
       final Map<dynamic, dynamic>? usbDeviceDetails =
       await platform.invokeMethod('getUsbDeviceDetails');
 
       if (usbDeviceDetails != null) {
-        setState(() {
+        setState(() async {
+          _usbPath = await platform.invokeMethod<String>('getUsbPath');
           _usbDeviceName = usbDeviceDetails['deviceName'];
           _usbVendorId = usbDeviceDetails['vendorId'];
           _usbProductId = usbDeviceDetails['productId'];
@@ -72,6 +75,8 @@ class _UsbFilePickerState extends State<UsbFilePicker> {
       await Permission.manageExternalStorage.request();
     }
   }
+
+  //part 2
 
   void _listAudioFiles(String path) async {
     try {
@@ -116,6 +121,8 @@ class _UsbFilePickerState extends State<UsbFilePicker> {
     }
   }
 
+  // part 3
+
   Future<String> _copyFileToLocal(String filePath) async {
     try {
       // Get the app's local directory
@@ -155,6 +162,8 @@ class _UsbFilePickerState extends State<UsbFilePicker> {
     }
     return '0:00';
   }
+
+  // part 4
 
   void _fetchSavedFiles() async {
     final dbHelper = DatabaseHelper();

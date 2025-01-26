@@ -11,6 +11,7 @@ import '../../../../common/widgets/home/audioPlayerCard.dart';
 import '../../../../common/widgets/home/videoCard.dart';
 import '../../notification_subscription/views/subscription_view.dart';
 import '../controllers/home_controller.dart';
+import 'connectUSB.dart';
 import 'usbFilePicker.dart';
 
 class HomeView extends GetView<HomeController> {
@@ -38,7 +39,8 @@ class HomeView extends GetView<HomeController> {
               Row(
                 children: [
                   CustomButton(text: 'Connect Device', onPressed: (){
-                    Get.to(UsbFilePicker());
+                    //Get.to(UsbFilePicker());
+                    connectUsbDevice(context);
                   },width: 160,borderRadius: 5),
                   Spacer(),
                   CustomButton(text: 'Get A Plan', onPressed: (){
