@@ -72,17 +72,34 @@ Future<void> connectUsbDevice(BuildContext context) async {
   }
 
   try {
-    // Step 3: List and process audio files
+    // Step 3: List and process audio files with retries
     String combinedPath = '$usbPath$selectedPath';
     final directory = Directory(combinedPath);
 
-    if (!directory.existsSync()) {
-      Navigator.pop(context); // Dismiss loading dialog
-      _showSnackbar(context, 'Directory does not exist!');
-      return;
+    int retryCountStep3 = 0;
+    const maxRetriesStep3 = 3;
+    List<FileSystemEntity> files = [];
+
+    while (retryCountStep3 < maxRetriesStep3) {
+      try {
+        if (!directory.existsSync()) {
+          throw Exception('Directory does not exist!');
+        }
+
+        files = directory.listSync(recursive: true, followLinks: false);
+        break; // Exit the retry loop if successful
+      } catch (e) {
+        retryCountStep3++;
+        if (retryCountStep3 < maxRetriesStep3) {
+          await Future.delayed(Duration(seconds: 10));
+        } else {
+          Navigator.pop(context); // Dismiss loading dialog
+          _showSnackbar(context, 'Failed to access directory after $maxRetriesStep3 attempts.');
+          return;
+        }
+      }
     }
 
-    final files = directory.listSync(recursive: true, followLinks: false);
     final audioFilesList = files.where((file) {
       final extension = file.path.split('.').last.toLowerCase();
       return ['mp3', 'wav', 'aac'].contains(extension);
@@ -134,8 +151,7 @@ Future<void> connectUsbDevice(BuildContext context) async {
         return '$fileName | $duration | $savedDate';
       }).toList();
 
-      _showSnackbar(
-          context, 'Fetched ${audioFiles.length} saved audio files.');
+      _showSnackbar(context, 'Fetched ${audioFiles.length} saved audio files.');
     } else {
       _showSnackbar(context, 'No saved audio files found in the database!');
     }

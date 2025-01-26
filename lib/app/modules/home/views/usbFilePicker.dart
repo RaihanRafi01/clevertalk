@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
@@ -21,6 +22,8 @@ class _UsbFilePickerState extends State<UsbFilePicker> {
   String? _usbVendorId;
   String? _usbDeviceName;
 
+  String _selectedFolderPath = '';  // Store the selected folder path
+
   List<String> _audioFiles = [];
   AudioPlayer _audioPlayer = AudioPlayer();
   bool _isUsbConnected = false;
@@ -31,6 +34,25 @@ class _UsbFilePickerState extends State<UsbFilePicker> {
     _requestPermissions();
     _fetchSavedFiles();
     _checkUsbDeviceConnection();
+  }
+
+  // New method to pick a folder
+  Future<void> _pickFolder() async {
+    try {
+      // Open the folder picker (updated method name in newer versions)
+      final result = await FilePicker.platform.getDirectoryPath();
+
+      if (result != null) {
+        setState(() {
+          _selectedFolderPath = result;
+        });
+        _showSnackbar(context, 'Selected Folder: $_selectedFolderPath');
+      } else {
+        _showSnackbar(context, 'No folder selected');
+      }
+    } catch (e) {
+      _showSnackbar(context, 'Error picking folder: $e');
+    }
   }
 
   // part 1
@@ -217,6 +239,19 @@ class _UsbFilePickerState extends State<UsbFilePicker> {
       appBar: AppBar(title: Text('USB Drive Audio Files')),
       body: Column(
         children: [
+          // Add new button to pick folder
+          Container(
+            padding: EdgeInsets.all(10),
+            child: Row(
+              children: [
+                Expanded(child: Text('Selected Folder Path: $_selectedFolderPath')),
+                IconButton(
+                  icon: Icon(Icons.folder_open),
+                  onPressed: _pickFolder,
+                ),
+              ],
+            ),
+          ),
           Container(
             padding: EdgeInsets.all(10),
             color: _isUsbConnected ? Colors.green : Colors.red,
