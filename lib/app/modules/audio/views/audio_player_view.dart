@@ -6,6 +6,7 @@ import '../../../../common/customFont.dart';
 import '../../../../common/widgets/auth/custom_button.dart';
 import '../../../../common/widgets/customAppBar.dart';
 import '../../../../common/widgets/svgIcon.dart';
+import '../../text/controllers/text_controller.dart';
 import '../controllers/audio_controller.dart';
 
 class AudioPlayerView extends StatelessWidget {
@@ -16,6 +17,7 @@ class AudioPlayerView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(AudioPlayerController(), permanent: true);
+    final textController = Get.put(ConvertToTextController());
 
     // Fetch files and set the selected file as the current index
     controller.fetchAudioFiles().then((_) {

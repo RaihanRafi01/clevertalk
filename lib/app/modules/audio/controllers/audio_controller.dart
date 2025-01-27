@@ -4,6 +4,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:sqflite/sql.dart';
 import '../../../data/database_helper.dart';
 import '../../../data/services/api_services.dart';
 import '../views/convert_view.dart';
@@ -97,7 +99,7 @@ class AudioPlayerController extends GetxController {
     }
   }
 
-  Future<void> convertToText() async {
+  /*Future<void> convertToText() async {
     try {
       if (audioFiles.isEmpty || currentIndex.value < 0) {
         throw Exception('No audio file selected');
@@ -113,7 +115,7 @@ class AudioPlayerController extends GetxController {
 
       isLoading.value = true; // Start loading
 
-      final response = await _apiService.convertToText(filePath);
+      final response = await _apiService.fetchTranscription(filePath);
 
       print('::::::::::::::::::::::::::::::::::::CODE: ${response.statusCode}');
       print('::::::::::::::::::::::::::::::::::::body: ${response.body}');
@@ -133,9 +135,102 @@ class AudioPlayerController extends GetxController {
     finally {
       isLoading.value = false; // Stop loading
     }
+  }*/
+
+
+  Future<void> convertToText() async {
+    try {
+      if (audioFiles.isEmpty || currentIndex.value < 0) {
+        throw Exception('No audio file selected');
+      }
+
+      final audioFile = audioFiles[currentIndex.value];
+      final filePath = audioFile['file_path'];
+      final fileName = audioFile['file_name'];
+
+      print('::::::::::::::::::::::::::::::::::::filePath: $filePath');
+      print('::::::::::::::::::::::::::::::::::::fileName: $fileName');
+
+      isLoading.value = true; // Start loading
+
+      final dbHelper = DatabaseHelper();
+      final db = await dbHelper.database;
+
+      // Check if the transcription exists in the database
+      final result = await db.query(
+        'audio_files',
+        where: 'file_path = ?',
+        whereArgs: [filePath],
+      );
+
+      if (result.isNotEmpty) {
+        final existingTranscription = result.first['transcription'];
+
+        if (existingTranscription != null && existingTranscription.toString().isNotEmpty) {
+          print('::::::::::::::::::::::::::::::::::::Transcription found in database');
+
+          // Decode the transcription and navigate to ConvertView
+          //final data = json.decode(existingTranscription.toString()) as List;
+          Get.to(() => ConvertView(
+            text: existingTranscription.toString(),
+            filePath: filePath,
+            fileName: fileName,
+          ));
+          Get.snackbar('Success', 'Loaded transcription from database');
+        } else {
+          // Fetch transcription from the API if not available in the database
+          await fetchTranscriptionFromApi(filePath, fileName, db);
+        }
+      } else {
+        // File not found in the database
+        Get.snackbar('Error', 'File not found in the database. Please add the file first.');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Error: $e');
+    } finally {
+      isLoading.value = false; // Stop loading
+    }
   }
 
-  Future<void> fetchSummary(String filePath, String fileName) async {
+  Future<void> fetchTranscriptionFromApi(String filePath, String fileName, Database db) async {
+    try {
+      final response = await _apiService.fetchTranscription(filePath);
+
+      print('::::::::::::::::::::::::::::::::::::CODE: ${response.statusCode}');
+      print('::::::::::::::::::::::::::::::::::::body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final result = json.decode(response.body);
+        final data = result['Data'];
+
+        // Save the transcription to the database
+        await db.update(
+          'audio_files',
+          {'transcription': json.encode(data)},
+          where: 'file_path = ?',
+          whereArgs: [filePath],
+        );
+
+        // Navigate to ConvertView with the fetched transcription
+        Get.to(() => ConvertView(
+          text: data,
+          filePath: filePath,
+          fileName: fileName,
+        ));
+
+        Get.snackbar('Success', 'Text Conversion Success');
+      } else {
+        Get.snackbar('Error', 'Text Conversion Failed: ${response.body}');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Error fetching transcription: $e');
+    }
+  }
+
+
+
+
+  /*Future<void> fetchSummary(String filePath, String fileName) async {
     try {
       isLoading.value = true; // Start loading
       final response = await _apiService.fetchSummary(filePath, fileName);
@@ -156,10 +251,115 @@ class AudioPlayerController extends GetxController {
     } finally {
       isLoading.value = false; // Stop loading
     }
+  }*/
+
+  Future<void> fetchSummary(String filePath, String fileName) async {
+    try {
+      isLoading.value = true; // Start loading
+      final dbHelper = DatabaseHelper();
+      final db = await dbHelper.database;
+
+      // Check if the file exists in the database
+      final result = await db.query(
+        'audio_files',
+        where: 'file_name = ?',
+        whereArgs: [fileName],
+      );
+
+      if (result.isNotEmpty) {
+        final existingSummary = result.first['summary'];
+
+        if (existingSummary != null && existingSummary.toString().isNotEmpty) {
+          // If the summary already exists, show it
+          Get.to(() => SummaryKeyPointView(summary: existingSummary.toString(), keyPoints: ''));
+        } else {
+          // If the summary is not available, fetch it from the API
+          final response = await _apiService.fetchSummary(filePath, fileName);
+
+          if (response.statusCode == 200) {
+            final jsonResponse = json.decode(response.body);
+            final summaryText = jsonResponse['Data']['content'];
+
+            // Update the summary in the database
+            await db.update(
+              'audio_files',
+              {'summary': summaryText},
+              where: 'file_name = ?',
+              whereArgs: [fileName],
+            );
+
+            // Navigate to SummaryKeyPointView with the new summary
+            Get.to(() => SummaryKeyPointView(summary: summaryText, keyPoints: ''));
+          } else {
+            Get.snackbar('Error', 'Failed to fetch summary: ${response.body}');
+          }
+        }
+      } else {
+        // If the file doesn't exist in the database, show an error
+        Get.snackbar('Error', 'File not found in the database. Please add the file first.');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Error: $e');
+    } finally {
+      isLoading.value = false; // Stop loading
+    }
   }
 
 
+
   Future<void> fetchKeyPoints(String filePath, String fileName) async {
+    try {
+      isLoading.value = true; // Start loading
+      final dbHelper = DatabaseHelper();
+      final db = await dbHelper.database;
+
+      // Check if the file exists in the database
+      final result = await db.query(
+        'audio_files',
+        where: 'file_name = ?',
+        whereArgs: [fileName],
+      );
+
+      if (result.isNotEmpty) {
+        final existingKeypoint = result.first['key_point'];
+
+        if (existingKeypoint != null && existingKeypoint.toString().isNotEmpty) {
+          // If the summary already exists, show it
+          Get.to(() => SummaryKeyPointView(isKey: true, summary: '', keyPoints: existingKeypoint.toString()));
+        } else {
+          // If the summary is not available, fetch it from the API
+          final response = await _apiService.fetchKeyPoints(filePath, fileName);
+
+          if (response.statusCode == 200) {
+            final jsonResponse = json.decode(response.body);
+            final keyPointText = jsonResponse['Data']['content'];
+
+            // Update the summary in the database
+            await db.update(
+              'audio_files',
+              {'key_point': keyPointText},
+              where: 'file_name = ?',
+              whereArgs: [fileName],
+            );
+
+            // Navigate to SummaryKeyPointView with the new summary
+            Get.to(() => SummaryKeyPointView(isKey: true, summary: '', keyPoints: keyPointText));
+          } else {
+            Get.snackbar('Error', 'Failed to fetch keyPoint: ${response.body}');
+          }
+        }
+      } else {
+        // If the file doesn't exist in the database, show an error
+        Get.snackbar('Error', 'File not found in the database. Please add the file first.');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Error: $e');
+    } finally {
+      isLoading.value = false; // Stop loading
+    }
+  }
+
+  /*Future<void> fetchKeyPoints(String filePath, String fileName) async {
     try {
       isLoading.value = true; // Start loading
       final response = await _apiService.fetchKeyPoints(filePath, fileName);
@@ -176,7 +376,7 @@ class AudioPlayerController extends GetxController {
     } finally {
       isLoading.value = false; // Stop loading
     }
-  }
+  }*/
 
   @override
   void onClose() {

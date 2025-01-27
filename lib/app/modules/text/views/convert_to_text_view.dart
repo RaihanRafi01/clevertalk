@@ -29,7 +29,7 @@ class ConvertToTextView extends StatelessWidget {
         audioController.currentIndex.value = index;
 
         // Start playing audio and fetch transcription
-        textController.fetchMessages(filePath, fileName).then((_) {
+        textController.fetchMessages(filePath).then((_) {
           audioController.playAudio(filePath: filePath);
 
           // Synchronize scrolling with audio

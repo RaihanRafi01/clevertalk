@@ -18,27 +18,32 @@ class DatabaseHelper {
     return _database!;
   }
 
+
   Future<Database> _initDatabase() async {
     String path = join(await getDatabasesPath(), 'audio_files.db');
     return await openDatabase(
       path,
-      version: 1, // Start with version 1 since the app will be reinstalled
+      version: 1, // Keep version as 1 since you're starting from scratch
       onCreate: (db, version) async {
         await db.execute(
-          '''
-          CREATE TABLE audio_files (
-            id INTEGER PRIMARY KEY,
-            file_name TEXT,
-            file_path TEXT,
-            duration TEXT,
-            saved_date TEXT,
-            parsed_date TEXT
-          )
-          ''',
+            '''
+        CREATE TABLE audio_files (
+          id INTEGER PRIMARY KEY,
+          file_name TEXT,
+          file_path TEXT,
+          duration TEXT,
+          saved_date TEXT,
+          parsed_date TEXT,
+          summary TEXT,
+          key_point TEXT,
+          transcription TEXT
+        )
+        '''
         );
       },
     );
   }
+
 
   Future<void> insertAudioFile(
       BuildContext context, String fileName, String filePath, String duration, bool isLocal , String localParsedDate) async {

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../data/database_helper.dart';
 import '../../../data/services/api_services.dart';
 import '../../audio/controllers/audio_controller.dart';
 
@@ -13,11 +14,11 @@ class ConvertToTextController extends GetxController {
   var isLoading = false.obs;
   final ScrollController scrollController = ScrollController();
 
-  Future<void> fetchMessages(String filePath, String fileName) async {
+  /*Future<void> fetchMessages(String filePath) async {
     final ApiService _apiService = ApiService();
     try {
       isLoading.value = true;
-      final response = await _apiService.fetchTranscription(filePath, fileName);
+      final response = await _apiService.fetchTranscription(filePath);
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
         final data = jsonData['Data'] as List;
@@ -45,7 +46,93 @@ class ConvertToTextController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }*/
+
+
+  Future<void> fetchMessages(String filePath) async {
+    final ApiService _apiService = ApiService();
+    try {
+      isLoading.value = true;
+
+      final dbHelper = DatabaseHelper();
+      final db = await dbHelper.database;
+
+      // Check if the file exists in the database
+      final result = await db.query(
+        'audio_files',
+        where: 'file_path = ?',
+        whereArgs: [filePath],
+      );
+
+      if (result.isNotEmpty) {
+        final existingTranscription = result.first['transcription'];
+
+        if (existingTranscription != null && existingTranscription.toString().isNotEmpty) {
+          // If transcription exists, use it
+          final data = json.decode(existingTranscription.toString()) as List;
+          messages.value = data.map<Map<String, String>>((entry) {
+            final speakerName = entry['Speaker_Name'] as String;
+            final transcript = entry['Transcript'] as String;
+            final startTime = formatTimestamp(entry['Start_time'] as double);
+            final endTime = formatTimestamp(entry['End_time'] as double);
+            return {
+              'name': speakerName,
+              'time': '$startTime - $endTime',
+              'description': transcript,
+            };
+          }).toList();
+
+          // Start scrolling based on timestamps
+          final audioController = Get.find<AudioPlayerController>();
+          audioController.playAudio();
+          syncScrollingWithAudio(audioController);
+        } else {
+          // Fetch transcription from the API
+          final response = await _apiService.fetchTranscription(filePath);
+
+          if (response.statusCode == 200) {
+            final jsonData = json.decode(response.body);
+            final data = jsonData['Data'] as List;
+
+            // Update the transcription in the database
+            await db.update(
+              'audio_files',
+              {'transcription': json.encode(data)},
+              where: 'file_path = ?',
+              whereArgs: [filePath],
+            );
+
+            messages.value = data.map<Map<String, String>>((entry) {
+              final speakerName = entry['Speaker_Name'] as String;
+              final transcript = entry['Transcript'] as String;
+              final startTime = formatTimestamp(entry['Start_time'] as double);
+              final endTime = formatTimestamp(entry['End_time'] as double);
+              return {
+                'name': speakerName,
+                'time': '$startTime - $endTime',
+                'description': transcript,
+              };
+            }).toList();
+
+            // Start scrolling based on timestamps
+            final audioController = Get.find<AudioPlayerController>();
+            audioController.playAudio();
+            syncScrollingWithAudio(audioController);
+          } else {
+            Get.snackbar('Error', 'Failed to fetch data: ${response.reasonPhrase}');
+          }
+        }
+      } else {
+        // File not found in the database
+        Get.snackbar('Error', 'File not found in the database. Please add the file first.');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Error fetching messages: $e');
+    } finally {
+      isLoading.value = false;
+    }
   }
+
 
   void syncScrollingWithAudio(AudioPlayerController audioController) {
     audioController.currentPosition.listen((position) {

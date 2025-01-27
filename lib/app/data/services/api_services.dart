@@ -408,7 +408,7 @@ class ApiService {
     return http.Response.fromStream(response);
   }
 
-  Future<http.Response> fetchTranscription(String filePath, String fileName) async {
+  Future<http.Response> fetchTranscription(String filePath) async {
     final Uri url = Uri.parse('${baseUrl}handle_recording_stuff/generate_transcription/');
 
     String? accessToken = await _storage.read(key: 'access_token');
