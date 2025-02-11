@@ -41,7 +41,7 @@ class AudioPlayerController extends GetxController {
 
   Future<void> fetchAudioFiles() async {
     final dbHelper = DatabaseHelper();
-    final files = await dbHelper.fetchAudioFiles(Get.context!);
+    final files = await dbHelper.fetchAudioFiles();
     audioFiles.assignAll(files);
 
     if (files.isNotEmpty) {

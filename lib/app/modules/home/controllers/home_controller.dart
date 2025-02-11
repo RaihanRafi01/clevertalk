@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:ffi';
+import 'package:clevertalk/app/modules/audio/controllers/audio_controller.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import '../../../data/database_helper.dart';
 import '../../../data/services/api_services.dart';
 import '../../authentication/views/verify_o_t_p_view.dart';
 import '../../dashboard/views/dashboard_view.dart';
@@ -25,8 +27,6 @@ class HomeController extends GetxController {
   RxBool isExpired = false.obs;
   RxBool isFree = false.obs;
   RxBool isVerified = false.obs;
-
-
 
 
   Future<void> fetchProfileData() async {

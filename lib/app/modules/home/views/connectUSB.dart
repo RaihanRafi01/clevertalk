@@ -139,7 +139,7 @@ Future<void> connectUsbDevice(BuildContext context) async {
     _showProgressDialog(context, "Fetching saved files...", progress: 0.0);
 
     // Step 4: Fetch saved files from the database
-    final savedFiles = await dbHelper.fetchAudioFiles(context);
+    final savedFiles = await dbHelper.fetchAudioFiles();
 
     Navigator.pop(context); // Dismiss fetching dialog
 

@@ -228,7 +228,7 @@ class _UsbFilePickerState extends State<UsbFilePicker> {
 
   void _fetchSavedFiles() async {
     final dbHelper = DatabaseHelper();
-    final savedFiles = await dbHelper.fetchAudioFiles(context);
+    final savedFiles = await dbHelper.fetchAudioFiles();
 
     setState(() {
       _audioFiles = savedFiles.map((file) {
@@ -244,7 +244,7 @@ class _UsbFilePickerState extends State<UsbFilePicker> {
 
   Future<void> _playAudioFromDatabase(String fileName) async {
     final dbHelper = DatabaseHelper();
-    final savedFiles = await dbHelper.fetchAudioFiles(context);
+    final savedFiles = await dbHelper.fetchAudioFiles();
     final filePath = savedFiles.firstWhere(
             (file) => file['file_name'] == fileName)['file_path'];
 

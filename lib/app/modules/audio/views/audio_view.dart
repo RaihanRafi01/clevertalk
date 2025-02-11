@@ -25,7 +25,7 @@ class _AudioViewState extends State<AudioView> {
 
   Future<void> _fetchAudioFiles() async {
     final dbHelper = DatabaseHelper();
-    final audioFiles = await dbHelper.fetchAudioFiles(context);
+    final audioFiles = await dbHelper.fetchAudioFiles();
 
     setState(() {
       _audioFiles = audioFiles;

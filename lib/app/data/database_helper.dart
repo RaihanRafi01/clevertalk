@@ -1,11 +1,14 @@
 import 'dart:async';
+import 'package:clevertalk/app/modules/audio/controllers/audio_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:intl/intl.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
+  //final AudioPlayerController audioPlayerController = Get.put(AudioPlayerController());
   factory DatabaseHelper() => _instance;
 
   static Database? _database;
@@ -64,9 +67,10 @@ class DatabaseHelper {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Audio file "$fileName" inserted successfully!')),
     );
+    //audioPlayerController.fetchAudioFiles();
   }
 
-  Future<List<Map<String, dynamic>>> fetchAudioFiles(BuildContext context) async {
+  Future<List<Map<String, dynamic>>> fetchAudioFiles() async {
     final db = await database;
     final files = await db.query('audio_files');
     /*ScaffoldMessenger.of(context).showSnackBar(

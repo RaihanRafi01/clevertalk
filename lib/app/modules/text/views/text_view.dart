@@ -27,7 +27,7 @@ class _TextViewState extends State<TextView> {
 
   Future<void> _fetchTextFiles() async {
     final dbHelper = DatabaseHelper();
-    final textFiles = await dbHelper.fetchAudioFiles(context);
+    final textFiles = await dbHelper.fetchAudioFiles();
 
     setState(() {
       _textFiles = textFiles;
