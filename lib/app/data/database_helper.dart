@@ -69,9 +69,9 @@ class DatabaseHelper {
   Future<List<Map<String, dynamic>>> fetchAudioFiles(BuildContext context) async {
     final db = await database;
     final files = await db.query('audio_files');
-    ScaffoldMessenger.of(context).showSnackBar(
+    /*ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('${files.length} audio files fetched successfully!')),
-    );
+    );*/
     return files;
   }
 

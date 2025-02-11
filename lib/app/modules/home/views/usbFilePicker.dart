@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:android_intent_plus/android_intent.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -31,9 +32,25 @@ class _UsbFilePickerState extends State<UsbFilePicker> {
   @override
   void initState() {
     super.initState();
+    _setupMethodChannel();
     _requestPermissions();
     _fetchSavedFiles();
     _checkUsbDeviceConnection();
+
+  }
+
+  void _setupMethodChannel() {
+    platform.setMethodCallHandler((call) async {
+      if (call.method == "onFolderSelected") {
+        final uriStr = call.arguments as String;
+        final resolvedPath = await _resolveContentUri(uriStr);
+        _showSnackbar(context, 'Selected Folder::: $resolvedPath');
+        setState(() {
+          _selectedFolderPath = resolvedPath;
+        });
+
+      }
+    });
   }
 
   // New method to pick a folder
@@ -42,7 +59,7 @@ class _UsbFilePickerState extends State<UsbFilePicker> {
       // Open the folder picker (updated method name in newer versions)
       final result = await FilePicker.platform.getDirectoryPath();
 
-      if (result != null) {
+      if (result != null && result.isNotEmpty) {
         setState(() {
           _selectedFolderPath = result;
         });
@@ -52,6 +69,28 @@ class _UsbFilePickerState extends State<UsbFilePicker> {
       }
     } catch (e) {
       _showSnackbar(context, 'Error picking folder: $e');
+    }
+  }
+
+  Future<void> _pickFolder2() async {
+    try {
+      final intent = AndroidIntent(
+        action: 'android.intent.action.OPEN_DOCUMENT_TREE',
+      );
+      await intent.launch();
+    } catch (e) {
+      _showSnackbar(context, 'Error picking folder: $e');
+    }
+  }
+
+// Platform-specific method to resolve content URIs on Android
+  Future<String> _resolveContentUri(String uriStr) async {
+    const platform = MethodChannel('usb_path_reader/usb');
+    try {
+      final resolvedPath = await platform.invokeMethod('resolveContentUri', {'uri': uriStr});
+      return resolvedPath ?? uriStr; // Fallback to original URI if resolution fails
+    } catch (e) {
+      return uriStr; // Return original URI if error occurs
     }
   }
 
@@ -247,7 +286,7 @@ class _UsbFilePickerState extends State<UsbFilePicker> {
                 Expanded(child: Text('Selected Folder Path: $_selectedFolderPath')),
                 IconButton(
                   icon: Icon(Icons.folder_open),
-                  onPressed: _pickFolder,
+                  onPressed: _pickFolder2,
                 ),
               ],
             ),

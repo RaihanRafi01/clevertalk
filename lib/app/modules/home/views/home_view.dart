@@ -39,7 +39,7 @@ class HomeView extends GetView<HomeController> {
               Row(
                 children: [
                   CustomButton(text: 'Connect Device', onPressed: (){
-                    //Get.to(UsbFilePicker());
+                   // Get.to(UsbFilePicker());
                     connectUsbDevice(context);
                   },width: 160,borderRadius: 5),
                   Spacer(),

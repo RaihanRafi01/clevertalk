@@ -99,6 +99,10 @@ class AudioPlayerController extends GetxController {
     }
   }
 
+  Future<void> stopAudio() async {
+    await _audioPlayer.stop();
+  }
+
   /*Future<void> convertToText() async {
     try {
       if (audioFiles.isEmpty || currentIndex.value < 0) {
@@ -213,7 +217,7 @@ class AudioPlayerController extends GetxController {
 
         // Navigate to ConvertView with the fetched transcription
         Get.to(() => ConvertView(
-          text: data,
+          text: json.encode(data),
           filePath: filePath,
           fileName: fileName,
         ));
@@ -253,7 +257,7 @@ class AudioPlayerController extends GetxController {
     }
   }*/
 
-  Future<void> fetchSummary(String filePath, String fileName) async {
+  /*Future<void> fetchSummary(String filePath, String fileName) async {
     try {
       isLoading.value = true; // Start loading
       final dbHelper = DatabaseHelper();
@@ -303,7 +307,7 @@ class AudioPlayerController extends GetxController {
     } finally {
       isLoading.value = false; // Stop loading
     }
-  }
+  }*/
 
 
 
@@ -325,12 +329,16 @@ class AudioPlayerController extends GetxController {
 
         if (existingKeypoint != null && existingKeypoint.toString().isNotEmpty) {
           // If the summary already exists, show it
-          Get.to(() => SummaryKeyPointView(isKey: true, summary: '', keyPoints: existingKeypoint.toString()));
+          Get.to(() => SummaryKeyPointView(keyPoints: existingKeypoint.toString()));
         } else {
           // If the summary is not available, fetch it from the API
           final response = await _apiService.fetchKeyPoints(filePath, fileName);
 
-          if (response.statusCode == 200) {
+
+          print('::::::::::statusCode::::::::::::::::${response.statusCode}');
+          print('::::::::body::::::::::::::::::${response.body}');
+
+          if (response.statusCode == 200 || response.statusCode == 201) {
             final jsonResponse = json.decode(response.body);
             final keyPointText = jsonResponse['Data']['content'];
 
@@ -343,7 +351,7 @@ class AudioPlayerController extends GetxController {
             );
 
             // Navigate to SummaryKeyPointView with the new summary
-            Get.to(() => SummaryKeyPointView(isKey: true, summary: '', keyPoints: keyPointText));
+            Get.to(() => SummaryKeyPointView(keyPoints: keyPointText));
           } else {
             Get.snackbar('Error', 'Failed to fetch keyPoint: ${response.body}');
           }

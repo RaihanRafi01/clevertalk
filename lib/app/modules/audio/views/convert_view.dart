@@ -97,14 +97,14 @@ class ConvertView extends GetView<AudioPlayerController> {
                       );
                     }),
                     const SizedBox(height: 20),
-                    CustomButton(
+                    /*CustomButton(
                       backgroundColor: AppColors.appColor2,
                       text: 'Summary',
                       onPressed: () {
                         controller.fetchSummary(filePath, fileName);
                       },
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 20),*/
                     CustomButton(
                       backgroundColor: AppColors.appColor2.withOpacity(.7),
                       text: 'Key Point',
@@ -112,6 +112,7 @@ class ConvertView extends GetView<AudioPlayerController> {
                         controller.fetchKeyPoints(filePath, fileName);
                       },
                     ),
+                    const SizedBox(height: 50),
                   ],
                 ),
               ),
