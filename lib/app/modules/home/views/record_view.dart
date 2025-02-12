@@ -125,7 +125,7 @@ class RecordView extends GetView<RecordController> {
                 svgPath: 'assets/images/audio/save_icon.svg',
                 onTap: () async {
                   TextEditingController txtController = TextEditingController();
-                  await controller.stopRecording(); // Wait for the recording to stop before proceeding
+                  await controller.pauseRecording(); // Wait for the recording to pause before proceeding
                   showDialog(
                     context: context,
                     barrierDismissible: false,

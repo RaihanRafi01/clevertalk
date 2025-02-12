@@ -98,7 +98,7 @@ class RecordController extends GetxController {
     }
   }
 
-  void pauseRecording() async {
+  Future<void> pauseRecording() async {
     try {
       await _recorder?.pauseRecorder();
       isPaused.value = true;
@@ -147,8 +147,8 @@ class RecordController extends GetxController {
   }
 
   Future<void> saveRecording(String filename) async {
-    final duration =
-        formatTime(recordingTime.value, recordingMilliseconds.value);
+    print(':::::::::::::::::::::::::TIME:::::::::::::::::${recordingTime.value} :: ${recordingMilliseconds.value}');
+    final duration = formatTime(recordingTime.value, recordingMilliseconds.value);
 
     // Insert audio details into the database
     if (_filePath != null) {
@@ -158,6 +158,7 @@ class RecordController extends GetxController {
       await DatabaseHelper().insertAudioFile(Get.context!, '$filename.WAV',
           _filePath!, duration, true, formattedDate);
       audioPlayerController.fetchAudioFiles();
+      await stopRecording();
     }
 
     /*final directory = await getApplicationDocumentsDirectory();
