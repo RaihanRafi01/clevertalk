@@ -10,6 +10,31 @@ class ApiService {
   // Base URL for the API
   final String baseUrl = 'http://192.168.20.201:8000/'; // https://apparently-intense-toad.ngrok-free.app/     //     https://agcourt.pythonanywhere.com/   // https://charming-willingly-starfish.ngrok-free.app/
 
+  Future<http.Response> signUpWithOther(
+      String username, String email) async {
+    // Construct the endpoint URL
+    final Uri url = Uri.parse('${baseUrl}authentication_app/social_signup_signin/');
+
+    // Headers for the HTTP request
+    final Map<String, String> headers = {
+      "Content-Type": "application/json",
+    };
+
+    // Request body
+    final Map<String, String> body = {
+      "username": username,
+      "email": email
+    };
+
+    // Make the POST request
+    return await http.post(
+      url,
+      headers: headers,
+      body: jsonEncode(body),
+    );
+  }
+
+
   // Sign-up method
   Future<http.Response> signUp(String email, String password, String username) async {
     // Construct the endpoint URL

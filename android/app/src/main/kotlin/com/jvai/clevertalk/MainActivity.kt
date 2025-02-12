@@ -1,4 +1,4 @@
-package com.jvai.clevertalk.clevertalk
+package com.jvai.clevertalk
 
 import android.content.Intent
 import android.content.Context

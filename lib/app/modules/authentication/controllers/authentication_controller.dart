@@ -30,6 +30,53 @@ class AuthenticationController extends GetxController {
     await _storage.write(key: 'refresh_token', value: refreshToken);
   }
 
+  Future<void> signUpWithOther(String username, String email) async {
+    isLoading.value = true; // Show the loading screen
+    try {
+      final http.Response response = await _service.signUpWithOther(
+          username, email);
+
+      print(':::::::::::::::RESPONSE:::::::::::::::::::::${response.body.toString()}');
+      print(':::::::::::::::CODE:::::::::::::::::::::${response.statusCode}');
+      print(':::::::::::::::REQUEST:::::::::::::::::::::${response.request}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // Assuming the server responds with success on code 200 or 201
+        final responseBody = jsonDecode(response.body);
+        final accessToken = responseBody['access'];
+        final refreshToken = responseBody['refresh'];
+
+        // Store the tokens securely
+        await storeTokens(accessToken, refreshToken);
+
+        print(':::::::::::::::responseBody:::::::::::::::::::::$responseBody');
+        print(':::::::::::::::accessToken:::::::::::::::::::::$accessToken');
+        print(':::::::::::::::refreshToken:::::::::::::::::::::$refreshToken');
+
+        Get.snackbar('Success', 'Logged In successfully!');
+        //Get.off(() => VerifyOTPView());
+
+        homeController.fetchProfileData();
+
+        // SharedPreferences
+
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('isLoggedIn', true); // User is logged in
+
+
+
+      } else {
+        final responseBody = jsonDecode(response.body);
+        Get.snackbar('Error', responseBody['message'] ?? 'Sign-up failed\nPlease Use Different Username');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'An unexpected error occurred');
+      print('Error: $e');
+    }finally {
+      isLoading.value = false; // Hide the loading screen
+    }
+  }
+
   Future<void> signUp(String email, String password, String username) async {
     isLoading.value = true; // Show the loading screen
     try {
