@@ -1,39 +1,20 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../../../common/widgets/audio_text/customListTile.dart';
 import '../../../../common/customFont.dart';
 import '../../../../common/widgets/customAppBar.dart';
 import '../../../data/database_helper.dart';
 import 'package:intl/intl.dart';
+import '../controllers/audio_controller.dart';
 
-class AudioView extends StatefulWidget {
+class AudioView extends StatelessWidget {
   const AudioView({super.key});
 
   @override
-  _AudioViewState createState() => _AudioViewState();
-}
-
-class _AudioViewState extends State<AudioView> {
-  List<Map<String, dynamic>> _audioFiles = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchAudioFiles();
-  }
-
-  Future<void> _fetchAudioFiles() async {
-    final dbHelper = DatabaseHelper();
-    final audioFiles = await dbHelper.fetchAudioFiles();
-
-    setState(() {
-      _audioFiles = audioFiles;
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final AudioPlayerController audioController = Get.put(AudioPlayerController());
+
     return Scaffold(
       appBar: CustomAppBar(
         isSearch: true,
@@ -58,38 +39,39 @@ class _AudioViewState extends State<AudioView> {
             ),
             const SizedBox(height: 20),
             Expanded(
-              child: _audioFiles.isEmpty
-                  ? Center(
-                child: Text(
-                  'No audio files available',
-                  style: TextStyle(fontSize: 16),
-                ),
-              )
-                  : ListView.separated(
-                itemCount: _audioFiles.length,
-                separatorBuilder: (context, index) => const Divider(
-                  color: Colors.grey,
-                  thickness: 1,
-                  indent: 16,
-                  endIndent: 16,
-                ),
-                itemBuilder: (context, index) {
-                  final audioFile = _audioFiles[index];
-                  final fileName = audioFile['file_name'] ?? 'Unknown Title';
-                  final parsedDate = audioFile['parsed_date'] ?? 'Unknown Date';
-                  final id = audioFile['id'];
-                  return CustomListTile(
-                    title: fileName,
-                    subtitle: parsedDate,
-                    duration: audioFile['duration'] ?? '00:00:00',
-                    id: id,
-                    onUpdate: _fetchAudioFiles, // Pass the refresh callback
-                    /*onPlayPressed: () {
-      _playAudio(audioFile); // Play audio
-    },*/
+              child: Obx(() {
+                if (audioController.audioFiles.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'No audio files available',
+                      style: TextStyle(fontSize: 16),
+                    ),
                   );
-                },
-              ),
+                } else {
+                  return ListView.separated(
+                    itemCount: audioController.audioFiles.length,
+                    separatorBuilder: (context, index) => const Divider(
+                      color: Colors.grey,
+                      thickness: 1,
+                      indent: 16,
+                      endIndent: 16,
+                    ),
+                    itemBuilder: (context, index) {
+                      final audioFile = audioController.audioFiles[index];
+                      final fileName = audioFile['file_name'] ?? 'Unknown Title';
+                      final parsedDate = audioFile['parsed_date'] ?? 'Unknown Date';
+                      final id = audioFile['id'];
+                      return CustomListTile(
+                        title: fileName,
+                        subtitle: parsedDate,
+                        duration: audioFile['duration'] ?? '00:00:00',
+                        id: id,
+                        onUpdate: audioController.fetchAudioFiles, // Pass the refresh callback
+                      );
+                    },
+                  );
+                }
+              }),
             ),
             SizedBox(height: 58),
           ],
@@ -97,8 +79,6 @@ class _AudioViewState extends State<AudioView> {
       ),
     );
   }
-
-
 
   String parseFileNameToDate(String fileName) {
     try {
@@ -124,21 +104,4 @@ class _AudioViewState extends State<AudioView> {
       return 'Unknown Date'; // Default fallback
     }
   }
-
-
-/*void _playAudio(Map<String, dynamic> audioFile) async {
-    final dbHelper = DatabaseHelper();
-    try {
-      final fileData = await dbHelper.getAudioFile(audioFile['file_name']);
-      final tempDir = Directory.systemTemp;
-      final tempFile = File('${tempDir.path}/${audioFile['file_name']}');
-      await tempFile.writeAsBytes(fileData);
-
-      print('Playing: ${tempFile.path}');
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
-    }
-  }*/
 }

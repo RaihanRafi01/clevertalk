@@ -180,3 +180,19 @@ class ConvertToTextController extends GetxController {
     return '$hours:$minutes:$secs';
   }
 }
+
+class TextViewController extends GetxController {
+  var textFiles = <Map<String, dynamic>>[].obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchTextFiles();
+  }
+
+  Future<void> fetchTextFiles() async {
+    final dbHelper = DatabaseHelper();
+    final files = await dbHelper.fetchAudioFiles();
+    textFiles.value = files;
+  }
+}

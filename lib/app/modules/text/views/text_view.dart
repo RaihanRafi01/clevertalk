@@ -1,41 +1,18 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import '../../../../common/widgets/audio_text/customListTile.dart';
 import '../../../../common/customFont.dart';
 import '../../../../common/widgets/customAppBar.dart';
-import '../../../data/database_helper.dart';
+import '../controllers/text_controller.dart';
 import 'convert_to_text_view.dart';
 
-class TextView extends StatefulWidget {
+class TextView extends StatelessWidget {
   const TextView({super.key});
 
-  @override
-  _TextViewState createState() => _TextViewState();
-}
-
-class _TextViewState extends State<TextView> {
-  List<Map<String, dynamic>> _textFiles = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchTextFiles();
-  }
-
-  Future<void> _fetchTextFiles() async {
-    final dbHelper = DatabaseHelper();
-    final textFiles = await dbHelper.fetchAudioFiles();
-
-    setState(() {
-      _textFiles = textFiles;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
+    final TextViewController controller = Get.put(TextViewController());
     return Scaffold(
       appBar: CustomAppBar(
         isSearch: true,
@@ -60,44 +37,48 @@ class _TextViewState extends State<TextView> {
             ),
             const SizedBox(height: 20),
             Expanded(
-              child: _textFiles.isEmpty
-                  ? Center(
-                child: Text(
-                  'No text files available',
-                  style: TextStyle(fontSize: 16),
-                ),
-              )
-                  : ListView.separated(
-                itemCount: _textFiles.length,
-                separatorBuilder: (context, index) => const Divider(
-                  color: Colors.grey,
-                  thickness: 1,
-                  indent: 16,
-                  endIndent: 16,
-                ),
-                itemBuilder: (context, index) {
-                  final textFile = _textFiles[index];
-                  final fileName = textFile['file_name'] ?? 'Unknown Title';
-                  final parsedDate = textFile['parsed_date'] ?? 'Unknown Date';
-                  final filePath = textFile['file_path'];
-                  final id = textFile['id']; // Add ID
-
-                  return GestureDetector(
-                    onTap: () {
-                      print(':::::::::::::::::::::::::id: $id');
-                      Get.to(() => ConvertToTextView(fileName: fileName, filePath: filePath,));
-                    },
-                    child: CustomListTile(
-                      title: fileName,
-                      subtitle: parsedDate,
-                      duration: textFile['duration'] ?? '00:00:00',
-                      showPlayIcon: false,
-                      id: id,
-                      onUpdate: _fetchTextFiles, // Pass the refresh callback
+              child: Obx(() {
+                if (controller.textFiles.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'No text files available',
+                      style: TextStyle(fontSize: 16),
                     ),
                   );
-                },
-              ),
+                } else {
+                  return ListView.separated(
+                    itemCount: controller.textFiles.length,
+                    separatorBuilder: (context, index) => const Divider(
+                      color: Colors.grey,
+                      thickness: 1,
+                      indent: 16,
+                      endIndent: 16,
+                    ),
+                    itemBuilder: (context, index) {
+                      final textFile = controller.textFiles[index];
+                      final fileName = textFile['file_name'] ?? 'Unknown Title';
+                      final parsedDate = textFile['parsed_date'] ?? 'Unknown Date';
+                      final filePath = textFile['file_path'];
+                      final id = textFile['id']; // Add ID
+
+                      return GestureDetector(
+                        onTap: () {
+                          print(':::::::::::::::::::::::::id: $id');
+                          Get.to(() => ConvertToTextView(fileName: fileName, filePath: filePath,));
+                        },
+                        child: CustomListTile(
+                          title: fileName,
+                          subtitle: parsedDate,
+                          duration: textFile['duration'] ?? '00:00:00',
+                          showPlayIcon: false,
+                          id: id,
+                          onUpdate: controller.fetchTextFiles, // Pass the refresh callback
+                        ),
+                      );
+                    },
+                  );
+                }
+              }),
             ),
             const SizedBox(height: 58),
           ],
@@ -105,25 +86,4 @@ class _TextViewState extends State<TextView> {
       ),
     );
   }
-
-  /*String parseFileNameToDate(String fileName) {
-    try {
-      final dateTimePart = fileName.substring(1, fileName.indexOf('.'));
-      final datePart = dateTimePart.split('-')[0]; // e.g., 20250112
-      final timePart = dateTimePart.split('-')[1]; // e.g., 142010
-
-      final year = int.parse(datePart.substring(0, 4));
-      final month = int.parse(datePart.substring(4, 6));
-      final day = int.parse(datePart.substring(6, 8));
-      final hour = int.parse(timePart.substring(0, 2));
-      final minute = int.parse(timePart.substring(2, 4));
-      final second = int.parse(timePart.substring(4, 6));
-
-      final dateTime = DateTime(year, month, day, hour, minute, second);
-
-      return DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime);
-    } catch (e) {
-      return 'Unknown Date';
-    }
-  }*/
 }
