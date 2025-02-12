@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../../data/database_helper.dart';
+import '../../audio/controllers/audio_controller.dart';
 
 class RecordController extends GetxController {
   var recordingTime = 0.obs;
@@ -20,6 +21,7 @@ class RecordController extends GetxController {
 
   int _pauseTime = 0; // Track time when recording is paused
   int _pauseMilliseconds = 0; // Track milliseconds when recording is paused
+  final AudioPlayerController audioPlayerController = Get.put(AudioPlayerController());
 
   @override
   void onInit() {
@@ -155,6 +157,7 @@ class RecordController extends GetxController {
 
       await DatabaseHelper().insertAudioFile(Get.context!, '$filename.WAV',
           _filePath!, duration, true, formattedDate);
+      audioPlayerController.fetchAudioFiles();
     }
 
     /*final directory = await getApplicationDocumentsDirectory();
