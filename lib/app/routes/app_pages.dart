@@ -1,5 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import '../modules/audio/bindings/audio_binding.dart';
 import '../modules/audio/views/audio_player_view.dart';
 import '../modules/audio/views/audio_view.dart';
@@ -28,15 +29,15 @@ import '../modules/setting/views/setting_view.dart';
 import '../modules/text/bindings/text_binding.dart';
 import '../modules/text/views/convert_to_text_view.dart';
 import '../modules/text/views/text_view.dart';
-
+import 'authMiddleware.dart';
 part 'app_routes.dart';
 
 class AppPages {
   AppPages._();
 
-  static const INITIAL = Routes.HOME;
 
   static final routes = [
+    // If the user is logged in, navigate to HOME; else, to the AUTHENTICATION screen
     GetPage(
       name: _Paths.HOME,
       page: () => DashboardView(),
@@ -78,4 +79,15 @@ class AppPages {
       binding: DashboardBinding(),
     ),
   ];
+
+  static Future<Widget> getInitialPage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+
+    if (isLoggedIn) {
+      return const DashboardView(); // If logged in, go to the home page
+    } else {
+      return AuthenticationView(); // If not logged in, go to authentication page
+    }
+  }
 }
