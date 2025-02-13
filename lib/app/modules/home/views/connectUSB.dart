@@ -2,15 +2,18 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:audioplayers/audioplayers.dart';
 import '../../../../common/appColors.dart';
 import '../../../data/database_helper.dart';
+import '../../audio/controllers/audio_controller.dart';
+import '../../text/controllers/text_controller.dart';
+import 'package:just_audio/just_audio.dart';
 
 Future<void> connectUsbDevice(BuildContext context) async {
   const platform = MethodChannel('usb_path_reader/usb');
-  final AudioPlayer audioPlayer = AudioPlayer();
+  //final AudioPlayer audioPlayer = AudioPlayer();
   final dbHelper = DatabaseHelper();
   String selectedPath = '/RECORD';
   String? usbPath;
@@ -117,7 +120,7 @@ Future<void> connectUsbDevice(BuildContext context) async {
       final file = audioFilesList[i];
       final originalFilePath = file.path;
       final localFilePath = await _copyFileToLocal(originalFilePath);
-      final duration = await _getAudioDuration(localFilePath, audioPlayer);
+      final duration = await _getAudioDuration(localFilePath);
 
       await dbHelper.insertAudioFile(
         context,
@@ -150,16 +153,22 @@ Future<void> connectUsbDevice(BuildContext context) async {
         final savedDate = file['saved_date'] as String;
         return '$fileName | $duration | $savedDate';
       }).toList();
+      //
+      final AudioPlayerController audioController = Get.put(AudioPlayerController());
+      final TextViewController textViewController = Get.put(TextViewController());
+      audioController.fetchAudioFiles();
+      textViewController.fetchTextFiles();
 
       _showSnackbar(context, 'Fetched ${audioFiles.length} saved audio files.');
     } else {
       _showSnackbar(context, 'No saved audio files found in the database!');
     }
+
   } catch (e) {
     _showSnackbar(context, 'An error occurred: $e');
   } finally {
     // Dispose the audio player when done
-    audioPlayer.dispose();
+    //audioPlayer.dispose();
   }
 }
 
@@ -180,7 +189,7 @@ Future<String> _copyFileToLocal(String filePath) async {
   }
 }
 
-Future<String> _getAudioDuration(String filePath, AudioPlayer audioPlayer) async {
+/*Future<String> _getAudioDuration(String filePath, AudioPlayer audioPlayer) async {
   Duration? duration;
 
   try {
@@ -195,6 +204,25 @@ Future<String> _getAudioDuration(String filePath, AudioPlayer audioPlayer) async
   if (duration != null) {
     return '${duration.inMinutes}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}';
   }
+  return '0:00';
+}*/
+
+Future<String> _getAudioDuration(String filePath) async {
+  final audioPlayer = AudioPlayer();
+
+  try {
+    await audioPlayer.setFilePath(filePath);
+    final duration = await audioPlayer.duration;
+
+    if (duration != null) {
+      return '${duration.inMinutes}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}';
+    }
+  } catch (e) {
+    return '0:00';
+  } finally {
+    await audioPlayer.dispose();
+  }
+
   return '0:00';
 }
 

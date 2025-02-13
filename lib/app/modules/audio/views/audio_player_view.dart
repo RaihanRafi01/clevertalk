@@ -123,6 +123,7 @@ class AudioPlayerView extends StatelessWidget {
                         child: CustomButton(
                           text: 'Convert To Text',
                           onPressed: () async {
+                            await controller.pauseAudio();
                             await controller.convertToText();
                           },
                         ),

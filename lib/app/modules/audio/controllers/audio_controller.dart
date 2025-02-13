@@ -329,6 +329,7 @@ class AudioPlayerController extends GetxController {
 
         if (existingKeypoint != null && existingKeypoint.toString().isNotEmpty) {
           // If the summary already exists, show it
+          print('::::::::existingKeypoint::::::::::::::::::${existingKeypoint.toString()}');
           Get.to(() => SummaryKeyPointView(keyPoints: existingKeypoint.toString()));
         } else {
           // If the summary is not available, fetch it from the API
@@ -336,7 +337,8 @@ class AudioPlayerController extends GetxController {
 
 
           print('::::::::::statusCode::::::::::::::::${response.statusCode}');
-          print('::::::::body::::::::::::::::::${response.body}');
+          print('::::::::body1::::::::::::::::::${response.body}');
+
 
           if (response.statusCode == 200 || response.statusCode == 201) {
             final jsonResponse = json.decode(response.body);
@@ -351,6 +353,8 @@ class AudioPlayerController extends GetxController {
             );
 
             // Navigate to SummaryKeyPointView with the new summary
+            print('::::::::key::::::::::::::::::$keyPointText');
+
             Get.to(() => SummaryKeyPointView(keyPoints: keyPointText));
           } else {
             Get.snackbar('Error', 'Failed to fetch keyPoint: ${response.body}');

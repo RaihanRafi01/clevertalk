@@ -14,11 +14,19 @@ class SummaryKeyPointView extends GetView {
   Widget build(BuildContext context) {
     // Parse the JSON string
     final Map<String, dynamic> data = json.decode(keyPoints);
+    
+    print('::::::::keyPoints:::::::::::::::$keyPoints');
 
     // Extract data
     final String title = data["Title"] ?? "No Title";
     final List<dynamic> mainPoints = data["Main Points"] ?? [];
     final List<dynamic> conclusions = data["Conclusions"] ?? [];
+
+
+
+    print('::::::::title:::::::::::::::$title');
+    print(':::::::::mainPoints::::::::::::::$mainPoints');
+    print('::::::::::::conclusions:::::::::::$conclusions');
 
     return Scaffold(
       appBar: CustomAppBar(
