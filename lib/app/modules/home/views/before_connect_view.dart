@@ -68,7 +68,7 @@ class BeforeConnectView extends StatelessWidget {
               Text(
                 '1. Plug the USB cable into your Clevertalk Recorder.\n'
                     '2. Connect the other end to your phone.\n'
-                    '3. Once connected, all audio files will be automatically downloaded into the app for transcription and summary.\n'
+                    '3. Once connected, Press "Continue" then all audio files will be automatically downloaded into the app for transcription and summary.\n'
                     '4. Your 600 free minutes per month subscription will be activated.',
                 style: h4.copyWith(fontSize: 16),
               ),

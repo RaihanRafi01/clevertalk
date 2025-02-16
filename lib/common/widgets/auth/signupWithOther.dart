@@ -1,11 +1,8 @@
 import 'package:clevertalk/app/modules/authentication/views/forgot_password_view.dart';
 import 'package:clevertalk/app/modules/authentication/views/sign_up_view.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../../../app/modules/authentication/controllers/authentication_controller.dart';
 import 'social_button.dart';
 class SignupWithOther extends StatelessWidget {

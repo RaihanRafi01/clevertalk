@@ -66,36 +66,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
       children: [
         Text(widget.label, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: widget.textColor)),
         const SizedBox(height: 8),
-        widget.phone
-            ? IntlPhoneField(
-          initialCountryCode: 'BD', // Set your default country code
-          initialValue: homeController.phone.value, // Dynamically set the value
-          decoration: InputDecoration(
-            hintText: widget.hint,
-            hintStyle: TextStyle(color: AppColors.appColor),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(widget.radius),
-              borderSide: const BorderSide(color: AppColors.appColor),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(widget.radius),
-              borderSide: const BorderSide(color: AppColors.appColor),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(widget.radius),
-              borderSide: const BorderSide(color: AppColors.appColor, width: 2),
-            ),
-          ),
-          onChanged: (phone) {
-            if (widget.onChanged != null) {
-              widget.onChanged!(phone.completeNumber);
-            }
-
-            // Update the phone number in the controller
-            homeController.phone.value = phone.completeNumber;
-          },
-        )
-            : TextField(
+        TextField(
           cursorColor: AppColors.appColor,
           controller: widget.controller,
           onChanged: widget.onChanged,
