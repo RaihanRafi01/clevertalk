@@ -7,12 +7,14 @@ import '../../../../common/widgets/auth/custom_button.dart';
 import '../../../../common/widgets/customAppBar.dart';
 import '../../../../common/widgets/svgIcon.dart';
 import '../../text/controllers/text_controller.dart';
+import '../../text/views/convert_to_text_view.dart';
 import '../controllers/audio_controller.dart';
 
 class AudioPlayerView extends StatelessWidget {
   final String fileName; // Parameter to accept the selected file
+  final String filepath;
 
-  const AudioPlayerView({Key? key, required this.fileName}) : super(key: key);
+  const AudioPlayerView({Key? key, required this.fileName,required this.filepath}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +126,7 @@ class AudioPlayerView extends StatelessWidget {
                           text: 'Convert To Text',
                           onPressed: () async {
                             await controller.pauseAudio();
-                            await controller.convertToText();
+                            Get.to(ConvertToTextView(fileName: fileName, filePath: filepath,));
                           },
                         ),
                       ),

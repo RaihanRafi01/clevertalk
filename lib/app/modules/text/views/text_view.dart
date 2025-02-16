@@ -67,6 +67,7 @@ class TextView extends StatelessWidget {
                           Get.to(() => ConvertToTextView(fileName: fileName, filePath: filePath,));
                         },
                         child: CustomListTile(
+                          filepath: filePath,
                           title: fileName,
                           subtitle: parsedDate,
                           duration: textFile['duration'] ?? '00:00:00',

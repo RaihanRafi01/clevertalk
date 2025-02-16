@@ -108,7 +108,7 @@ class SummaryKeyPointView extends GetView {
             padding: const EdgeInsets.only(left: 20, top: 4),
             child: Text(
               text,
-              textAlign: TextAlign.justify,
+              //textAlign: TextAlign.start,
               style: h4.copyWith(fontSize: 18),
             ),
           ),

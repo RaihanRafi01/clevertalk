@@ -7,11 +7,13 @@ import '../../../../common/customFont.dart';
 import '../../../../common/widgets/svgIcon.dart';
 import '../../../app/data/database_helper.dart';
 import '../../../app/modules/audio/views/audio_player_view.dart';
+import '../../../app/modules/text/views/convert_to_text_view.dart';
 import '../home/customDeletePopUp.dart';
 import '../home/customPopUp.dart';
 
 class CustomListTile extends StatelessWidget {
   final String title;
+  final String filepath;
   final String subtitle;
   final String duration;
   final bool showPlayIcon;
@@ -21,6 +23,7 @@ class CustomListTile extends StatelessWidget {
   const CustomListTile({
     Key? key,
     required this.title,
+    required this.filepath,
     required this.subtitle,
     required this.duration,
     this.showPlayIcon = true, // Default to true
@@ -78,7 +81,7 @@ class CustomListTile extends StatelessWidget {
               SvgIcon(
                 height: 24,
                 svgPath: 'assets/images/audio/play_icon.svg',
-                onTap: () => Get.to(() => AudioPlayerView(fileName: title)), // Pass the file name
+                onTap: () => navigateBasedOnTranscription(context, title, filepath), // Pass the file name
               ),
             if (showPlayIcon) const SizedBox(width: 10), // Spacing only if play_icon exists
             SvgIcon(
@@ -145,3 +148,15 @@ class CustomListTile extends StatelessWidget {
     );
   }
 }
+
+void navigateBasedOnTranscription(BuildContext context, String fileName, String filePath) async {
+  final dbHelper = DatabaseHelper();
+  final hasText = await dbHelper.hasTranscription(fileName);
+
+  if (hasText) {
+    Get.to(() => ConvertToTextView(fileName: fileName, filePath: filePath));
+  } else {
+    Get.to(() => AudioPlayerView(fileName: fileName, filepath: filePath));
+  }
+}
+

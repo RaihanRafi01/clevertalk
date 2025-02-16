@@ -22,7 +22,7 @@ Future<void> connectUsbDevice(BuildContext context) async {
   String? usbVendorId;
   String? usbDeviceName;
   bool isUsbConnected = false;
-  List<String> audioFiles = [];
+  //List<String> audioFiles = [];
 
   int retryCount = 0;
   const maxRetries = 3;
@@ -32,12 +32,10 @@ Future<void> connectUsbDevice(BuildContext context) async {
 
   while (retryCount < maxRetries) {
     try {
-      // Step 1: Request permissions
       if (Platform.isAndroid && await Permission.manageExternalStorage.isDenied) {
         await Permission.manageExternalStorage.request();
       }
 
-      // Step 2: Check USB connection
       final Map<dynamic, dynamic>? usbDeviceDetails =
       await platform.invokeMethod('getUsbDeviceDetails');
 
@@ -69,13 +67,12 @@ Future<void> connectUsbDevice(BuildContext context) async {
   }
 
   if (!isUsbConnected || usbPath == null) {
-    Navigator.pop(context); // Dismiss loading dialog
+    Navigator.pop(context);
     _showSnackbar(context, 'Failed to connect USB device after $maxRetries attempts');
     return;
   }
 
   try {
-    // Step 3: List and process audio files with retries
     String combinedPath = '$usbPath$selectedPath';
     final directory = Directory(combinedPath);
 
@@ -90,13 +87,13 @@ Future<void> connectUsbDevice(BuildContext context) async {
         }
 
         files = directory.listSync(recursive: true, followLinks: false);
-        break; // Exit the retry loop if successful
+        break;
       } catch (e) {
         retryCountStep3++;
         if (retryCountStep3 < maxRetriesStep3) {
           await Future.delayed(Duration(seconds: 10));
         } else {
-          Navigator.pop(context); // Dismiss loading dialog
+          Navigator.pop(context);
           _showSnackbar(context, 'Failed to access directory after $maxRetriesStep3 attempts.');
           return;
         }
@@ -108,67 +105,42 @@ Future<void> connectUsbDevice(BuildContext context) async {
       return ['mp3', 'wav', 'aac'].contains(extension);
     }).toList();
 
-    // Delete existing audio files from the database
-    await dbHelper.deleteAllAudioFiles(context);
+    final savedFiles = await dbHelper.fetchAudioFiles();
+    final savedFileNames = savedFiles.map((file) => file['file_name'] as String).toSet();
 
-    Navigator.pop(context); // Dismiss initial loading dialog
+    List<FileSystemEntity> newFiles = audioFilesList.where((file) {
+      final fileName = file.path.split('/').last;
+      return !savedFileNames.contains(fileName);
+    }).toList();
 
-    // Show progress indicator during database insertion
-    _showProgressDialog(context, "Processing audio files...");
+    Navigator.pop(context);
+    _showProgressDialog(context, "Processing new audio files...");
 
-    for (var i = 0; i < audioFilesList.length; i++) {
-      final file = audioFilesList[i];
+    for (var i = 0; i < newFiles.length; i++) {
+      final file = newFiles[i];
       final originalFilePath = file.path;
       final localFilePath = await _copyFileToLocal(originalFilePath);
       final duration = await _getAudioDuration(localFilePath);
 
       await dbHelper.insertAudioFile(
         context,
-        localFilePath.split('/').last, // File name
-        localFilePath, // Local file path
+        localFilePath.split('/').last,
+        localFilePath,
         duration,
         false,
         '',
       );
 
-      // Update progress
-      final progress = (i + 1) / audioFilesList.length;
-      _updateProgressDialog(context, "Processing file ${i + 1} of ${audioFilesList.length}...", progress);
+      final progress = (i + 1) / newFiles.length;
+      _updateProgressDialog(context, "Processing file ${i + 1} of ${newFiles.length}...", progress);
     }
 
-    Navigator.pop(context); // Dismiss progress dialog
+    Navigator.pop(context);
 
-    // Show loading dialog while fetching saved files
-    _showProgressDialog(context, "Fetching saved files...", progress: 0.0);
-
-    // Step 4: Fetch saved files from the database
-    final savedFiles = await dbHelper.fetchAudioFiles();
-
-    Navigator.pop(context); // Dismiss fetching dialog
-
-    if (savedFiles.isNotEmpty) {
-      audioFiles = savedFiles.map((file) {
-        final fileName = file['file_name'] as String;
-        final duration = file['duration'] as String;
-        final savedDate = file['saved_date'] as String;
-        return '$fileName | $duration | $savedDate';
-      }).toList();
-      //
-      final AudioPlayerController audioController = Get.put(AudioPlayerController());
-      final TextViewController textViewController = Get.put(TextViewController());
-      audioController.fetchAudioFiles();
-      textViewController.fetchTextFiles();
-
-      _showSnackbar(context, 'Fetched ${audioFiles.length} saved audio files.');
-    } else {
-      _showSnackbar(context, 'No saved audio files found in the database!');
-    }
+    _showSnackbar(context, 'Added ${newFiles.length} new audio files to the database.');
 
   } catch (e) {
     _showSnackbar(context, 'An error occurred: $e');
-  } finally {
-    // Dispose the audio player when done
-    //audioPlayer.dispose();
   }
 }
 
@@ -188,24 +160,6 @@ Future<String> _copyFileToLocal(String filePath) async {
     throw Exception('Error copying file: $e');
   }
 }
-
-/*Future<String> _getAudioDuration(String filePath, AudioPlayer audioPlayer) async {
-  Duration? duration;
-
-  try {
-    await audioPlayer.play(DeviceFileSource(filePath));
-    await Future.delayed(Duration(milliseconds: 1000));
-    duration = await audioPlayer.getDuration();
-    await audioPlayer.stop();
-  } catch (e) {
-    return '0:00';
-  }
-
-  if (duration != null) {
-    return '${duration.inMinutes}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}';
-  }
-  return '0:00';
-}*/
 
 Future<String> _getAudioDuration(String filePath) async {
   final audioPlayer = AudioPlayer();

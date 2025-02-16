@@ -107,7 +107,7 @@ class ConvertView extends GetView<AudioPlayerController> {
                     const SizedBox(height: 20),*/
                     CustomButton(
                       backgroundColor: AppColors.appColor2.withOpacity(.7),
-                      text: 'Key Point',
+                      text: 'Key Pointttt',
                       onPressed: () {
                         controller.fetchKeyPoints(filePath, fileName);
                       },

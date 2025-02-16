@@ -21,6 +21,22 @@ class DatabaseHelper {
     return _database!;
   }
 
+  Future<bool> hasTranscription(String fileName) async {
+    final db = await database;
+    final result = await db.query(
+      'audio_files',
+      columns: ['transcription'],
+      where: 'file_name = ?',
+      whereArgs: [fileName],
+    );
+
+    if (result.isNotEmpty) {
+      final transcription = result.first['transcription'] as String?;
+      return transcription != null && transcription.isNotEmpty;
+    }
+    return false;
+  }
+
 
   Future<Database> _initDatabase() async {
     String path = join(await getDatabasesPath(), 'audio_files.db');

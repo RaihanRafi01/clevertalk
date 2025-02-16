@@ -94,9 +94,11 @@ class HomeView extends GetView<HomeController> {
                   itemBuilder: (context, index) {
                     final audioFile = audioPlayerController.audioFiles[index];
                     final fileName = audioFile['file_name'] ?? 'Unknown Title';
+                    final filePath = audioFile['file_path'];
                     final parsedDate = audioFile['parsed_date'] ?? 'Unknown Date';
                     final id = audioFile['id'];
                     return CustomListTile(
+                      filepath: filePath,
                       title: fileName,
                       subtitle: parsedDate,
                       duration: audioFile['duration'] ?? '00:00:00',

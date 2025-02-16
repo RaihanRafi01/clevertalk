@@ -227,7 +227,7 @@ class ConvertToTextView extends StatelessWidget {
                   const SizedBox(height: 10),
                   CustomButton(
                     backgroundColor: AppColors.appColor3,
-                    text: 'Key Point',
+                    text: 'Summary',
                     onPressed: () async {
                       await audioController.pauseAudio();
                       audioController.fetchKeyPoints(filePath, fileName);
