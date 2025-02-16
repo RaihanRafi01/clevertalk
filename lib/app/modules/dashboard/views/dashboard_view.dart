@@ -28,7 +28,7 @@ class _DashboardViewState extends State<DashboardView> {
     // List of pages for navigation
     final List<Widget> _screens = [
       const HomeView(),
-      const TextView(),
+      //const TextView(),
       const AudioView(),
       const SettingView(),
       const ProfileView(),

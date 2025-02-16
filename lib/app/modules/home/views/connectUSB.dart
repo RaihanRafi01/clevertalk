@@ -138,6 +138,10 @@ Future<void> connectUsbDevice(BuildContext context) async {
     Navigator.pop(context);
 
     _showSnackbar(context, 'Added ${newFiles.length} new audio files to the database.');
+    final AudioPlayerController audioController = Get.put(AudioPlayerController());
+    //final TextViewController textViewController = Get.put(TextViewController());
+    audioController.fetchAudioFiles();
+    //textViewController.fetchTextFiles();
 
   } catch (e) {
     _showSnackbar(context, 'An error occurred: $e');

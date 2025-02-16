@@ -22,11 +22,9 @@ class HomeView extends GetView<HomeController> {
         isSearch: true,
         title: "CLEVERTALK",
         onFirstIconPressed: () {
-          // Action for the first button
           print("First icon pressed");
         },
         onSecondIconPressed: () {
-          // Action for the second button
           print("Second icon pressed");
         },
       ),
@@ -40,91 +38,111 @@ class HomeView extends GetView<HomeController> {
                 Row(
                   children: [
                     CustomButton(
+                      height: 70,
                       text: 'Connect Clevertalk Recorder',
                       onPressed: () {
-                        // Get.to(UsbFilePicker());
-                        //connectUsbDevice(context); // Define this function or replace it with the appropriate logic
                         Get.to(BeforeConnectView());
                       },
-                      width: 160,
-                      borderRadius: 5,
-                      height: 60,
+                      width: 180,
+                      borderRadius: 30,
                     ),
                     Spacer(),
                     CustomButton(
-                      height: 60,
+                      height: 70,
                       text: 'Explore Plan',
                       onPressed: () {
                         Get.to(SubscriptionView());
                       },
-                      width: 160,
-                      borderRadius: 5,
-                      backgroundColor: AppColors.appColor2,
+                      width: 180,
+                      borderRadius: 30,
+                      //backgroundColor: AppColors.appColor2,
                     ),
                   ],
                 ),
                 SizedBox(height: 20),
-                CustomButton(
-                  height: 40,
-                  text: '120 minutes remaining',
-                  onPressed: () {
-                    // Action for the button
-                  },
-                  width: 250,
-                  borderRadius: 5,
-                  backgroundColor: AppColors.appColor2,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 80),
+                  child: CustomButton(
+                    height: 40,
+                    text: '120 minutes remaining',
+                    onPressed: () {},
+                    borderRadius: 30,
+                    //backgroundColor: AppColors.appColor2,
+                  ),
                 ),
                 SizedBox(height: 20),
               ],
             ),
 
-            // Middle scrollable section
+            // Middle Section (List or Centered Button)
             Expanded(
               child: Obx(() {
-                return ListView.separated(
-                  shrinkWrap: true,
-                  physics: ClampingScrollPhysics(), // Ensures smooth scrolling
-                  itemCount: audioPlayerController.audioFiles.length,
-                  separatorBuilder: (context, index) => const Divider(
-                    color: Colors.grey,
-                    thickness: 1,
-                    indent: 16,
-                    endIndent: 16,
-                  ),
-                  itemBuilder: (context, index) {
-                    final audioFile = audioPlayerController.audioFiles[index];
-                    final fileName = audioFile['file_name'] ?? 'Unknown Title';
-                    final filePath = audioFile['file_path'];
-                    final parsedDate = audioFile['parsed_date'] ?? 'Unknown Date';
-                    final id = audioFile['id'];
-                    return CustomListTile(
-                      filepath: filePath,
-                      title: fileName,
-                      subtitle: parsedDate,
-                      duration: audioFile['duration'] ?? '00:00:00',
-                      id: id,
-                      onUpdate: () => audioPlayerController.fetchAudioFiles(), // Refresh the list
-                    );
-                  },
-                );
+                if (audioPlayerController.audioFiles.isEmpty) {
+                  // If no audio files, center the button
+                  return Center(
+                    child: CustomButton(
+                      width: 250,
+                      borderRadius: 5,
+                      text: 'Start Recording',
+                      onPressed: () => Get.to(() => RecordView()),
+                    ),
+                  );
+                } else {
+                  // Display list of audio files
+                  return ListView.separated(
+                    shrinkWrap: true,
+                    physics: ClampingScrollPhysics(),
+                    itemCount: audioPlayerController.audioFiles.length,
+                    separatorBuilder: (context, index) => const Divider(
+                      color: Colors.grey,
+                      thickness: 1,
+                      indent: 16,
+                      endIndent: 16,
+                    ),
+                    itemBuilder: (context, index) {
+                      final audioFile = audioPlayerController.audioFiles[index];
+                      final fileName = audioFile['file_name'] ?? 'Unknown Title';
+                      final filePath = audioFile['file_path'];
+                      final parsedDate = audioFile['parsed_date'] ?? 'Unknown Date';
+                      final id = audioFile['id'];
+
+                      return CustomListTile(
+                        filepath: filePath,
+                        title: fileName,
+                        subtitle: parsedDate,
+                        duration: audioFile['duration'] ?? '00:00:00',
+                        id: id,
+                        onUpdate: () => audioPlayerController.fetchAudioFiles(),
+                      );
+                    },
+                  );
+                }
               }),
             ),
 
-            // Bottom fixed section
-            Column(
-              children: [
-                SizedBox(height: 20),
-                Center(
-                  child: CustomButton(
-                    width: 250,
-                    borderRadius: 5,
-                    text: 'Start Recording',
-                    onPressed: () => Get.to(() => RecordView()),
-                  ),
-                ),
-                SizedBox(height: 70),
-              ],
-            ),
+            // Bottom Section (Only shown when audio files exist)
+            Obx(() {
+              if (audioPlayerController.audioFiles.isNotEmpty) {
+                return Column(
+                  children: [
+                    SizedBox(height: 20),
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 80),
+                        child: CustomButton(
+                          borderRadius: 30,
+                          text: 'Start Recording',
+                          onPressed: () => Get.to(() => RecordView()),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 70),
+                  ],
+                );
+              } else {
+                return SizedBox.shrink(); // Hide if no audio files
+              }
+            }),
           ],
         ),
       ),

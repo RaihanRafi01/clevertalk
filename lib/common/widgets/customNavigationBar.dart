@@ -17,10 +17,10 @@ class CustomNavigationBar extends StatelessWidget {
         'label': 'Home',
         'icon': 'assets/images/navbar/home_icon.svg',
       },
-      {
+      /*{
         'label': 'Text',
         'icon': 'assets/images/navbar/text_icon.svg',
-      },
+      },*/
       {
         'label': 'Audio',
         'icon': 'assets/images/navbar/audio_icon.svg',

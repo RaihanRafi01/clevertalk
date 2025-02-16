@@ -62,13 +62,18 @@ class AudioView extends StatelessWidget {
                       final filePath = audioFile['file_path'];
                       final parsedDate = audioFile['parsed_date'] ?? 'Unknown Date';
                       final id = audioFile['id'];
-                      return CustomListTile(
-                        filepath: filePath,
-                        title: fileName,
-                        subtitle: parsedDate,
-                        duration: audioFile['duration'] ?? '00:00:00',
-                        id: id,
-                        onUpdate: audioController.fetchAudioFiles, // Pass the refresh callback
+                      return GestureDetector(
+                        onTap: (){
+                          navigateBasedOnTranscription(context, fileName, filePath);
+                        },
+                        child: CustomListTile(
+                          filepath: filePath,
+                          title: fileName,
+                          subtitle: parsedDate,
+                          duration: audioFile['duration'] ?? '00:00:00',
+                          id: id,
+                          onUpdate: audioController.fetchAudioFiles, // Pass the refresh callback
+                        ),
                       );
                     },
                   );
