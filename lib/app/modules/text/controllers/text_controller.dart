@@ -74,13 +74,14 @@ class ConvertToTextController extends GetxController {
                 return;
               }
 
-              // Update state dynamically
+              // 🔹 Update the UI immediately before saving
               messages.value = updatedMessages.map<Map<String, String>>((entry) => {
                 'name': entry['Speaker_Name'].toString(),
                 'time': '${formatTimestamp(entry['Start_time'] as double)} - ${formatTimestamp(entry['End_time'] as double)}',
                 'description': entry['Transcript'].toString(),
               }).toList();
 
+              messages.refresh(); // 🔥 Ensure UI updates instantly
 
               // Save updated transcription to database
               final dbHelper = DatabaseHelper();
@@ -94,6 +95,9 @@ class ConvertToTextController extends GetxController {
 
               print("Updated transcription saved: ${json.encode(updatedMessages)}");
 
+              // 🔹 Fetch messages again to reload the latest data
+              await fetchMessages(filePath);
+
               Get.back(); // Close dialog
             },
             child: Text('Save'),
@@ -104,8 +108,15 @@ class ConvertToTextController extends GetxController {
   }
 
 
+
   void editSpeakerName(BuildContext context,String filePath) {
     TextEditingController speakerNameController = TextEditingController();
+
+    // 🔹 Extract unique speaker names
+    Set<String> uniqueSpeakers = messages.map((msg) => msg['name']!).toSet();
+
+    // 🔹 Ensure a valid default selection
+    String selectedSpeaker = uniqueSpeakers.isNotEmpty ? uniqueSpeakers.first : "";
 
     Get.dialog(
       AlertDialog(
@@ -113,19 +124,22 @@ class ConvertToTextController extends GetxController {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Dropdown for selecting a speaker (only unique speakers)
             DropdownButtonFormField<String>(
-              value: messages.isNotEmpty ? messages.first['name'] : null,
-              items: messages.map((msg) {
+              value: selectedSpeaker.isNotEmpty ? selectedSpeaker : null, // Ensure default value
+              items: uniqueSpeakers.map((speaker) {
                 return DropdownMenuItem(
-                  value: msg['name'],
-                  child: Text(msg['name']!),
+                  value: speaker,
+                  child: Text(speaker),
                 );
               }).toList(),
               onChanged: (value) {
-                speakerNameController.text = value ?? '';
+                selectedSpeaker = value ?? '';
               },
               decoration: InputDecoration(labelText: "Select Speaker"),
             ),
+            const SizedBox(height: 10),
+            // Text field to enter new speaker name
             TextField(
               controller: speakerNameController,
               decoration: InputDecoration(labelText: 'New Speaker Name'),
@@ -139,27 +153,58 @@ class ConvertToTextController extends GetxController {
           ),
           TextButton(
             onPressed: () async {
-              if (speakerNameController.text.isNotEmpty) {
-                // Update speaker name in messages
-                messages.forEach((msg) {
-                  if (msg['name'] == speakerNameController.text) {
-                    msg['name'] = speakerNameController.text;
-                  }
-                });
-                messages.refresh();
-
-                // Update the database
-                final dbHelper = DatabaseHelper();
-                final db = await dbHelper.database;
-                await db.update(
-                  'audio_files',
-                  {'transcription': json.encode(messages)},
-                  where: 'file_path = ?',
-                  whereArgs: [filePath],
-                );
-
-                Get.back(); // Close dialog
+              if (speakerNameController.text.trim().isEmpty) {
+                Get.snackbar("Error", "Speaker name cannot be empty!");
+                return;
               }
+
+              final newSpeakerName = speakerNameController.text.trim();
+
+              // 🔹 Update all instances of the selected speaker in `messages`
+              for (var msg in messages) {
+                if (msg['name'] == selectedSpeaker) {
+                  msg['name'] = newSpeakerName;
+                }
+              }
+              messages.refresh(); // 🔥 Ensure UI updates immediately
+
+              // 🔹 Update the database
+              final dbHelper = DatabaseHelper();
+              final db = await dbHelper.database;
+
+              // Fetch existing transcription from DB
+              final result = await db.query(
+                'audio_files',
+                where: 'file_path = ?',
+                whereArgs: [filePath],
+              );
+
+              if (result.isNotEmpty) {
+                final existingTranscription = result.first['transcription'];
+
+                if (existingTranscription != null && existingTranscription.toString().isNotEmpty) {
+                  List<dynamic> data = json.decode(existingTranscription.toString());
+
+                  // 🔹 Update speaker names in the database
+                  for (var entry in data) {
+                    if (entry['Speaker_Name'] == selectedSpeaker) {
+                      entry['Speaker_Name'] = newSpeakerName;
+                    }
+                  }
+
+                  // Save updated transcription back to the database
+                  await db.update(
+                    'audio_files',
+                    {'transcription': json.encode(data)},
+                    where: 'file_path = ?',
+                    whereArgs: [filePath],
+                  );
+
+                  print("Updated speaker names saved: ${json.encode(data)}");
+                }
+              }
+
+              Get.back(); // Close dialog
             },
             child: Text('Save'),
           ),
@@ -167,6 +212,8 @@ class ConvertToTextController extends GetxController {
       ),
     );
   }
+
+
 
 
 
