@@ -185,26 +185,16 @@ class ConvertToTextView extends StatelessWidget {
                       const Spacer(),
                       SvgIcon(
                         svgPath: 'assets/images/audio/edit_icon.svg',
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (BuildContext context) {
-                              return CustomPopup(
-                                controller: TextEditingController(),
-                                title: 'Edit',
-                                isSecondInput: true,
-                                hint1: 'Speaker 01',
-                                hint2: 'Speaker 02',
-                                onButtonPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                              );
-                            },
-                          );
-                        },
+                        onTap: () => textController.editSpeakerName(context,filePath), // Speaker edit
                         height: 24,
                       ),
+
+                      SvgIcon(
+                        svgPath: 'assets/images/audio/edit_icon.svg',
+                        onTap: () => textController.editFullTranscription(context,filePath), // Transcription edit
+                        height: 24,
+                      ),
+
                     ],
                   ),
                 ],
@@ -219,11 +209,6 @@ class ConvertToTextView extends StatelessWidget {
               right: 10,
               child: Column(
                 children: [
-                  /*CustomButton(
-                    backgroundColor: AppColors.appColor2,
-                    text: 'Summary',
-                    onPressed: () => audioController.fetchSummary(filePath, fileName),
-                  ),*/
                   const SizedBox(height: 10),
                   CustomButton(
                     backgroundColor: AppColors.appColor3,

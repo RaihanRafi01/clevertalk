@@ -14,39 +14,160 @@ class ConvertToTextController extends GetxController {
   var isLoading = false.obs;
   final ScrollController scrollController = ScrollController();
 
-  /*Future<void> fetchMessages(String filePath) async {
-    final ApiService _apiService = ApiService();
-    try {
-      isLoading.value = true;
-      final response = await _apiService.fetchTranscription(filePath);
-      if (response.statusCode == 200) {
-        final jsonData = json.decode(response.body);
-        final data = jsonData['Data'] as List;
-        messages.value = data.map<Map<String, String>>((entry) {
-          final speakerName = entry['Speaker_Name'] as String;
-          final transcript = entry['Transcript'] as String;
-          final startTime = formatTimestamp(entry['Start_time'] as double);
-          final endTime = formatTimestamp(entry['End_time'] as double);
-          return {
-            'name': speakerName,
-            'time': '$startTime - $endTime',
-            'description': transcript,
-          };
-        }).toList();
+  void editFullTranscription(BuildContext context,String filePath) {
+    TextEditingController transcriptionController = TextEditingController();
 
-        // Start scrolling based on timestamps when data is fetched
-        final audioController = Get.find<AudioPlayerController>();
-        audioController.playAudio();
-        syncScrollingWithAudio(audioController);
-      } else {
-        Get.snackbar('Error', 'Failed to fetch data: ${response.reasonPhrase}');
-      }
-    } catch (e) {
-      Get.snackbar('Error', 'Error fetching messages: $e');
-    } finally {
-      isLoading.value = false;
-    }
-  }*/
+    // Load current transcription text, keeping original timestamps
+    String fullText = messages.map((msg) => "${msg['name']}: ${msg['description']}").join('\n');
+    transcriptionController.text = fullText;
+
+    Get.dialog(
+      AlertDialog(
+        title: Text('Edit Transcription'),
+        content: TextField(
+          controller: transcriptionController,
+          maxLines: 10,
+          decoration: InputDecoration(labelText: 'Edit Full Transcription'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              if (transcriptionController.text.trim().isEmpty) {
+                Get.snackbar("Error", "Transcription cannot be empty!");
+                return;
+              }
+
+              // Convert edited text into JSON format for storage
+              List<Map<String, dynamic>> updatedMessages = transcriptionController.text
+                  .split('\n')
+                  .where((line) => line.contains(': ')) // Ensure valid format
+                  .map((line) {
+                final parts = line.split(': ');
+                final speakerName = parts[0].trim();
+                final transcript = parts.sublist(1).join(': ').trim();
+
+                // Retrieve the original Start_time and End_time dynamically
+                final originalEntry = messages.firstWhere(
+                      (msg) => msg['name'] == speakerName,
+                  orElse: () => {'time': '00:00:00 - 00:00:00'}, // Default
+                );
+
+                final times = originalEntry['time']!.split(' - ');
+                final startTime = parseTimeToSeconds(times[0]);
+                final endTime = parseTimeToSeconds(times[1]);
+
+                return {
+                  "Speaker_Name": speakerName,
+                  "Transcript": transcript,
+                  "Start_time": startTime,
+                  "End_time": endTime,
+                };
+              }).toList();
+
+              // Ensure we have valid data
+              if (updatedMessages.isEmpty) {
+                Get.snackbar("Error", "Invalid transcription format.");
+                return;
+              }
+
+              // Update state dynamically
+              messages.value = updatedMessages.map<Map<String, String>>((entry) => {
+                'name': entry['Speaker_Name'].toString(),
+                'time': '${formatTimestamp(entry['Start_time'] as double)} - ${formatTimestamp(entry['End_time'] as double)}',
+                'description': entry['Transcript'].toString(),
+              }).toList();
+
+
+              // Save updated transcription to database
+              final dbHelper = DatabaseHelper();
+              final db = await dbHelper.database;
+              await db.update(
+                'audio_files',
+                {'transcription': json.encode(updatedMessages)}, // Save as JSON
+                where: 'file_path = ?',
+                whereArgs: [filePath],
+              );
+
+              print("Updated transcription saved: ${json.encode(updatedMessages)}");
+
+              Get.back(); // Close dialog
+            },
+            child: Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+  void editSpeakerName(BuildContext context,String filePath) {
+    TextEditingController speakerNameController = TextEditingController();
+
+    Get.dialog(
+      AlertDialog(
+        title: Text('Edit Speaker Name'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            DropdownButtonFormField<String>(
+              value: messages.isNotEmpty ? messages.first['name'] : null,
+              items: messages.map((msg) {
+                return DropdownMenuItem(
+                  value: msg['name'],
+                  child: Text(msg['name']!),
+                );
+              }).toList(),
+              onChanged: (value) {
+                speakerNameController.text = value ?? '';
+              },
+              decoration: InputDecoration(labelText: "Select Speaker"),
+            ),
+            TextField(
+              controller: speakerNameController,
+              decoration: InputDecoration(labelText: 'New Speaker Name'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              if (speakerNameController.text.isNotEmpty) {
+                // Update speaker name in messages
+                messages.forEach((msg) {
+                  if (msg['name'] == speakerNameController.text) {
+                    msg['name'] = speakerNameController.text;
+                  }
+                });
+                messages.refresh();
+
+                // Update the database
+                final dbHelper = DatabaseHelper();
+                final db = await dbHelper.database;
+                await db.update(
+                  'audio_files',
+                  {'transcription': json.encode(messages)},
+                  where: 'file_path = ?',
+                  whereArgs: [filePath],
+                );
+
+                Get.back(); // Close dialog
+              }
+            },
+            child: Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
 
 
   Future<void> fetchMessages(String filePath) async {
@@ -68,13 +189,20 @@ class ConvertToTextController extends GetxController {
         final existingTranscription = result.first['transcription'];
 
         if (existingTranscription != null && existingTranscription.toString().isNotEmpty) {
-          // If transcription exists, use it
+          // If transcription exists, parse safely
           final data = json.decode(existingTranscription.toString()) as List;
+
           messages.value = data.map<Map<String, String>>((entry) {
-            final speakerName = entry['Speaker_Name'] as String;
-            final transcript = entry['Transcript'] as String;
-            final startTime = formatTimestamp(entry['Start_time'] as double);
-            final endTime = formatTimestamp(entry['End_time'] as double);
+            final speakerName = (entry['Speaker_Name'] ?? 'Unknown Speaker') as String;
+            final transcript = (entry['Transcript'] ?? '') as String;
+
+            final startTime = entry['Start_time'] != null
+                ? formatTimestamp((entry['Start_time'] as num).toDouble()) // Ensure it's a double
+                : '00:00:00';
+            final endTime = entry['End_time'] != null
+                ? formatTimestamp((entry['End_time'] as num).toDouble())
+                : '00:00:00';
+
             return {
               'name': speakerName,
               'time': '$startTime - $endTime',
@@ -103,10 +231,16 @@ class ConvertToTextController extends GetxController {
             );
 
             messages.value = data.map<Map<String, String>>((entry) {
-              final speakerName = entry['Speaker_Name'] as String;
-              final transcript = entry['Transcript'] as String;
-              final startTime = formatTimestamp(entry['Start_time'] as double);
-              final endTime = formatTimestamp(entry['End_time'] as double);
+              final speakerName = (entry['Speaker_Name'] ?? 'Unknown Speaker') as String;
+              final transcript = (entry['Transcript'] ?? '') as String;
+
+              final startTime = entry['Start_time'] != null
+                  ? formatTimestamp((entry['Start_time'] as num).toDouble())
+                  : '00:00:00';
+              final endTime = entry['End_time'] != null
+                  ? formatTimestamp((entry['End_time'] as num).toDouble())
+                  : '00:00:00';
+
               return {
                 'name': speakerName,
                 'time': '$startTime - $endTime',
@@ -128,10 +262,12 @@ class ConvertToTextController extends GetxController {
       }
     } catch (e) {
       Get.snackbar('Error', 'Error fetching messages: $e');
+      print(':::::::::::::::::::::::::::::::::Error : $e');
     } finally {
       isLoading.value = false;
     }
   }
+
 
 
   void syncScrollingWithAudio(AudioPlayerController audioController) {
