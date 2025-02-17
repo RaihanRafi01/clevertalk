@@ -357,8 +357,6 @@ class AudioPlayerController extends GetxController {
             // Navigate to SummaryKeyPointView with the new summary
             print('::::::::key::::::::::::::::::$keyPointText');
 
-            Get.snackbar('Please Wait', 'We will send you a notification when its finish');
-
             NotificationService.showNotification(
               title: "Summary Ready!",
               body: "Click to view Summary",

@@ -52,8 +52,12 @@ class SummaryKeyPointController extends GetxController {
         parsedDate = result.first['parsed_date']?.toString() ?? "Unknown Date";
       }
 
-      // Validate and clean JSON before parsing
-      String cleanedJson = keyPoints.replaceAll(RegExp(r',\s*}'), "}").replaceAll(RegExp(r',\s*\]'), "]");
+      // Trim and remove unnecessary whitespace before parsing JSON
+      String cleanedJson = keyPoints
+          .replaceAll(RegExp(r',\s*}'), "}")  // Remove trailing commas before closing curly braces
+          .replaceAll(RegExp(r',\s*\]'), "]") // Remove trailing commas before closing square brackets
+          .replaceAll(RegExp(r'\s+'), " ")    // Remove extra spaces
+          .trim();                            // Trim leading and trailing spaces
 
       final Map<String, dynamic> data = json.decode(cleanedJson);
 
@@ -62,13 +66,13 @@ class SummaryKeyPointController extends GetxController {
 
       mainPoints = (data["Main Points"] as List?)
           ?.map((e) => (e as Map<String, dynamic>).map(
-              (key, value) => MapEntry(key.toString(), value.toString())))
+              (key, value) => MapEntry(key.toString().trim(), value.toString().trim())))
           .toList() ??
           [];
 
       conclusions = (data["Conclusions"] as List?)
           ?.map((e) => (e as Map<String, dynamic>).map(
-              (key, value) => MapEntry(key.toString(), value.toString())))
+              (key, value) => MapEntry(key.toString().trim(), value.toString().trim())))
           .toList() ??
           [];
 
@@ -80,6 +84,9 @@ class SummaryKeyPointController extends GetxController {
       isLoading.value = false; // Data loading is complete
     }
   }
+
+
+
 
 
   void _initializeControllers() {
