@@ -6,6 +6,7 @@ import '../../../../common/customFont.dart';
 import '../../../../common/widgets/auth/custom_button.dart';
 import '../../../../common/widgets/customAppBar.dart';
 import '../../../../common/widgets/svgIcon.dart';
+import '../../../data/services/notification_services.dart';
 import '../../text/controllers/text_controller.dart';
 import '../../text/views/convert_to_text_view.dart';
 import '../controllers/audio_controller.dart';
@@ -126,7 +127,18 @@ class AudioPlayerView extends StatelessWidget {
                           text: 'Convert To Text',
                           onPressed: () async {
                             await controller.pauseAudio();
-                            Get.to(ConvertToTextView(fileName: fileName, filePath: filepath,));
+                            Get.snackbar('Please Wait', 'We will send you a notification when its completed');
+                            //await textController.fetchMessages(filepath);
+                            await textController.fetchMessages(filepath).then((_) {
+                              NotificationService.showNotification(
+                                title: "Conversion Ready!",
+                                body: "Click to view Conversion",
+                                payload: "Conversion",
+                                keyPoints: filepath,
+                                fileName: fileName,
+                              );
+                            });
+                            //Get.to(ConvertToTextView(fileName: fileName, filePath: filepath,));
                           },
                         ),
                       ),

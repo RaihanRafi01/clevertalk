@@ -8,6 +8,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:sqflite/sql.dart';
 import '../../../data/database_helper.dart';
 import '../../../data/services/api_services.dart';
+import '../../../data/services/notification_services.dart';
 import '../views/convert_view.dart';
 import '../views/summary_key_point_view.dart';
 
@@ -313,7 +314,7 @@ class AudioPlayerController extends GetxController {
 
   Future<void> fetchKeyPoints(String filePath, String fileName) async {
     try {
-      isLoading.value = true; // Start loading
+      //isLoading.value = true; // Start loading
       final dbHelper = DatabaseHelper();
       final db = await dbHelper.database;
 
@@ -332,6 +333,7 @@ class AudioPlayerController extends GetxController {
           print('::::::::existingKeypoint::::::::::::::::::${existingKeypoint.toString()}');
           Get.to(() => SummaryKeyPointView(keyPoints: existingKeypoint.toString(), fileName: fileName,));
         } else {
+          Get.snackbar('Please Wait', 'We will send you a notification when its completed');
           // If the summary is not available, fetch it from the API
           final response = await _apiService.fetchKeyPoints(filePath, fileName);
 
@@ -355,7 +357,17 @@ class AudioPlayerController extends GetxController {
             // Navigate to SummaryKeyPointView with the new summary
             print('::::::::key::::::::::::::::::$keyPointText');
 
-            Get.to(() => SummaryKeyPointView(keyPoints: keyPointText, fileName: fileName,));
+            Get.snackbar('Please Wait', 'We will send you a notification when its finish');
+
+            NotificationService.showNotification(
+              title: "Summary Ready!",
+              body: "Click to view Summary",
+              payload: "Summary",
+              keyPoints: keyPointText,
+              fileName: fileName,
+            );
+
+            //Get.to(() => SummaryKeyPointView(keyPoints: keyPointText, fileName: fileName,));
           } else {
             Get.snackbar('Error', 'Failed to fetch keyPoint: ${response.body}');
           }
@@ -366,8 +378,6 @@ class AudioPlayerController extends GetxController {
       }
     } catch (e) {
       Get.snackbar('Error', 'Error: $e');
-    } finally {
-      isLoading.value = false; // Stop loading
     }
   }
 

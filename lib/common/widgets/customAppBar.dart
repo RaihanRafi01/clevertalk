@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 
+import '../../app/data/services/notification_services.dart';
 import '../../app/modules/authentication/views/forgot_password_view.dart';
 import '../customFont.dart';
 
@@ -50,7 +51,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
         // Second SVG Icon Button
         IconButton(
-          onPressed: (){
+          onPressed: () async {
+            print('notification pressed !');
             Get.to(() => NotificationSubscriptionView());
           },
           icon: SvgPicture.asset(
@@ -62,6 +64,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       ],
     );
   }
+
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);

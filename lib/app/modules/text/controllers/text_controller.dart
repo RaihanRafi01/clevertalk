@@ -296,9 +296,9 @@ class ConvertToTextController extends GetxController {
             }).toList();
 
             // Start scrolling based on timestamps
-            final audioController = Get.find<AudioPlayerController>();
-            audioController.playAudio();
-            syncScrollingWithAudio(audioController);
+            //final audioController = Get.find<AudioPlayerController>();
+            //audioController.playAudio();
+            //syncScrollingWithAudio(audioController);
           } else {
             Get.snackbar('Error', 'Failed to fetch data: ${response.reasonPhrase}');
           }

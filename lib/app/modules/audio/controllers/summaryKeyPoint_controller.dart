@@ -52,29 +52,35 @@ class SummaryKeyPointController extends GetxController {
         parsedDate = result.first['parsed_date']?.toString() ?? "Unknown Date";
       }
 
-      final Map<String, dynamic> data = json.decode(keyPoints);
+      // Validate and clean JSON before parsing
+      String cleanedJson = keyPoints.replaceAll(RegExp(r',\s*}'), "}").replaceAll(RegExp(r',\s*\]'), "]");
+
+      final Map<String, dynamic> data = json.decode(cleanedJson);
+
       titleController.text = data["Title"]?.toString() ?? "No Title";
       dateController.text = parsedDate;
 
       mainPoints = (data["Main Points"] as List?)
-              ?.map((e) => (e as Map<String, dynamic>).map(
-                  (key, value) => MapEntry(key.toString(), value.toString())))
-              .toList() ??
+          ?.map((e) => (e as Map<String, dynamic>).map(
+              (key, value) => MapEntry(key.toString(), value.toString())))
+          .toList() ??
           [];
 
       conclusions = (data["Conclusions"] as List?)
-              ?.map((e) => (e as Map<String, dynamic>).map(
-                  (key, value) => MapEntry(key.toString(), value.toString())))
-              .toList() ??
+          ?.map((e) => (e as Map<String, dynamic>).map(
+              (key, value) => MapEntry(key.toString(), value.toString())))
+          .toList() ??
           [];
 
       _initializeControllers();
     } catch (e) {
       Get.snackbar("Error", "Failed to load data: $e");
+      print(':::::::::::::::::::Error: $e');
     } finally {
       isLoading.value = false; // Data loading is complete
     }
   }
+
 
   void _initializeControllers() {
     mainPointTitleControllers = mainPoints
