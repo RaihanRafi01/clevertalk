@@ -1,10 +1,11 @@
-import 'package:clevertalk/common/widgets/auth/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../../../common/appColors.dart';
 import '../../../../common/customFont.dart';
+import '../../../../common/widgets/auth/custom_button.dart';
 import '../../../../common/widgets/customAppBar.dart';
+import '../../audio/views/summary_key_point_view.dart';
+import '../../text/views/convert_to_text_view.dart';
 import '../controllers/notification_subscription_controller.dart';
 
 class NotificationSubscriptionView extends GetView<NotificationSubscriptionController> {
@@ -12,78 +13,78 @@ class NotificationSubscriptionView extends GetView<NotificationSubscriptionContr
 
   @override
   Widget build(BuildContext context) {
+    Get.put(NotificationSubscriptionController()); // Ensure controller is registered
+
     return Scaffold(
       appBar: CustomAppBar(
         isSearch: true,
         title: "CLEVERTALK",
         onFirstIconPressed: () {
-          // Action for the first button
           print("First icon pressed");
         },
         onSecondIconPressed: () {
-          // Action for the second button
           print("Second icon pressed");
         },
       ),
       body: Column(
         children: [
-          // Scrollable content area
           Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Today',
-                    style: h4.copyWith(fontSize: 18, fontWeight: FontWeight.bold),
+            child: Obx(() {
+              if (controller.notifications.isEmpty) {
+                return const Center(
+                  child: Text(
+                    "No new notifications",
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
-                  const SizedBox(height: 10),
-                  NotificationCard(
-                    message: 'Please reconnect your device within 2 days or your subscription pack will be canceled.',
-                    time: '09:10 PM',
-                  ),
-                  NotificationCard(
-                    message: 'Please reconnect your device within 2 days or your subscription pack will be canceled.',
-                    time: '09:10 PM',
-                  ),
-                  NotificationCard(
-                    message: 'Please reconnect your device within 2 days or your subscription pack will be canceled.',
-                    time: '09:10 PM',
-                  ),
-                  NotificationCard(
-                    message: 'Please reconnect your device within 2 days or your subscription pack will be canceled.',
-                    time: '09:10 PM',
-                  ),
-                  NotificationCard(
-                    message: 'Please reconnect your device within 2 days or your subscription pack will be canceled.',
-                    time: '09:10 PM',
-                  ),
-                  NotificationCard(
-                    message: 'Please reconnect your device within 2 days or your subscription pack will be canceled.',
-                    time: '09:10 PM',
-                  ),
+                );
+              }
 
-                  const SizedBox(height: 20),
-                  Text(
-                    'Yesterday',
-                    style: h4.copyWith(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  NotificationCard(
-                    message: 'We are currently offering a 10% discount on our device. When you purchase the device, you will also get free lifetime premium access to the app.',
-                    time: '09:10 PM',
-                  ),
-                ],
-              ),
-            ),
+              final groupedNotifications = controller.groupNotificationsByDate();
+
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: groupedNotifications.entries.map((entry) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        //Text(entry.key, style: h4.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
+                        //const SizedBox(height: 10),
+                        ...entry.value.map((notification) => GestureDetector(
+                          onTap: (){
+                            print(':::::::::::::::: check keypoint: ${notification.keyPoints}');
+                            print(':::::::::::::::: check: ${notification.fileName}');
+                            if(notification.type == 'Conversion'){
+                              Get.to(() => ConvertToTextView(
+                                filePath: notification.keyPoints ?? "No file path",
+                                fileName: notification.fileName ?? "Unknown File",
+                              ));
+                            }else if(notification.type == 'Summary'){
+                              Get.to(() => SummaryKeyPointView(
+                                keyPoints: notification.keyPoints ?? "No Key Points",
+                                fileName: notification.fileName ?? "Unknown File",
+                              ));
+                            }
+                          },
+                          child: NotificationCard(
+                            message: '${notification.message} of ${notification.fileName}',
+                            time: notification.time,
+                          ),
+                        )),
+                        const SizedBox(height: 10),
+                      ],
+                    );
+                  }).toList(),
+                ),
+              );
+            }),
           ),
-          // Fixed button at the bottom
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: CustomButton(
               text: 'Read All',
-              onPressed: () {},
+              onPressed: () => controller.markAllAsRead(),
             ),
           ),
         ],
