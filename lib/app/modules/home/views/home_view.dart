@@ -49,7 +49,7 @@ class HomeView extends GetView<HomeController> {
                     Spacer(),
                     CustomButton(
                       height: 70,
-                      text: 'Explore Plan',
+                      text: 'Explore Plans',
                       onPressed: () {
                         Get.to(SubscriptionView());
                       },
@@ -106,13 +106,18 @@ class HomeView extends GetView<HomeController> {
                       final parsedDate = audioFile['parsed_date'] ?? 'Unknown Date';
                       final id = audioFile['id'];
 
-                      return CustomListTile(
-                        filepath: filePath,
-                        title: fileName,
-                        subtitle: parsedDate,
-                        duration: audioFile['duration'] ?? '00:00:00',
-                        id: id,
-                        onUpdate: () => audioPlayerController.fetchAudioFiles(),
+                      return GestureDetector(
+                        onTap: (){
+                          navigateBasedOnTranscription(context, fileName, filePath);
+                        },
+                        child: CustomListTile(
+                          filepath: filePath,
+                          title: fileName,
+                          subtitle: parsedDate,
+                          duration: audioFile['duration'] ?? '00:00:00',
+                          id: id,
+                          onUpdate: () => audioPlayerController.fetchAudioFiles(),
+                        ),
                       );
                     },
                   );
@@ -136,7 +141,7 @@ class HomeView extends GetView<HomeController> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 70),
+                    SizedBox(height: 90),
                   ],
                 );
               } else {

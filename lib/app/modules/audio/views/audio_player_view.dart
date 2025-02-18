@@ -127,7 +127,7 @@ class AudioPlayerView extends StatelessWidget {
                           text: 'Convert To Text',
                           onPressed: () async {
                             await controller.pauseAudio();
-                            Get.snackbar('Please Wait', 'We will send you a notification when its completed');
+                            Get.snackbar('Transcription in progress...', 'This may take some time, but don\'t worry! We\'ll notify you as soon as it\'s ready. Feel free to using the app while you wait.');
                             //await textController.fetchMessages(filepath);
                             await textController.fetchMessages(filepath).then((_) {
                               NotificationService.showNotification(

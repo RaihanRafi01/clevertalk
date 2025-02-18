@@ -77,13 +77,13 @@ class CustomListTile extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (showPlayIcon) // Conditional rendering for play_icon
+            /*if (showPlayIcon) // Conditional rendering for play_icon
               SvgIcon(
                 height: 24,
                 svgPath: 'assets/images/audio/play_icon.svg',
                 onTap: () => navigateBasedOnTranscription(context, title, filepath), // Pass the file name
               ),
-            if (showPlayIcon) const SizedBox(width: 10), // Spacing only if play_icon exists
+            if (showPlayIcon) const SizedBox(width: 10),*/ // Spacing only if play_icon exists
             SvgIcon(
               height: 24,
               svgPath: 'assets/images/audio/edit_icon.svg',

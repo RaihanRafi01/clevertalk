@@ -22,7 +22,7 @@ class CustomNavigationBar extends StatelessWidget {
         'icon': 'assets/images/navbar/text_icon.svg',
       },*/
       {
-        'label': 'Audio',
+        'label': 'Recordings',
         'icon': 'assets/images/navbar/audio_icon.svg',
       },
       {

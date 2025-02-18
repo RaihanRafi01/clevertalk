@@ -73,7 +73,7 @@ class BeforeConnectView extends StatelessWidget {
 
           // Fixed Button at the Bottom
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 80).copyWith(bottom: 60), // Increased bottom padding
+            padding: const EdgeInsets.symmetric(horizontal: 80).copyWith(bottom: 90), // Increased bottom padding
             child: Center(
               child: CustomButton(
                 borderRadius: 30,

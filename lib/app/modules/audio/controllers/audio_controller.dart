@@ -333,7 +333,7 @@ class AudioPlayerController extends GetxController {
           print('::::::::existingKeypoint::::::::::::::::::${existingKeypoint.toString()}');
           Get.to(() => SummaryKeyPointView(keyPoints: existingKeypoint.toString(), fileName: fileName,));
         } else {
-          Get.snackbar('Please Wait', 'We will send you a notification when its completed');
+          Get.snackbar('Summarization in progress...', 'This may take some time, but don\'t worry! We\'ll notify you as soon as it\'s ready. Feel free to using the app while you wait.');
           // If the summary is not available, fetch it from the API
           final response = await _apiService.fetchKeyPoints(filePath, fileName);
 
