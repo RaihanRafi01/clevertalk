@@ -118,10 +118,8 @@ class SummaryKeyPointView extends StatelessWidget {
                                     fontSize: 12,
                                   ),
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 16),
-                                    child: SvgPicture.asset(
-                                        'assets/images/summary/arrow_icon.svg'),
+                                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                                    child: SvgPicture.asset('assets/images/summary/arrow_icon.svg'),
                                   ),
                                   GetBuilder<LanguageController>(
                                     builder: (langController) => Container(
@@ -132,26 +130,18 @@ class SummaryKeyPointView extends StatelessWidget {
                                         borderRadius: BorderRadius.circular(20),
                                       ),
                                       child: DropdownButton<String>(
-                                        value: langController
-                                            .selectedLanguage.value,
+                                        value: langController.selectedLanguage.value,
                                         onChanged: (String? newValue) {
-                                          langController
-                                              .updateLanguage(newValue);
+                                          langController.updateLanguage(newValue);
                                           // Add your translation logic here if needed
                                         },
                                         borderRadius: BorderRadius.circular(20),
                                         dropdownColor: AppColors.appColor,
                                         underline: const SizedBox(),
                                         isExpanded: true,
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 10),
-                                        items: <String>[
-                                          'English',
-                                          'Spanish',
-                                          'French',
-                                          'German'
-                                        ].map<DropdownMenuItem<String>>(
-                                            (String value) {
+                                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                                        items: <String>['English', 'Spanish', 'French', 'German']
+                                            .map<DropdownMenuItem<String>>((String value) {
                                           return DropdownMenuItem<String>(
                                             value: value,
                                             child: Text(
@@ -170,7 +160,11 @@ class SummaryKeyPointView extends StatelessWidget {
                                   CustomButton(
                                     text: 'Translate',
                                     onPressed: () {
-                                      // Add translation logic here if needed
+                                      // Get the LanguageController instance
+                                      final langController = Get.find<LanguageController>();
+                                      // Print "English" and the selected language
+                                      print('Source Language: English');
+                                      print('Target Language: ${langController.selectedLanguage.value}');
                                     },
                                     height: 26,
                                     width: 70,
