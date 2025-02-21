@@ -16,6 +16,7 @@ class CustomButton extends StatelessWidget {
   final bool isEditPage;
   final double width;
   final double height;
+  final double fontSize;
   final String svgAsset;
 
   const CustomButton({
@@ -31,6 +32,7 @@ class CustomButton extends StatelessWidget {
     this.isEditPage = false,
     this.width = double.maxFinite,
     this.height = 45,
+    this.fontSize = 16,
     this.svgAsset = 'assets/images/profile/gem.svg',
   });
 
@@ -52,7 +54,7 @@ class CustomButton extends StatelessWidget {
         child: isGem ? textWithIcon() : Text(
           text,
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 16, color: textColor),
+          style: TextStyle(fontSize: fontSize, color: textColor),
         ),
       )
           : OutlinedButton(
@@ -66,7 +68,7 @@ class CustomButton extends StatelessWidget {
           child: isGem ? textWithIcon() : Text(
             text.toUpperCase(),
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 16, color: textColor),
+            style: TextStyle(fontSize: fontSize, color: textColor),
           ),
         ),
       ),
@@ -90,7 +92,7 @@ class CustomButton extends StatelessWidget {
           text,
           textAlign: TextAlign.center,
           style: h4.copyWith(
-            fontSize: 16,
+            fontSize: fontSize,
             color: textColor,
             fontWeight: FontWeight.bold,
           ),

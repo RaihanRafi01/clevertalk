@@ -24,6 +24,7 @@ class SummaryKeyPointController extends GetxController {
   List<TextEditingController> conclusionTitleControllers = [];
   List<TextEditingController> conclusionValueControllers = [];
   RxBool isEditing = false.obs;
+  RxBool isTranslate = false.obs;
   RxBool isLoading = true.obs; // Add a loading state
   String parsedDate = "Unknown Date";
 
@@ -224,5 +225,16 @@ class SummaryKeyPointController extends GetxController {
     conclusionTitleControllers.forEach((controller) => controller.dispose());
     conclusionValueControllers.forEach((controller) => controller.dispose());
     super.onClose();
+  }
+}
+
+class LanguageController extends GetxController {
+  RxString selectedLanguage = 'Spanish'.obs;
+
+  void updateLanguage(String? newValue) {
+    if (newValue != null) {
+      selectedLanguage.value = newValue;
+      update(); // This ensures GetBuilder rebuilds when language changes
+    }
   }
 }

@@ -88,6 +88,7 @@ flutter:
     - assets/images/profile/
     - assets/images/settings/
     - assets/images/navbar/
+    - assets/images/summary/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
