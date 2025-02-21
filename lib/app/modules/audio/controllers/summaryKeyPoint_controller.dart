@@ -6,32 +6,35 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
-
+import 'package:sqflite/sqflite.dart';
 import '../../../data/database_helper.dart';
+import '../../../data/services/api_services.dart';
+import '../../../data/services/notification_services.dart';
 
 class SummaryKeyPointController extends GetxController {
-  final String keyPoints;
-  final String fileName;
+  final String fileName; // We only need fileName now, not keyPoints
 
-  SummaryKeyPointController({required this.keyPoints, required this.fileName});
+  SummaryKeyPointController({required this.fileName});
 
+  final ApiService _apiService = ApiService();
   late TextEditingController titleController;
   late TextEditingController dateController;
-  List<Map<String, String>> mainPoints = [];
-  List<Map<String, String>> conclusions = [];
+
+  RxList<Map<String, String>> mainPoints = <Map<String, String>>[].obs;
+  RxList<Map<String, String>> conclusions = <Map<String, String>>[].obs;
+
   List<TextEditingController> mainPointTitleControllers = [];
   List<TextEditingController> mainPointValueControllers = [];
   List<TextEditingController> conclusionTitleControllers = [];
   List<TextEditingController> conclusionValueControllers = [];
   RxBool isEditing = false.obs;
   RxBool isTranslate = false.obs;
-  RxBool isLoading = true.obs; // Add a loading state
+  RxBool isLoading = true.obs;
   String parsedDate = "Unknown Date";
 
   @override
   void onInit() {
     super.onInit();
-    // Initialize controllers immediately
     titleController = TextEditingController();
     dateController = TextEditingController();
     _loadData();
@@ -42,55 +45,111 @@ class SummaryKeyPointController extends GetxController {
       final dbHelper = DatabaseHelper();
       final db = await dbHelper.database;
 
+      // Fetch the latest key_point and parsed_date from the database
       final result = await db.query(
         'audio_files',
-        columns: ['parsed_date'],
+        columns: ['key_point', 'parsed_date'],
         where: 'file_name = ?',
         whereArgs: [fileName],
       );
 
       if (result.isNotEmpty) {
         parsedDate = result.first['parsed_date']?.toString() ?? "Unknown Date";
+        String? keyPointText = result.first['key_point']?.toString();
+
+        if (keyPointText != null && keyPointText.isNotEmpty) {
+          String cleanedJson = keyPointText
+              .replaceAll(RegExp(r',\s*}'), "}")
+              .replaceAll(RegExp(r',\s*\]'), "]")
+              .replaceAll(RegExp(r'\s+'), " ")
+              .trim();
+
+          final Map<String, dynamic> data = json.decode(cleanedJson);
+
+          titleController.text = data["Title"]?.toString() ?? "No Title";
+          dateController.text = parsedDate;
+
+          mainPoints.value = (data["Main Points"] as List?)
+              ?.map((e) => (e as Map<String, dynamic>).map(
+                  (key, value) => MapEntry(key.toString().trim(), value.toString().trim())))
+              .toList() ??
+              [];
+          conclusions.value = (data["Conclusions"] as List?)
+              ?.map((e) => (e as Map<String, dynamic>).map(
+                  (key, value) => MapEntry(key.toString().trim(), value.toString().trim())))
+              .toList() ??
+              [];
+        } else {
+          // Handle case where key_point is null or empty
+          titleController.text = "No Title";
+          dateController.text = parsedDate;
+          mainPoints.clear();
+          conclusions.clear();
+        }
+      } else {
+        // No record found in the database
+        titleController.text = "No Title";
+        dateController.text = "Unknown Date";
+        mainPoints.clear();
+        conclusions.clear();
       }
-
-      // Trim and remove unnecessary whitespace before parsing JSON
-      String cleanedJson = keyPoints
-          .replaceAll(RegExp(r',\s*}'), "}")  // Remove trailing commas before closing curly braces
-          .replaceAll(RegExp(r',\s*\]'), "]") // Remove trailing commas before closing square brackets
-          .replaceAll(RegExp(r'\s+'), " ")    // Remove extra spaces
-          .trim();                            // Trim leading and trailing spaces
-
-      final Map<String, dynamic> data = json.decode(cleanedJson);
-
-      titleController.text = data["Title"]?.toString() ?? "No Title";
-      dateController.text = parsedDate;
-
-      mainPoints = (data["Main Points"] as List?)
-          ?.map((e) => (e as Map<String, dynamic>).map(
-              (key, value) => MapEntry(key.toString().trim(), value.toString().trim())))
-          .toList() ??
-          [];
-
-      conclusions = (data["Conclusions"] as List?)
-          ?.map((e) => (e as Map<String, dynamic>).map(
-              (key, value) => MapEntry(key.toString().trim(), value.toString().trim())))
-          .toList() ??
-          [];
 
       _initializeControllers();
     } catch (e) {
       Get.snackbar("Error", "Failed to load data: $e");
       print(':::::::::::::::::::Error: $e');
     } finally {
-      isLoading.value = false; // Data loading is complete
+      isLoading.value = false;
     }
   }
 
+  Future<void> summaryRegenerate(String filePath, String fileName) async {
+    final dbHelper = DatabaseHelper();
+    final db = await dbHelper.database;
+    try {
+      Get.snackbar('Summarization Regenerate in progress...', 'This may take some time, but don\'t worry! We\'ll notify you as soon as it\'s ready. Feel free to using the app while you wait.');
+      final response = await _apiService.fetchKeyPoints(filePath, fileName);
 
+      print('::::::::::statusCode::::::::::::::::${response.statusCode}');
+      print('::::::::body1::::::::::::::::::${response.body}');
 
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final jsonResponse = json.decode(response.body);
+        final keyPointText = jsonResponse['Data']['content'];
 
+        // Update the database
+        await db.update(
+          'audio_files',
+          {'key_point': keyPointText},
+          where: 'file_name = ?',
+          whereArgs: [fileName],
+        );
+        // Reload data from the database and update UI
+        await _loadData();
+
+        NotificationService.showNotification(
+          title: "Summary Ready!",
+          body: "Click to view Summary",
+          payload: "Summary",
+          keyPoints: keyPointText,
+          fileName: fileName,
+        );
+      } else {
+        Get.snackbar('Error', 'Summary Failed: ${response.body}');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Error fetching transcription: $e');
+    }
+  }
 
   void _initializeControllers() {
+    // Dispose old controllers to prevent memory leaks
+    mainPointTitleControllers.forEach((controller) => controller.dispose());
+    mainPointValueControllers.forEach((controller) => controller.dispose());
+    conclusionTitleControllers.forEach((controller) => controller.dispose());
+    conclusionValueControllers.forEach((controller) => controller.dispose());
+
+    // Reinitialize controllers with new data
     mainPointTitleControllers = mainPoints
         .map((point) => TextEditingController(text: point.keys.first))
         .toList();
@@ -165,14 +224,12 @@ class SummaryKeyPointController extends GetxController {
           pickedTime.hour,
           pickedTime.minute,
         );
-
         dateController.text =
             DateFormat('yyyy-MM-dd HH:mm:ss').format(finalDateTime);
       }
     }
   }
 
-  /// Generates and shares the PDF
   Future<void> generateAndSharePdf() async {
     final pdf = pw.Document();
 
@@ -182,24 +239,16 @@ class SummaryKeyPointController extends GetxController {
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
             pw.Text(titleController.text,
-                style: pw.TextStyle(
-                  fontSize: 20,
-                ),
+                style: pw.TextStyle(fontSize: 20),
                 textAlign: pw.TextAlign.center),
             pw.SizedBox(height: 20),
-            pw.Text(
-              "Key Points :",
-              style: pw.TextStyle(fontSize: 18),
-            ),
+            pw.Text("Key Points :", style: pw.TextStyle(fontSize: 18)),
             pw.SizedBox(height: 10),
             for (var point in mainPoints)
               pw.Text("${point.keys.first}:\n${point.values.first}\n\n",
                   style: pw.TextStyle(fontSize: 14)),
             pw.SizedBox(height: 10),
-            pw.Text(
-              "Conclusions :",
-              style: pw.TextStyle(fontSize: 18),
-            ),
+            pw.Text("Conclusions :", style: pw.TextStyle(fontSize: 18)),
             pw.SizedBox(height: 10),
             for (var conclusion in conclusions)
               pw.Text("${conclusion.keys.first}:\n${conclusion.values.first}\n\n",
@@ -234,7 +283,7 @@ class LanguageController extends GetxController {
   void updateLanguage(String? newValue) {
     if (newValue != null) {
       selectedLanguage.value = newValue;
-      update(); // This ensures GetBuilder rebuilds when language changes
+      update();
     }
   }
 }

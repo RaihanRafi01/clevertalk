@@ -8,12 +8,14 @@ import '../../audio/views/summary_key_point_view.dart';
 import '../../text/views/convert_to_text_view.dart';
 import '../controllers/notification_subscription_controller.dart';
 
-class NotificationSubscriptionView extends GetView<NotificationSubscriptionController> {
+class NotificationSubscriptionView
+    extends GetView<NotificationSubscriptionController> {
   const NotificationSubscriptionView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    Get.put(NotificationSubscriptionController()); // Ensure controller is registered
+    Get.put(
+        NotificationSubscriptionController()); // Ensure controller is registered
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -39,7 +41,8 @@ class NotificationSubscriptionView extends GetView<NotificationSubscriptionContr
                 );
               }
 
-              final groupedNotifications = controller.groupNotificationsByDate();
+              final groupedNotifications =
+                  controller.groupNotificationsByDate();
 
               return SingleChildScrollView(
                 padding: const EdgeInsets.all(16.0),
@@ -52,26 +55,33 @@ class NotificationSubscriptionView extends GetView<NotificationSubscriptionContr
                         //Text(entry.key, style: h4.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
                         //const SizedBox(height: 10),
                         ...entry.value.map((notification) => GestureDetector(
-                          onTap: (){
-                            print(':::::::::::::::: check keypoint: ${notification.keyPoints}');
-                            print(':::::::::::::::: check: ${notification.fileName}');
-                            if(notification.type == 'Conversion'){
-                              Get.to(() => ConvertToTextView(
-                                filePath: notification.keyPoints ?? "No file path",
-                                fileName: notification.fileName ?? "Unknown File",
-                              ));
-                            }else if(notification.type == 'Summary'){
-                              Get.to(() => SummaryKeyPointView(
-                                keyPoints: notification.keyPoints ?? "No Key Points",
-                                fileName: notification.fileName ?? "Unknown File",
-                              ));
-                            }
-                          },
-                          child: NotificationCard(
-                            message: '${notification.message} of ${notification.fileName}',
-                            time: notification.time,
-                          ),
-                        )),
+                              onTap: () {
+                                print(
+                                    ':::::::::::::::: check keypoint: ${notification.keyPoints}');
+                                print(
+                                    ':::::::::::::::: check: ${notification.fileName}');
+                                if (notification.type == 'Conversion') {
+                                  Get.to(() => ConvertToTextView(
+                                        filePath: notification.keyPoints ??
+                                            "No file path",
+                                        fileName: notification.fileName ??
+                                            "Unknown File",
+                                      ));
+                                } else if (notification.type == 'Summary') {
+                                  Get.to(() => SummaryKeyPointView(
+                                        //keyPoints: notification.keyPoints ??"No Key Points",
+                                        fileName: notification.fileName ??
+                                            "Unknown File",
+                                        filePath: notification.filePath ?? 'Unknown FilePath',
+                                      ));
+                                }
+                              },
+                              child: NotificationCard(
+                                message:
+                                    '${notification.message} of ${notification.fileName}',
+                                time: notification.time,
+                              ),
+                            )),
                         const SizedBox(height: 10),
                       ],
                     );

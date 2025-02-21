@@ -23,6 +23,7 @@ class NotificationSubscriptionController extends GetxController {
       String? message = data['message']; // Assuming message is passed
       String? time = data['time'] ?? "Just now";
       String? fileName = data['fileName'];
+      String? filePath = data['filePath'];
       String? keyPoints = data['keyPoints'];
 
       notifications.insert(
@@ -32,6 +33,7 @@ class NotificationSubscriptionController extends GetxController {
           message: message ?? "New notification received",
           time: time!,
           fileName: fileName,
+          filePath: filePath,
           keyPoints: keyPoints,
         ),
       );
@@ -60,6 +62,7 @@ class NotificationModel {
   final String message;
   final String time;
   final String? fileName;
+  final String? filePath;
   final String? keyPoints;
 
   NotificationModel({
@@ -67,6 +70,7 @@ class NotificationModel {
     required this.message,
     required this.time,
     this.fileName,
+    this.filePath,
     this.keyPoints
   });
 }

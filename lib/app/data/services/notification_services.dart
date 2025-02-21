@@ -167,6 +167,7 @@ class NotificationService {
     String? payload,
     String? keyPoints,
     String? fileName,
+    String? filePath,
   }) async {
     // Generate payload
     String jsonPayload = jsonEncode({
@@ -175,6 +176,7 @@ class NotificationService {
       'time': DateTime.now().toLocal().toString().substring(11, 16), // HH:MM format
       'keyPoints': keyPoints,
       'fileName': fileName,
+      'filePath': filePath,
     });
 
     const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
@@ -208,13 +210,15 @@ class NotificationService {
       String? type = data['type'];
       String? keyPoints = data['keyPoints'];
       String? fileName = data['fileName'];
+      String? filePath = data['filePath'];
 
       if (type == "notification_page") {
         Get.to(ProfileView());
       } else if (type == "Summary") {
         Get.to(() => SummaryKeyPointView(
-          keyPoints: keyPoints ?? "No Key Points",
+          //keyPoints: keyPoints ?? "No Key Points",
           fileName: fileName ?? "Unknown File",
+          filePath: filePath ?? "Unknown FilePath",
         ));
       } else if (type == "Conversion") {
         Get.to(() => ConvertToTextView(

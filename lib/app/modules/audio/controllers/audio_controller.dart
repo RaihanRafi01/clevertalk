@@ -331,7 +331,7 @@ class AudioPlayerController extends GetxController {
         if (existingKeypoint != null && existingKeypoint.toString().isNotEmpty) {
           // If the summary already exists, show it
           print('::::::::existingKeypoint::::::::::::::::::${existingKeypoint.toString()}');
-          Get.to(() => SummaryKeyPointView(keyPoints: existingKeypoint.toString(), fileName: fileName,));
+          Get.to(() => SummaryKeyPointView(/*keyPoints: existingKeypoint.toString(),*/ fileName: fileName,filePath: filePath,));
         } else {
           Get.snackbar('Summarization in progress...', 'This may take some time, but don\'t worry! We\'ll notify you as soon as it\'s ready. Feel free to using the app while you wait.');
           // If the summary is not available, fetch it from the API
