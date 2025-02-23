@@ -133,7 +133,6 @@ class SummaryKeyPointView extends StatelessWidget {
                                         value: langController.selectedLanguage.value,
                                         onChanged: (String? newValue) {
                                           langController.updateLanguage(newValue);
-                                          // Add your translation logic here if needed
                                         },
                                         borderRadius: BorderRadius.circular(20),
                                         dropdownColor: AppColors.appColor,
@@ -160,11 +159,16 @@ class SummaryKeyPointView extends StatelessWidget {
                                   CustomButton(
                                     text: 'Translate',
                                     onPressed: () {
-                                      // Get the LanguageController instance
                                       final langController = Get.find<LanguageController>();
-                                      // Print "English" and the selected language
+                                      final summaryController = Get.find<SummaryKeyPointController>();
+                                      String targetLanguage = langController.selectedLanguage.value;
+
+                                      // Print the languages for debugging
                                       print('Source Language: English');
-                                      print('Target Language: ${langController.selectedLanguage.value}');
+                                      print('Target Language: $targetLanguage');
+
+                                      // Trigger translation using ChatGPT API
+                                      summaryController.translateText(targetLanguage);
                                     },
                                     height: 26,
                                     width: 70,

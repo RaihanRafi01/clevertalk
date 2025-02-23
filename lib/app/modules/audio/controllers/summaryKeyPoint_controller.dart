@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:http/http.dart' as http; // Add this for HTTP requests
 import 'package:pdf/widgets.dart' as pw;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -263,6 +264,90 @@ class SummaryKeyPointController extends GetxController {
     await file.writeAsBytes(await pdf.save());
 
     await Share.shareXFiles([XFile(file.path)], text: "Summary Key Points PDF");
+  }
+
+
+  Future<void> translateText(String targetLanguage) async {
+    try {
+      isLoading.value = true; // Show loading indicator
+
+      // Construct the current text to translate
+      String textToTranslate = json.encode({
+        "Title": titleController.text,
+        "Main Points": mainPoints,
+        "Conclusions": conclusions,
+      });
+
+      // ChatGPT API details
+      const String apiKey = 'sk-proj-WnXhKbRYsA'; // Replace with your OpenAI API key
+      const String apiUrl = 'https://api.openai.com/v1/chat/completions';
+
+      // Prompt to translate the text and return only JSON
+      String prompt =
+          'Translate the following JSON content from English to $targetLanguage and return only the translated JSON without any additional text or formatting:\n\n$textToTranslate';
+
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {
+          'Authorization': 'Bearer $apiKey',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'model': 'gpt-4o-mini', // or 'gpt-4o-mini' if you prefer
+          'messages': [
+            {'role': 'system', 'content': 'You are a precise JSON translator.'},
+            {'role': 'user', 'content': prompt},
+          ],
+          'max_tokens': 1000,
+        }),
+      );
+
+      print(':::::::::::::::GPT statusCode: ${response.statusCode}');
+      print(':::::::::::::::GPT body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        String translatedText = jsonResponse['choices'][0]['message']['content'];
+
+        // Clean up the response in case it still includes extra formatting
+        translatedText = translatedText
+            .replaceAll('```json', '')
+            .replaceAll('```', '')
+            .trim();
+
+        // Try to parse the translated text as JSON
+        try {
+          final Map<String, dynamic> translatedData = json.decode(translatedText);
+
+          titleController.text = translatedData["Title"]?.toString() ?? "No Title";
+          mainPoints.value = (translatedData["Main Points"] as List?)
+              ?.map((e) => (e as Map<String, dynamic>).map(
+                  (key, value) => MapEntry(key.toString().trim(), value.toString().trim())))
+              .toList() ??
+              [];
+          conclusions.value = (translatedData["Conclusions"] as List?)
+              ?.map((e) => (e as Map<String, dynamic>).map(
+                  (key, value) => MapEntry(key.toString().trim(), value.toString().trim())))
+              .toList() ??
+              [];
+
+          _initializeControllers(); // Reinitialize text controllers with translated data
+          Get.snackbar('Success', 'Text translated to $targetLanguage');
+        } catch (e) {
+          // If parsing fails, log the raw translated text for debugging
+          print('Translated Text (raw): $translatedText');
+          throw FormatException('Failed to parse translated JSON: $e');
+        }
+      } else {
+        Get.snackbar('Error', 'Translation failed: ${response.body}');
+        print('ChatGPT API Error: ${response.body}');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Translation error: $e');
+      print('Translation Error: $e');
+    } finally {
+      isLoading.value = false; // Hide loading indicator
+    }
   }
 
   @override
