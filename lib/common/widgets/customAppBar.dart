@@ -87,7 +87,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                   child: Center(
                     child: Text(
-                      '$unreadCount',
+                      unreadCount > 9 ? '9+' : '$unreadCount', // Show "9+" if count > 9
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 10,
