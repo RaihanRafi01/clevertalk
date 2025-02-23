@@ -36,26 +36,29 @@ class HomeView extends GetView<HomeController> {
             Column(
               children: [
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    CustomButton(
-                      height: 70,
-                      text: 'Connect Clevertalk Recorder',
-                      onPressed: () {
-                        Get.to(BeforeConnectView());
-                      },
-                      width: 180,
-                      borderRadius: 30,
+                    Expanded(
+                      child: CustomButton(
+                        height: 70,
+                        text: 'Connect Clevertalk Recorder',
+                        onPressed: () {
+                          Get.to(BeforeConnectView());
+                        },
+                        borderRadius: 30,
+                      ),
                     ),
-                    Spacer(),
-                    CustomButton(
-                      height: 70,
-                      text: 'Explore Plans',
-                      onPressed: () {
-                        Get.to(SubscriptionView());
-                      },
-                      width: 180,
-                      borderRadius: 30,
-                      //backgroundColor: AppColors.appColor2,
+                    SizedBox(width: 40),
+                    Expanded(
+                      child: CustomButton(
+                        height: 70,
+                        text: 'Explore Plans',
+                        onPressed: () {
+                          Get.to(SubscriptionView());
+                        },
+                        borderRadius: 30,
+                        //backgroundColor: AppColors.appColor2,
+                      ),
                     ),
                   ],
                 ),

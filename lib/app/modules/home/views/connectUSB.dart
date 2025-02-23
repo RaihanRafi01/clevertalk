@@ -173,7 +173,15 @@ Future<String> _getAudioDuration(String filePath) async {
     final duration = await audioPlayer.duration;
 
     if (duration != null) {
-      return '${duration.inMinutes}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}';
+      final hours = duration.inHours;
+      final minutes = duration.inMinutes % 60;
+      final seconds = duration.inSeconds % 60;
+
+      if (hours > 0) {
+        return '${hours}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+      } else {
+        return '${minutes}:${seconds.toString().padLeft(2, '0')}';
+      }
     }
   } catch (e) {
     return '0:00';
@@ -183,6 +191,7 @@ Future<String> _getAudioDuration(String filePath) async {
 
   return '0:00';
 }
+
 
 void _showSnackbar(BuildContext context, String message) {
   ScaffoldMessenger.of(context).showSnackBar(

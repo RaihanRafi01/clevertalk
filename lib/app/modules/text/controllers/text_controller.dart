@@ -236,28 +236,73 @@ class ConvertToTextController extends GetxController {
         final existingTranscription = result.first['transcription'];
 
         if (existingTranscription != null && existingTranscription.toString().isNotEmpty) {
-          // If transcription exists, parse safely
+          // Parse existing transcription
           final data = json.decode(existingTranscription.toString()) as List;
+          List<Map<String, dynamic>> splitData = [];
 
-          messages.value = data.map<Map<String, String>>((entry) {
+          for (var entry in data) {
+            final startTime = (entry['Start_time'] as num).toDouble();
+            final endTime = (entry['End_time'] as num).toDouble();
+            final duration = endTime - startTime;
             final speakerName = (entry['Speaker_Name'] ?? 'Unknown Speaker') as String;
             final transcript = (entry['Transcript'] ?? '') as String;
 
-            final startTime = entry['Start_time'] != null
-                ? formatTimestamp((entry['Start_time'] as num).toDouble()) // Ensure it's a double
-                : '00:00:00';
-            final endTime = entry['End_time'] != null
-                ? formatTimestamp((entry['End_time'] as num).toDouble())
-                : '00:00:00';
+            // Split transcript into sentences based on . ! ?
+            final sentences = transcript
+                .split(RegExp(r'(?<=[.!?])\s+'))
+                .where((s) => s.trim().isNotEmpty)
+                .toList();
+
+            if (duration <= 30 || sentences.length <= 1) {
+              // If duration is 30s or less, or only one sentence, keep as one chunk
+              splitData.add(entry);
+            } else {
+              // Calculate time per sentence and aim for ~30s chunks
+              final timePerSentence = duration / sentences.length;
+              double currentTime = startTime;
+              List<String> currentChunkSentences = [];
+              double currentChunkDuration = 0.0;
+
+              for (int i = 0; i < sentences.length; i++) {
+                currentChunkSentences.add(sentences[i]);
+                currentChunkDuration += timePerSentence;
+
+                // Check if we've reached ~30s or it's the last sentence
+                if (currentChunkDuration >= 25.0 || i == sentences.length - 1) {
+                  final chunkEndTime = currentTime + currentChunkDuration;
+                  final clampedEndTime = chunkEndTime.clamp(currentTime, endTime);
+
+                  splitData.add({
+                    'Speaker_Name': speakerName,
+                    'Transcript': currentChunkSentences.join(' '),
+                    'Start_time': currentTime,
+                    'End_time': clampedEndTime,
+                  });
+
+                  // Reset for next chunk
+                  currentTime = clampedEndTime;
+                  currentChunkSentences = [];
+                  currentChunkDuration = 0.0;
+                }
+              }
+            }
+          }
+
+          // Update messages with the split data
+          messages.value = splitData.map<Map<String, String>>((entry) {
+            final speakerName = (entry['Speaker_Name'] ?? 'Unknown Speaker') as String;
+            final transcript = (entry['Transcript'] ?? '') as String;
+            final startTimeFormatted = formatTimestamp((entry['Start_time'] as num).toDouble());
+            final endTimeFormatted = formatTimestamp((entry['End_time'] as num).toDouble());
 
             return {
               'name': speakerName,
-              'time': '$startTime - $endTime',
+              'time': '$startTimeFormatted - $endTimeFormatted',
               'description': transcript,
             };
           }).toList();
 
-          // Start scrolling based on timestamps
+          // Sync scrolling with audio
           final audioController = Get.find<AudioPlayerController>();
           audioController.playAudio();
           syncScrollingWithAudio(audioController);
@@ -268,34 +313,78 @@ class ConvertToTextController extends GetxController {
           if (response.statusCode == 200) {
             final jsonData = json.decode(response.body);
             final data = jsonData['Data'] as List;
+            List<Map<String, dynamic>> splitData = [];
+
+            for (var entry in data) {
+              final startTime = (entry['Start_time'] as num).toDouble();
+              final endTime = (entry['End_time'] as num).toDouble();
+              final duration = endTime - startTime;
+              final speakerName = (entry['Speaker_Name'] ?? 'Unknown Speaker') as String;
+              final transcript = (entry['Transcript'] ?? '') as String;
+
+              // Split transcript into sentences based on . ! ?
+              final sentences = transcript
+                  .split(RegExp(r'(?<=[.!?])\s+'))
+                  .where((s) => s.trim().isNotEmpty)
+                  .toList();
+
+              if (duration <= 30 || sentences.length <= 1) {
+                // If duration is 30s or less, or only one sentence, keep as one chunk
+                splitData.add(entry);
+              } else {
+                // Calculate time per sentence and aim for ~30s chunks
+                final timePerSentence = duration / sentences.length;
+                double currentTime = startTime;
+                List<String> currentChunkSentences = [];
+                double currentChunkDuration = 0.0;
+
+                for (int i = 0; i < sentences.length; i++) {
+                  currentChunkSentences.add(sentences[i]);
+                  currentChunkDuration += timePerSentence;
+
+                  // Check if we've reached ~30s or it's the last sentence
+                  if (currentChunkDuration >= 25.0 || i == sentences.length - 1) {
+                    final chunkEndTime = currentTime + currentChunkDuration;
+                    final clampedEndTime = chunkEndTime.clamp(currentTime, endTime);
+
+                    splitData.add({
+                      'Speaker_Name': speakerName,
+                      'Transcript': currentChunkSentences.join(' '),
+                      'Start_time': currentTime,
+                      'End_time': clampedEndTime,
+                    });
+
+                    // Reset for next chunk
+                    currentTime = clampedEndTime;
+                    currentChunkSentences = [];
+                    currentChunkDuration = 0.0;
+                  }
+                }
+              }
+            }
 
             // Update the transcription in the database
             await db.update(
               'audio_files',
-              {'transcription': json.encode(data)},
+              {'transcription': json.encode(splitData)},
               where: 'file_path = ?',
               whereArgs: [filePath],
             );
 
-            messages.value = data.map<Map<String, String>>((entry) {
+            messages.value = splitData.map<Map<String, String>>((entry) {
               final speakerName = (entry['Speaker_Name'] ?? 'Unknown Speaker') as String;
               final transcript = (entry['Transcript'] ?? '') as String;
-
-              final startTime = entry['Start_time'] != null
-                  ? formatTimestamp((entry['Start_time'] as num).toDouble())
-                  : '00:00:00';
-              final endTime = entry['End_time'] != null
-                  ? formatTimestamp((entry['End_time'] as num).toDouble())
-                  : '00:00:00';
+              final startTimeFormatted = formatTimestamp((entry['Start_time'] as num).toDouble());
+              final endTimeFormatted = formatTimestamp((entry['End_time'] as num).toDouble());
 
               return {
                 'name': speakerName,
-                'time': '$startTime - $endTime',
+                'time': '$startTimeFormatted - $endTimeFormatted',
                 'description': transcript,
               };
             }).toList();
 
-            // Start scrolling based on timestamps
+            // Sync scrolling with audio
             //final audioController = Get.find<AudioPlayerController>();
             //audioController.playAudio();
             //syncScrollingWithAudio(audioController);
@@ -304,7 +393,6 @@ class ConvertToTextController extends GetxController {
           }
         }
       } else {
-        // File not found in the database
         Get.snackbar('Error', 'File not found in the database. Please add the file first.');
       }
     } catch (e) {
@@ -314,7 +402,6 @@ class ConvertToTextController extends GetxController {
       isLoading.value = false;
     }
   }
-
 
 
   void syncScrollingWithAudio(AudioPlayerController audioController) {
