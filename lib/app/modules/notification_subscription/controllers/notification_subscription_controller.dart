@@ -35,6 +35,7 @@ class NotificationSubscriptionController extends GetxController {
           fileName: fileName,
           filePath: filePath,
           keyPoints: keyPoints,
+          isRead: false, // New notifications are unread by default
         ),
       );
     } catch (e) {
@@ -42,18 +43,36 @@ class NotificationSubscriptionController extends GetxController {
     }
   }
 
+  // Get unread notification count
+  int getUnreadCount() {
+    return notifications.where((notification) => !notification.isRead).length;
+  }
+
   // Group notifications by date
   Map<String, List<NotificationModel>> groupNotificationsByDate() {
     Map<String, List<NotificationModel>> groupedNotifications = {};
     for (var notification in notifications) {
-      groupedNotifications.putIfAbsent(notification.time, () => []).add(notification);
+      groupedNotifications
+          .putIfAbsent(notification.time, () => [])
+          .add(notification);
     }
     return groupedNotifications;
   }
 
   // Mark all as read
   void markAllAsRead() {
-    notifications.clear();
+    for (var notification in notifications) {
+      notification.isRead = true; // Mark each notification as read
+    }
+    notifications.refresh(); // Trigger UI update
+  }
+
+  // Optional: Mark a single notification as read
+  void markAsRead(int index) {
+    if (index >= 0 && index < notifications.length) {
+      notifications[index].isRead = true;
+      notifications.refresh(); // Trigger UI update
+    }
   }
 }
 
@@ -64,6 +83,7 @@ class NotificationModel {
   final String? fileName;
   final String? filePath;
   final String? keyPoints;
+  bool isRead; // Added isRead property
 
   NotificationModel({
     required this.type,
@@ -71,6 +91,7 @@ class NotificationModel {
     required this.time,
     this.fileName,
     this.filePath,
-    this.keyPoints
+    this.keyPoints,
+    this.isRead = false, // Default to unread
   });
 }

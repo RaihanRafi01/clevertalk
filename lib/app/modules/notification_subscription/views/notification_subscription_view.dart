@@ -14,8 +14,7 @@ class NotificationSubscriptionView
 
   @override
   Widget build(BuildContext context) {
-    Get.put(
-        NotificationSubscriptionController()); // Ensure controller is registered
+    Get.put(NotificationSubscriptionController()); // Ensure controller is registered
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -42,7 +41,7 @@ class NotificationSubscriptionView
               }
 
               final groupedNotifications =
-                  controller.groupNotificationsByDate();
+              controller.groupNotificationsByDate();
 
               return SingleChildScrollView(
                 padding: const EdgeInsets.all(16.0),
@@ -54,34 +53,41 @@ class NotificationSubscriptionView
                       children: [
                         //Text(entry.key, style: h4.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
                         //const SizedBox(height: 10),
-                        ...entry.value.map((notification) => GestureDetector(
-                              onTap: () {
-                                print(
-                                    ':::::::::::::::: check keypoint: ${notification.keyPoints}');
-                                print(
-                                    ':::::::::::::::: check: ${notification.fileName}');
-                                if (notification.type == 'Conversion') {
-                                  Get.to(() => ConvertToTextView(
-                                        filePath: notification.keyPoints ??
-                                            "No file path",
-                                        fileName: notification.fileName ??
-                                            "Unknown File",
-                                      ));
-                                } else if (notification.type == 'Summary') {
-                                  Get.to(() => SummaryKeyPointView(
-                                        //keyPoints: notification.keyPoints ??"No Key Points",
-                                        fileName: notification.fileName ??
-                                            "Unknown File",
-                                        filePath: notification.filePath ?? 'Unknown FilePath',
-                                      ));
-                                }
-                              },
-                              child: NotificationCard(
-                                message:
-                                    '${notification.message} of ${notification.fileName}',
-                                time: notification.time,
-                              ),
-                            )),
+                        ...entry.value.map((notification) {
+                          // Find the index of the notification in the list
+                          final index = controller.notifications.indexOf(notification);
+                          return GestureDetector(
+                            onTap: () {
+                              // Mark the notification as read
+                              controller.markAsRead(index);
+
+                              print(
+                                  ':::::::::::::::: check keypoint: ${notification.keyPoints}');
+                              print(
+                                  ':::::::::::::::: check: ${notification.fileName}');
+                              if (notification.type == 'Conversion') {
+                                Get.to(() => ConvertToTextView(
+                                  filePath: notification.keyPoints ??
+                                      "No file path",
+                                  fileName: notification.fileName ??
+                                      "Unknown File",
+                                ));
+                              } else if (notification.type == 'Summary') {
+                                Get.to(() => SummaryKeyPointView(
+                                  fileName: notification.fileName ??
+                                      "Unknown File",
+                                  filePath: notification.filePath ??
+                                      'Unknown FilePath',
+                                ));
+                              }
+                            },
+                            child: NotificationCard(
+                              message: '${notification.message} of ${notification.fileName}',
+                              time: notification.time,
+                              isRead: notification.isRead, // Pass isRead status
+                            ),
+                          );
+                        }),
                         const SizedBox(height: 10),
                       ],
                     );
@@ -106,9 +112,14 @@ class NotificationSubscriptionView
 class NotificationCard extends StatelessWidget {
   final String message;
   final String time;
+  final bool isRead; // Add isRead parameter
 
-  const NotificationCard({Key? key, required this.message, required this.time})
-      : super(key: key);
+  const NotificationCard({
+    Key? key,
+    required this.message,
+    required this.time,
+    required this.isRead,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -126,14 +137,20 @@ class NotificationCard extends StatelessWidget {
           children: [
             Text(
               message,
-              style: h4.copyWith(fontSize: 16, color: Colors.white),
+              style: h4.copyWith(
+                fontSize: 16,
+                color: isRead ? Colors.grey : Colors.white, // Grey if read
+              ),
             ),
             const SizedBox(height: 5),
             Align(
               alignment: Alignment.bottomRight,
               child: Text(
                 time,
-                style: h4.copyWith(fontSize: 12, color: Colors.white),
+                style: h4.copyWith(
+                  fontSize: 12,
+                  color: isRead ? Colors.grey : Colors.white,
+                ),
               ),
             ),
           ],

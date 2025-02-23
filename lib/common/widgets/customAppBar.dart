@@ -1,3 +1,4 @@
+import 'package:clevertalk/app/modules/notification_subscription/controllers/notification_subscription_controller.dart';
 import 'package:clevertalk/app/modules/notification_subscription/views/notification_subscription_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -28,9 +29,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get the NotificationSubscriptionController instance
+    final NotificationSubscriptionController controller =
+    Get.find<NotificationSubscriptionController>();
+
     return AppBar(
-      backgroundColor: Colors.transparent, // You can customize the background color
-      elevation: 0, // Optional: Removes the shadow under the AppBar
+      backgroundColor: Colors.transparent,
+      elevation: 0,
       title: Text(
         title,
         style: h1.copyWith(
@@ -39,32 +44,65 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       actions: [
-        if(isSearch)
+        if (isSearch)
         // First SVG Icon Button
-        IconButton(
-          onPressed: onFirstIconPressed,
-          icon: SvgPicture.asset(
-            firstIcon,
-            height: 24,
-            width: 24,
+          IconButton(
+            onPressed: onFirstIconPressed,
+            icon: SvgPicture.asset(
+              firstIcon,
+              height: 24,
+              width: 24,
+            ),
           ),
-        ),
-        // Second SVG Icon Button
-        IconButton(
-          onPressed: () async {
-            print('notification pressed !');
-            Get.to(() => NotificationSubscriptionView());
-          },
-          icon: SvgPicture.asset(
-            secondIcon,
-            height: 24,
-            width: 24,
-          ),
+        // Second SVG Icon Button with Badge
+        Stack(
+          children: [
+            IconButton(
+              onPressed: () async {
+                print('notification pressed!');
+                Get.to(() => NotificationSubscriptionView());
+              },
+              icon: SvgPicture.asset(
+                secondIcon,
+                height: 24,
+                width: 24,
+              ),
+            ),
+            // Badge with unread count
+            Obx(() {
+              final unreadCount = controller.getUnreadCount();
+              if (unreadCount == 0) return const SizedBox.shrink(); // Hide badge if no unread notifications
+              return Positioned(
+                right: 8,
+                top: 8,
+                child: Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: Colors.black, // Customize badge color
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 16,
+                    minHeight: 16,
+                  ),
+                  child: Center(
+                    child: Text(
+                      '$unreadCount',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ],
         ),
       ],
     );
   }
-
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
