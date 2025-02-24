@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import '../../../../common/appColors.dart';
 import '../../../../common/customFont.dart';
 import '../../../../common/widgets/auth/custom_button.dart';
 import '../../../../common/widgets/audio_text/customUserText.dart';
 import '../../../../common/widgets/customAppBar.dart';
-import '../../../../common/widgets/home/customPopUp.dart';
 import '../../../../common/widgets/svgIcon.dart';
 import '../../audio/controllers/audio_controller.dart';
-import '../../audio/views/summary_key_point_view.dart';
 import '../controllers/text_controller.dart';
 
 class ConvertToTextView extends StatelessWidget {
@@ -20,19 +19,15 @@ class ConvertToTextView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final audioController = Get.put(AudioPlayerController(), permanent: true);
-    final textController = Get.put(ConvertToTextController());
+    final textController = Get.put(ConvertToTextController(filePath: filePath));
 
     // Start transcription fetching and audio playback
     audioController.fetchAudioFiles().then((_) {
       final index = audioController.audioFiles.indexWhere((file) => file['file_name'] == fileName);
       if (index != -1) {
         audioController.currentIndex.value = index;
-
-        // Start playing audio and fetch transcription
         textController.fetchMessages(filePath).then((_) {
           audioController.playAudio(filePath: filePath);
-
-          // Synchronize scrolling with audio
           textController.syncScrollingWithAudio(audioController);
         });
       }
@@ -52,34 +47,137 @@ class ConvertToTextView extends StatelessWidget {
         ),
         body: Stack(
           children: [
-            Obx(() => textController.isLoading.value
-                ? Center(child: CircularProgressIndicator())
-                : Positioned.fill(
-              top: 260,
-              bottom: 100,
-              child: SingleChildScrollView(
-                controller: textController.scrollController,
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Column(
-                  children: List.generate(textController.messages.length, (index) {
-                    final msg = textController.messages[index];
-                    return Obx(() {
-                      bool isHighlighted = index == textController.currentHighlightedIndex.value;
-                      return CustomUserText(
-                        name: msg['name']!,
-                        time: msg['time']!,
-                        UserColor: msg['name'] == 'l' ? AppColors.green : AppColors.textUserColor,
-                        description: msg['description']!,
-                        isHighlighted: isHighlighted,
-                      );
-                    });
-                  }),
-                ),
-              ),
-            )),
+            Obx(() {
+              if (textController.isLoading.value) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-            // Fixed header
-            // audio player
+              return Positioned.fill(
+                top: 260,
+                bottom: 100,
+                child: SingleChildScrollView(
+                  controller: textController.scrollController,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          if (!textController.isEditing.value) ...[
+                            GestureDetector(
+                              onTap: () => textController.editSpeakerName(context, filePath),
+                              child: SvgPicture.asset('assets/images/summary/speaker_edit_icon.svg'),
+                            ),
+                            const SizedBox(width: 16),
+                            /*GestureDetector(
+                              onTap: () => textController.editFullTranscription(context, filePath),
+                              child: SvgPicture.asset('assets/images/audio/edit_icon.svg'),
+                            ),
+                            const SizedBox(width: 16),*/
+                            GestureDetector(
+                              onTap: () => textController.isTranslate.toggle(),
+                              child: SvgPicture.asset('assets/images/summary/translate_icon.svg'),
+                            ),
+                            const SizedBox(width: 16),
+                          ],
+                          GestureDetector(
+                            onTap: () {
+                              if (textController.isEditing.value) {
+                                textController.saveTranscription();
+                              }
+                              textController.isTranslate.value = false;
+                              textController.isEditing.toggle();
+                            },
+                            child: SvgPicture.asset(
+                              textController.isEditing.value
+                                  ? 'assets/images/summary/save_icon.svg'
+                                  : 'assets/images/summary/edit_icon.svg',
+                            ),
+                          ),
+                        ],
+                      ),
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 100),
+                        transitionBuilder: (Widget child, Animation<double> animation) {
+                          final offsetAnimation = Tween<Offset>(
+                            begin: const Offset(0.0, -0.5),
+                            end: const Offset(0.0, 0.0),
+                          ).animate(animation);
+                          return SlideTransition(position: offsetAnimation, child: child);
+                        },
+                        child: textController.isTranslate.value
+                            ? Container(
+                          key: const ValueKey('translateRow'),
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              CustomButton(
+                                text: textController.currentLanguage.value.isEmpty
+                                    ? 'English'
+                                    : textController.currentLanguage.value,
+                                onPressed: () {},
+                                height: 26,
+                                width: 70,
+                                fontSize: 12,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                child: SvgPicture.asset('assets/images/summary/arrow_icon.svg'),
+                              ),
+                              Obx(() => Container(
+                                height: 30,
+                                width: 120,
+                                decoration: BoxDecoration(
+                                  color: AppColors.appColor,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: DropdownButton<String>(
+                                  value: textController.selectedLanguage.value,
+                                  onChanged: (value) => textController.selectedLanguage.value = value!,
+                                  borderRadius: BorderRadius.circular(20),
+                                  dropdownColor: AppColors.appColor,
+                                  underline: const SizedBox(),
+                                  isExpanded: true,
+                                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                                  items: <String>[
+                                    'English', 'Spanish', 'French', 'German', 'Italian',
+                                    'Portuguese', 'Chinese', 'Hindi', 'Dutch', 'Ukrainian', 'Russian'
+                                  ].map((String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(
+                                        value,
+                                        style: h4.copyWith(fontSize: 12, color: Colors.white),
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              )),
+                              const Spacer(),
+                              CustomButton(
+                                text: 'Translate',
+                                onPressed: () => textController.translateText(),
+                                height: 26,
+                                width: 70,
+                                fontSize: 12,
+                              ),
+                            ],
+                          ),
+                        )
+                            : const SizedBox(height: 20, key: ValueKey('empty')),
+                      ),
+                      Obx(() => textController.isEditing.value
+                          ? _buildEditableList(textController)
+                          : _buildReadOnlyList(textController)),
+                    ],
+                  ),
+                ),
+              );
+            }),
+
+            // Fixed header (audio player)
             Positioned(
               top: 10,
               left: 10,
@@ -183,25 +281,12 @@ class ConvertToTextView extends StatelessWidget {
                         ),
                       ),
                       const Spacer(),
-                      SvgIcon(
-                        svgPath: 'assets/images/audio/edit_icon.svg',
-                        onTap: () => textController.editSpeakerName(context,filePath), // Speaker edit
-                        height: 24,
-                      ),
-
-                      SvgIcon(
-                        svgPath: 'assets/images/audio/edit_icon.svg',
-                        onTap: () => textController.editFullTranscription(context,filePath), // Transcription edit
-                        height: 24,
-                      ),
-
                     ],
                   ),
                 ],
               ),
             ),
 
-            // summary ,key point , loading screen
             // Fixed bottom buttons
             Positioned(
               bottom: 20,
@@ -239,6 +324,60 @@ class ConvertToTextView extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildEditableList(ConvertToTextController controller) {
+    return Column(
+      children: List.generate(controller.messages.length, (index) {
+        final msg = controller.messages[index];
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                controller: controller.nameControllers[index],
+                style: h4.copyWith(fontSize: 15, fontWeight: FontWeight.bold),
+                decoration: const InputDecoration(
+                  labelText: "Speaker Name",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: controller.descControllers[index],
+                style: h4.copyWith(fontSize: 15),
+                maxLines: 2,
+                decoration: const InputDecoration(
+                  labelText: "Transcription",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 5),
+              Text(msg['time']!, style: h4.copyWith(fontSize: 12)),
+            ],
+          ),
+        );
+      }),
+    );
+  }
+
+  Widget _buildReadOnlyList(ConvertToTextController controller) {
+    return Column(
+      children: List.generate(controller.messages.length, (index) {
+        final msg = controller.messages[index];
+        return Obx(() {
+          bool isHighlighted = index == controller.currentHighlightedIndex.value;
+          return CustomUserText(
+            name: msg['name']!,
+            time: msg['time']!,
+            UserColor: msg['name'] == 'l' ? AppColors.green : AppColors.textUserColor,
+            description: msg['description']!,
+            isHighlighted: isHighlighted,
+          );
+        });
+      }),
     );
   }
 }
