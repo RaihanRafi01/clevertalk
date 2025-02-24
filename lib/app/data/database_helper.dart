@@ -55,7 +55,9 @@ class DatabaseHelper {
           parsed_date TEXT,
           summary TEXT,
           key_point TEXT,
-          transcription TEXT
+          transcription TEXT,
+          language_summary TEXT,
+          language_transcription TEXT
         )
         '''
         );
@@ -78,7 +80,9 @@ class DatabaseHelper {
       'file_path': filePath,
       'duration': duration,
       'saved_date': date,
-      'parsed_date': parsedDate, // Save parsed date
+      'parsed_date': parsedDate,
+      'language_summary': "English",
+      'language_transcription': "English",
     });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Audio file "$fileName" inserted successfully!')),

@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:http/http.dart' as http; // Add this for HTTP requests
+import 'package:http/http.dart' as http;
 import 'package:pdf/widgets.dart' as pw;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -13,7 +13,7 @@ import '../../../data/services/api_services.dart';
 import '../../../data/services/notification_services.dart';
 
 class SummaryKeyPointController extends GetxController {
-  final String fileName; // We only need fileName now, not keyPoints
+  final String fileName;
 
   SummaryKeyPointController({required this.fileName});
 
@@ -28,9 +28,12 @@ class SummaryKeyPointController extends GetxController {
   List<TextEditingController> mainPointValueControllers = [];
   List<TextEditingController> conclusionTitleControllers = [];
   List<TextEditingController> conclusionValueControllers = [];
+
   RxBool isEditing = false.obs;
   RxBool isTranslate = false.obs;
   RxBool isLoading = true.obs;
+  RxString selectedLanguage = 'English'.obs;
+  RxString currentLanguage = 'English'.obs;
   String parsedDate = "Unknown Date";
 
   @override
@@ -43,13 +46,10 @@ class SummaryKeyPointController extends GetxController {
 
   Future<void> _loadData() async {
     try {
-      final dbHelper = DatabaseHelper();
-      final db = await dbHelper.database;
-
-      // Fetch the latest key_point and parsed_date from the database
+      final db = await DatabaseHelper().database;
       final result = await db.query(
         'audio_files',
-        columns: ['key_point', 'parsed_date'],
+        columns: ['key_point', 'parsed_date', 'language_summary'],
         where: 'file_name = ?',
         whereArgs: [fileName],
       );
@@ -57,77 +57,54 @@ class SummaryKeyPointController extends GetxController {
       if (result.isNotEmpty) {
         parsedDate = result.first['parsed_date']?.toString() ?? "Unknown Date";
         String? keyPointText = result.first['key_point']?.toString();
+        currentLanguage.value = result.first['language_summary']?.toString() ?? 'English';
 
         if (keyPointText != null && keyPointText.isNotEmpty) {
-          String cleanedJson = keyPointText
+          final data = json.decode(keyPointText
               .replaceAll(RegExp(r',\s*}'), "}")
               .replaceAll(RegExp(r',\s*\]'), "]")
               .replaceAll(RegExp(r'\s+'), " ")
-              .trim();
+              .trim());
 
-          final Map<String, dynamic> data = json.decode(cleanedJson);
-
-          titleController.text = data["Title"]?.toString() ?? "No Title";
+          titleController.text = data["Title"] ?? "No Title";
           dateController.text = parsedDate;
-
           mainPoints.value = (data["Main Points"] as List?)
               ?.map((e) => (e as Map<String, dynamic>).map(
-                  (key, value) => MapEntry(key.toString().trim(), value.toString().trim())))
+                  (k, v) => MapEntry(k.trim(), v.toString().trim())))
               .toList() ??
               [];
           conclusions.value = (data["Conclusions"] as List?)
               ?.map((e) => (e as Map<String, dynamic>).map(
-                  (key, value) => MapEntry(key.toString().trim(), value.toString().trim())))
+                  (k, v) => MapEntry(k.trim(), v.toString().trim())))
               .toList() ??
               [];
-        } else {
-          // Handle case where key_point is null or empty
-          titleController.text = "No Title";
-          dateController.text = parsedDate;
-          mainPoints.clear();
-          conclusions.clear();
         }
-      } else {
-        // No record found in the database
-        titleController.text = "No Title";
-        dateController.text = "Unknown Date";
-        mainPoints.clear();
-        conclusions.clear();
       }
 
       _initializeControllers();
     } catch (e) {
       Get.snackbar("Error", "Failed to load data: $e");
-      print(':::::::::::::::::::Error: $e');
+      print('Error: $e');
     } finally {
       isLoading.value = false;
     }
   }
 
   Future<void> summaryRegenerate(String filePath, String fileName) async {
-    final dbHelper = DatabaseHelper();
-    final db = await dbHelper.database;
+    final db = await DatabaseHelper().database;
     try {
-      Get.snackbar('Summarization Regenerate in progress...', 'This may take some time, but don\'t worry! We\'ll notify you as soon as it\'s ready. Feel free to using the app while you wait.');
+      Get.snackbar('Regenerating Summary...', 'Please wait.');
       final response = await _apiService.fetchKeyPoints(filePath, fileName);
 
-      print('::::::::::statusCode::::::::::::::::${response.statusCode}');
-      print('::::::::body1::::::::::::::::::${response.body}');
-
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final jsonResponse = json.decode(response.body);
-        final keyPointText = jsonResponse['Data']['content'];
-
-        // Update the database
+        final keyPointText = json.decode(response.body)['Data']['content'];
         await db.update(
           'audio_files',
-          {'key_point': keyPointText},
+          {'key_point': keyPointText, 'language': 'English'}, // Reset to English on regen
           where: 'file_name = ?',
           whereArgs: [fileName],
         );
-        // Reload data from the database and update UI
         await _loadData();
-
         NotificationService.showNotification(
           title: "Summary Ready!",
           body: "Click to view Summary",
@@ -139,47 +116,23 @@ class SummaryKeyPointController extends GetxController {
         Get.snackbar('Error', 'Summary Failed: ${response.body}');
       }
     } catch (e) {
-      Get.snackbar('Error', 'Error fetching transcription: $e');
+      Get.snackbar('Error', 'Error: $e');
     }
   }
 
   void _initializeControllers() {
-    // Dispose old controllers to prevent memory leaks
-    mainPointTitleControllers.forEach((controller) => controller.dispose());
-    mainPointValueControllers.forEach((controller) => controller.dispose());
-    conclusionTitleControllers.forEach((controller) => controller.dispose());
-    conclusionValueControllers.forEach((controller) => controller.dispose());
-
-    // Reinitialize controllers with new data
-    mainPointTitleControllers = mainPoints
-        .map((point) => TextEditingController(text: point.keys.first))
-        .toList();
-    mainPointValueControllers = mainPoints
-        .map((point) => TextEditingController(text: point.values.first))
-        .toList();
-    conclusionTitleControllers = conclusions
-        .map((point) => TextEditingController(text: point.keys.first))
-        .toList();
-    conclusionValueControllers = conclusions
-        .map((point) => TextEditingController(text: point.values.first))
-        .toList();
+    mainPointTitleControllers = mainPoints.map((p) => TextEditingController(text: p.keys.first)).toList();
+    mainPointValueControllers = mainPoints.map((p) => TextEditingController(text: p.values.first)).toList();
+    conclusionTitleControllers = conclusions.map((p) => TextEditingController(text: p.keys.first)).toList();
+    conclusionValueControllers = conclusions.map((p) => TextEditingController(text: p.values.first)).toList();
   }
 
   Future<void> saveKeyPoints() async {
-    final dbHelper = DatabaseHelper();
-    final db = await dbHelper.database;
-
-    for (int i = 0; i < mainPoints.length; i++) {
-      mainPoints[i] = {
-        mainPointTitleControllers[i].text: mainPointValueControllers[i].text
-      };
-    }
-
-    for (int i = 0; i < conclusions.length; i++) {
-      conclusions[i] = {
-        conclusionTitleControllers[i].text: conclusionValueControllers[i].text
-      };
-    }
+    final db = await DatabaseHelper().database;
+    mainPoints.value = List.generate(mainPoints.length,
+            (i) => {mainPointTitleControllers[i].text: mainPointValueControllers[i].text});
+    conclusions.value = List.generate(conclusions.length,
+            (i) => {conclusionTitleControllers[i].text: conclusionValueControllers[i].text});
 
     final updatedData = {
       "Title": titleController.text,
@@ -187,19 +140,18 @@ class SummaryKeyPointController extends GetxController {
       "Conclusions": conclusions,
     };
 
-    final updatedJson = json.encode(updatedData);
-
     await db.update(
       'audio_files',
       {
-        'key_point': updatedJson,
+        'key_point': json.encode(updatedData),
         'parsed_date': dateController.text,
+        'language_summary': currentLanguage.value, // Save current language
       },
       where: 'file_name = ?',
       whereArgs: [fileName],
     );
 
-    Get.snackbar("Success", "Key Points updated successfully!");
+    Get.snackbar("Success", "Key Points saved!");
     isEditing.value = false;
   }
 
@@ -212,141 +164,100 @@ class SummaryKeyPointController extends GetxController {
     );
 
     if (pickedDate != null) {
-      TimeOfDay? pickedTime = await showTimePicker(
-        context: Get.context!,
-        initialTime: TimeOfDay.now(),
-      );
-
+      TimeOfDay? pickedTime = await showTimePicker(context: Get.context!, initialTime: TimeOfDay.now());
       if (pickedTime != null) {
-        DateTime finalDateTime = DateTime(
-          pickedDate.year,
-          pickedDate.month,
-          pickedDate.day,
-          pickedTime.hour,
-          pickedTime.minute,
-        );
-        dateController.text =
-            DateFormat('yyyy-MM-dd HH:mm:ss').format(finalDateTime);
+        dateController.text = DateFormat('yyyy-MM-dd HH:mm:ss').format(
+            DateTime(pickedDate.year, pickedDate.month, pickedDate.day, pickedTime.hour, pickedTime.minute));
       }
     }
   }
 
   Future<void> generateAndSharePdf() async {
     final pdf = pw.Document();
-
-    pdf.addPage(
-      pw.Page(
-        build: (pw.Context context) => pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Text(titleController.text,
-                style: pw.TextStyle(fontSize: 20),
-                textAlign: pw.TextAlign.center),
-            pw.SizedBox(height: 20),
-            pw.Text("Key Points :", style: pw.TextStyle(fontSize: 18)),
-            pw.SizedBox(height: 10),
-            for (var point in mainPoints)
-              pw.Text("${point.keys.first}:\n${point.values.first}\n\n",
-                  style: pw.TextStyle(fontSize: 14)),
-            pw.SizedBox(height: 10),
-            pw.Text("Conclusions :", style: pw.TextStyle(fontSize: 18)),
-            pw.SizedBox(height: 10),
-            for (var conclusion in conclusions)
-              pw.Text("${conclusion.keys.first}:\n${conclusion.values.first}\n\n",
-                  style: pw.TextStyle(fontSize: 14)),
-          ],
-        ),
+    pdf.addPage(pw.Page(
+      build: (pw.Context context) => pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text(titleController.text, style: pw.TextStyle(fontSize: 20)),
+          pw.SizedBox(height: 20),
+          pw.Text("Key Points:", style: pw.TextStyle(fontSize: 18)),
+          for (var point in mainPoints) pw.Text("${point.keys.first}: ${point.values.first}\n"),
+          pw.SizedBox(height: 10),
+          pw.Text("Conclusions:", style: pw.TextStyle(fontSize: 18)),
+          for (var conclusion in conclusions) pw.Text("${conclusion.keys.first}: ${conclusion.values.first}\n"),
+        ],
       ),
-    );
+    ));
 
-    final output = await getTemporaryDirectory();
-    final file = File("${output.path}/summary.pdf");
+    final file = File("${(await getTemporaryDirectory()).path}/summary.pdf");
     await file.writeAsBytes(await pdf.save());
-
     await Share.shareXFiles([XFile(file.path)], text: "Summary Key Points PDF");
   }
 
-
-  Future<void> translateText(String targetLanguage) async {
+  Future<void> translateText() async {
     try {
-      isLoading.value = true; // Show loading indicator
-
-      // Construct the current text to translate
-      String textToTranslate = json.encode({
+      isLoading.value = true;
+      final textToTranslate = json.encode({
         "Title": titleController.text,
         "Main Points": mainPoints,
         "Conclusions": conclusions,
       });
 
-      // ChatGPT API details
-      const String apiKey = 'sk-proj-WnXhKbRYsA'; // Replace with your OpenAI API key
-      const String apiUrl = 'https://api.openai.com/v1/chat/completions';
-
-      // Prompt to translate the text and return only JSON
-      String prompt =
-          'Translate the following JSON content from English to $targetLanguage and return only the translated JSON without any additional text or formatting:\n\n$textToTranslate';
+      const apiKey = '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';
+      const apiUrl = 'https://api.openai.com/v1/chat/completions';
 
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {
           'Authorization': 'Bearer $apiKey',
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json; charset=utf-8',
         },
         body: json.encode({
-          'model': 'gpt-4o-mini', // or 'gpt-4o-mini' if you prefer
+          'model': 'gpt-4o-mini',
           'messages': [
             {'role': 'system', 'content': 'You are a precise JSON translator.'},
-            {'role': 'user', 'content': prompt},
+            {
+              'role': 'user',
+              'content':
+              'Translate the following JSON content from ${currentLanguage.value} to ${selectedLanguage.value} and return only the translated JSON:\n\n$textToTranslate',
+            },
           ],
           'max_tokens': 1000,
         }),
       );
 
-      print(':::::::::::::::GPT statusCode: ${response.statusCode}');
-      print(':::::::::::::::GPT body: ${response.body}');
-
       if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
-        String translatedText = jsonResponse['choices'][0]['message']['content'];
-
-        // Clean up the response in case it still includes extra formatting
-        translatedText = translatedText
+        final translatedText = json
+            .decode(utf8.decode(response.bodyBytes))['choices'][0]['message']['content']
             .replaceAll('```json', '')
             .replaceAll('```', '')
             .trim();
+        final translatedData = json.decode(translatedText);
 
-        // Try to parse the translated text as JSON
-        try {
-          final Map<String, dynamic> translatedData = json.decode(translatedText);
+        titleController.text = translatedData["Title"] ?? "No Title";
+        mainPoints.value = (translatedData["Main Points"] as List?)
+            ?.map((e) => (e as Map<String, dynamic>).map(
+                (k, v) => MapEntry(k.trim(), v.toString().trim())))
+            .toList() ??
+            [];
+        conclusions.value = (translatedData["Conclusions"] as List?)
+            ?.map((e) => (e as Map<String, dynamic>).map(
+                (k, v) => MapEntry(k.trim(), v.toString().trim())))
+            .toList() ??
+            [];
 
-          titleController.text = translatedData["Title"]?.toString() ?? "No Title";
-          mainPoints.value = (translatedData["Main Points"] as List?)
-              ?.map((e) => (e as Map<String, dynamic>).map(
-                  (key, value) => MapEntry(key.toString().trim(), value.toString().trim())))
-              .toList() ??
-              [];
-          conclusions.value = (translatedData["Conclusions"] as List?)
-              ?.map((e) => (e as Map<String, dynamic>).map(
-                  (key, value) => MapEntry(key.toString().trim(), value.toString().trim())))
-              .toList() ??
-              [];
-
-          _initializeControllers(); // Reinitialize text controllers with translated data
-          Get.snackbar('Success', 'Text translated to $targetLanguage');
-        } catch (e) {
-          // If parsing fails, log the raw translated text for debugging
-          print('Translated Text (raw): $translatedText');
-          throw FormatException('Failed to parse translated JSON: $e');
-        }
+        _initializeControllers();
+        currentLanguage.value = selectedLanguage.value; // Update language before saving
+        await saveKeyPoints(); // Save with new language
+        Get.snackbar('Success', 'Translated to ${selectedLanguage.value}');
       } else {
         Get.snackbar('Error', 'Translation failed: ${response.body}');
-        print('ChatGPT API Error: ${response.body}');
       }
     } catch (e) {
       Get.snackbar('Error', 'Translation error: $e');
-      print('Translation Error: $e');
+      print('Error: $e');
     } finally {
-      isLoading.value = false; // Hide loading indicator
+      isLoading.value = false;
     }
   }
 
@@ -354,21 +265,10 @@ class SummaryKeyPointController extends GetxController {
   void onClose() {
     titleController.dispose();
     dateController.dispose();
-    mainPointTitleControllers.forEach((controller) => controller.dispose());
-    mainPointValueControllers.forEach((controller) => controller.dispose());
-    conclusionTitleControllers.forEach((controller) => controller.dispose());
-    conclusionValueControllers.forEach((controller) => controller.dispose());
+    mainPointTitleControllers.forEach((c) => c.dispose());
+    mainPointValueControllers.forEach((c) => c.dispose());
+    conclusionTitleControllers.forEach((c) => c.dispose());
+    conclusionValueControllers.forEach((c) => c.dispose());
     super.onClose();
-  }
-}
-
-class LanguageController extends GetxController {
-  RxString selectedLanguage = 'Spanish'.obs;
-
-  void updateLanguage(String? newValue) {
-    if (newValue != null) {
-      selectedLanguage.value = newValue;
-      update();
-    }
   }
 }
