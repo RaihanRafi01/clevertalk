@@ -204,23 +204,32 @@ class ConvertToTextController extends GetxController {
         body: json.encode({
           'model': 'gpt-4o-mini',
           'messages': [
-            {'role': 'system', 'content': 'You are a precise JSON translator.'},
+            {
+              'role': 'system',
+              'content': 'You are a precise JSON translator. Return only valid JSON without any additional text or markdown.'
+            },
             {
               'role': 'user',
               'content':
               'Translate the following JSON content from ${currentLanguage.value} to ${selectedLanguage.value} and return only the translated JSON:\n\n$textToTranslate',
             },
           ],
-          'max_tokens': 1000,
+          'max_tokens': 8000,
         }),
       );
 
       if (response.statusCode == 200) {
-        final translatedText = json
-            .decode(utf8.decode(response.bodyBytes))['choices'][0]['message']['content']
-            .replaceAll('```json', '')
-            .replaceAll('```', '')
-            .trim();
+        // Print raw response for debugging
+        print('Raw response: ${response.body}');
+
+        final responseBody = utf8.decode(response.bodyBytes);
+        final jsonData = json.decode(responseBody);
+        final translatedText = jsonData['choices'][0]['message']['content'].trim();
+
+        // Print processed text for debugging
+        print('Processed text: $translatedText');
+
+        // Attempt to decode translatedText as JSON
         final translatedData = json.decode(translatedText) as List;
 
         _updateMessages(translatedData);
@@ -228,7 +237,7 @@ class ConvertToTextController extends GetxController {
         await saveTranscription(filePath);
         Get.snackbar('Success', 'Translated to ${selectedLanguage.value}');
       } else {
-        Get.snackbar('Error', 'Translation failed: ${response.body}');
+        Get.snackbar('Error', 'Translation failed: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
       Get.snackbar('Error', 'Translation error: $e');
