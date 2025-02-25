@@ -1,19 +1,51 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:clevertalk/common/widgets/auth/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:just_audio/just_audio.dart';
+
 import '../../../../common/appColors.dart';
 import '../../../data/database_helper.dart';
 import '../../audio/controllers/audio_controller.dart';
-import '../../text/controllers/text_controller.dart';
-import 'package:just_audio/just_audio.dart';
+
+// Dialog State Controller using GetX
+class DialogStateController extends GetxController {
+  var title = ''.obs;
+  var message = ''.obs;
+  var icon = Rxn<IconData>();
+  var iconColor = Rxn<Color>();
+  var progress = Rxn<double>();
+  var isLoading = false.obs;
+  var showContinue = false.obs;
+  var showTryAgain = false.obs;
+
+  void updateDialog({
+    String? title,
+    String? message,
+    IconData? icon,
+    Color? iconColor,
+    double? progress,
+    bool? isLoading,
+    bool? showContinue,
+    bool? showTryAgain,
+  }) {
+    if (title != null) this.title.value = title;
+    if (message != null) this.message.value = message;
+    this.icon.value = icon;
+    this.iconColor.value = iconColor;
+    this.progress.value = progress;
+    if (isLoading != null) this.isLoading.value = isLoading;
+    if (showContinue != null) this.showContinue.value = showContinue;
+    if (showTryAgain != null) this.showTryAgain.value = showTryAgain;
+  }
+}
 
 Future<void> connectUsbDevice(BuildContext context) async {
   const platform = MethodChannel('usb_path_reader/usb');
-  //final AudioPlayer audioPlayer = AudioPlayer();
   final dbHelper = DatabaseHelper();
   String selectedPath = '/RECORD';
   String? usbPath;
@@ -22,83 +54,110 @@ Future<void> connectUsbDevice(BuildContext context) async {
   String? usbVendorId;
   String? usbDeviceName;
   bool isUsbConnected = false;
-  //List<String> audioFiles = [];
 
   int retryCount = 0;
   const maxRetries = 3;
 
-  // Show loading dialog
-  _showLoadingDialog(context, "Connecting USB device...");
+  // Initialize and show persistent dialog
+  final dialogController = _showPersistentDialog(context);
 
-  while (retryCount < maxRetries) {
-    try {
-      if (Platform.isAndroid && await Permission.manageExternalStorage.isDenied) {
-        await Permission.manageExternalStorage.request();
-      }
+  Future<void> tryConnect() async {
+    retryCount = 0;
+    isUsbConnected = false;
 
-      final Map<dynamic, dynamic>? usbDeviceDetails =
-      await platform.invokeMethod('getUsbDeviceDetails');
+    dialogController.updateDialog(
+      title: "Connecting",
+      message: "Connecting to CleverTalk recorder...",
+      isLoading: true,
+      showTryAgain: false,
+      showContinue: false,
+    );
 
-      if (usbDeviceDetails != null) {
-        usbPath = await platform.invokeMethod<String>('getUsbPath');
-        usbDeviceName = usbDeviceDetails['deviceName'];
-        usbVendorId = usbDeviceDetails['vendorId'];
-        usbProductId = usbDeviceDetails['productId'];
-        usbDeviceUUID = usbDeviceDetails['deviceUUID'];
-        isUsbConnected = true;
+    while (retryCount < maxRetries) {
+      try {
+        if (Platform.isAndroid && await Permission.manageExternalStorage.isDenied) {
+          await Permission.manageExternalStorage.request();
+        }
 
-        _showSnackbar(
-          context,
-          'USB connected: Name=$usbDeviceName, UUID=$usbDeviceUUID, VendorID=$usbVendorId, ProductID=$usbProductId',
-        );
-        break;
-      } else {
+        final Map<dynamic, dynamic>? usbDeviceDetails =
+        await platform.invokeMethod('getUsbDeviceDetails');
+
+        if (usbDeviceDetails != null) {
+          usbPath = await platform.invokeMethod<String>('getUsbPath');
+          usbDeviceName = usbDeviceDetails['deviceName'];
+          usbVendorId = usbDeviceDetails['vendorId'];
+          usbProductId = usbDeviceDetails['productId'];
+          usbDeviceUUID = usbDeviceDetails['deviceUUID'];
+          isUsbConnected = true;
+
+          dialogController.updateDialog(
+            title: "Success",
+            message: "Successfully connected to the recorder\nPlease wait for file transfer from CleverTalk recorder",
+            icon: Icons.check_circle,
+            iconColor: AppColors.appColor,
+            isLoading: true,
+          );
+          await Future.delayed(Duration(seconds: 2));
+          break;
+        } else {
+          retryCount++;
+          if (retryCount < maxRetries) {
+            await Future.delayed(Duration(seconds: 10));
+          }
+        }
+      } catch (e) {
         retryCount++;
         if (retryCount < maxRetries) {
           await Future.delayed(Duration(seconds: 10));
         }
       }
-    } catch (e) {
-      retryCount++;
-      if (retryCount < maxRetries) {
-        await Future.delayed(Duration(seconds: 10));
-      }
     }
-  }
 
-  if (!isUsbConnected || usbPath == null) {
-    Navigator.pop(context);
-    _showSnackbar(context, 'Failed to connect USB device after $maxRetries attempts');
-    return;
-  }
+    if (!isUsbConnected || usbPath == null) {
+      dialogController.updateDialog(
+        title: "Error",
+        message: "Failed to connect USB device after $maxRetries attempts",
+        icon: Icons.error,
+        iconColor: Colors.red.shade700,
+        isLoading: false,
+        showTryAgain: true,
+      );
+      return;
+    }
 
-  try {
-    String combinedPath = '$usbPath$selectedPath';
-    final directory = Directory(combinedPath);
+    try {
+      String combinedPath = '$usbPath$selectedPath';
+      final directory = Directory(combinedPath);
 
-    int retryCountStep3 = 0;
-    const maxRetriesStep3 = 3;
-    List<FileSystemEntity> files = [];
+      int retryCountStep3 = 0;
+      const maxRetriesStep3 = 3;
+      List<FileSystemEntity> files = [];
 
-    while (retryCountStep3 < maxRetriesStep3) {
-      try {
-        if (!directory.existsSync()) {
-          throw Exception('Directory does not exist!');
-        }
+      while (retryCountStep3 < maxRetriesStep3) {
+        try {
+          if (!directory.existsSync()) {
+            throw Exception('Directory does not exist!');
+          }
 
-        files = directory.listSync(recursive: true, followLinks: false);
-        break;
-      } catch (e) {
-        retryCountStep3++;
-        if (retryCountStep3 < maxRetriesStep3) {
-          await Future.delayed(Duration(seconds: 10));
-        } else {
-          Navigator.pop(context);
-          _showSnackbar(context, 'Failed to access directory after $maxRetriesStep3 attempts.');
-          return;
+          files = directory.listSync(recursive: true, followLinks: false);
+          break;
+        } catch (e) {
+          retryCountStep3++;
+          if (retryCountStep3 < maxRetriesStep3) {
+            await Future.delayed(Duration(seconds: 10));
+          } else {
+            dialogController.updateDialog(
+              title: "Error",
+              message: "Failed to access directory after $maxRetriesStep3 attempts.",
+              icon: Icons.error,
+              iconColor: Colors.red.shade700,
+              isLoading: false,
+              showTryAgain: true,
+            );
+            return;
+          }
         }
       }
-    }
 
     final audioFilesList = files.where((file) {
       final extension = file.path.split('.').last.toLowerCase();
@@ -113,8 +172,12 @@ Future<void> connectUsbDevice(BuildContext context) async {
       return !savedFileNames.contains(fileName);
     }).toList();
 
-    Navigator.pop(context);
-    _showProgressDialog(context, "Processing new audio files...");
+      dialogController.updateDialog(
+        title: "Transferring",
+        message: "Please wait for file transfer from CleverTalk recorder\n\nFiles remaining: ${newFiles.length}",
+        progress: 0.0,
+        isLoading: true,
+      );
 
     for (var i = 0; i < newFiles.length; i++) {
       final file = newFiles[i];
@@ -123,6 +186,7 @@ Future<void> connectUsbDevice(BuildContext context) async {
       final duration = await _getAudioDuration(localFilePath);
 
       await dbHelper.insertAudioFile(
+        false,
         context,
         localFilePath.split('/').last,
         localFilePath,
@@ -131,21 +195,41 @@ Future<void> connectUsbDevice(BuildContext context) async {
         '',
       );
 
-      final progress = (i + 1) / newFiles.length;
-      _updateProgressDialog(context, "Processing file ${i + 1} of ${newFiles.length}...", progress);
+        final progress = (i + 1) / newFiles.length;
+        dialogController.updateDialog(
+          title: "Transferring",
+          message: "Please wait for file transfer from CleverTalk recorder\n\nFiles remaining: ${newFiles.length - (i + 1)}",
+          progress: progress,
+          isLoading: true,
+        );
+      }
+
+      dialogController.updateDialog(
+        title: "Completed",
+        message: "All files have been downloaded!\n${newFiles.length} files transferred successfully",
+        icon: Icons.check_circle,
+        iconColor: AppColors.appColor,
+        isLoading: false,
+        showContinue: true,
+      );
+
+      final AudioPlayerController audioController = Get.put(AudioPlayerController());
+      audioController.fetchAudioFiles();
+
+    } catch (e) {
+      dialogController.updateDialog(
+        title: "Error",
+        message: "An error occurred: $e",
+        icon: Icons.error,
+        iconColor: Colors.red.shade700,
+        isLoading: false,
+        showTryAgain: true,
+      );
     }
-
-    Navigator.pop(context);
-
-    _showSnackbar(context, 'Added ${newFiles.length} new audio files to the database.');
-    final AudioPlayerController audioController = Get.put(AudioPlayerController());
-    //final TextViewController textViewController = Get.put(TextViewController());
-    audioController.fetchAudioFiles();
-    //textViewController.fetchTextFiles();
-
-  } catch (e) {
-    _showSnackbar(context, 'An error occurred: $e');
   }
+
+  // Initial call to start the connection process
+  await tryConnect();
 }
 
 Future<String> _copyFileToLocal(String filePath) async {
@@ -192,75 +276,115 @@ Future<String> _getAudioDuration(String filePath) async {
   return '0:00';
 }
 
+DialogStateController _showPersistentDialog(BuildContext context) {
+  final controller = Get.put(DialogStateController());
 
-void _showSnackbar(BuildContext context, String message) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(message)),
-  );
-}
-
-void _showProgressDialog(BuildContext context, String message, {double progress = 0}) {
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (BuildContext context) {
-      return Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
+  Get.dialog(
+    WillPopScope(
+      onWillPop: () async => false, // Prevents dialog dismissal on back button press
+      child: Obx(() => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        elevation: 8,
+        child: Container(
+          padding: EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                controller.iconColor.value == Colors.red.shade700 ? Colors.red.shade100 :
+                controller.iconColor.value == AppColors.appColor ? AppColors.appColor2 :
+                Colors.blue.shade100,
+                Colors.white
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(20),
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(message, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              SizedBox(height: 16),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: LinearProgressIndicator(
-                  value: progress,
-                  backgroundColor: Colors.grey.shade300,
+              if (controller.icon.value != null) ...[
+                Icon(
+                  controller.icon.value,
+                  color: controller.iconColor.value,
+                  size: 48,
+                ),
+                SizedBox(height: 16),
+              ],
+              Text(
+                controller.title.value,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: controller.iconColor.value ?? Colors.blue.shade900,
+                ),
+              ),
+              SizedBox(height: 12),
+              Text(
+                controller.message.value,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey.shade700,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              if (controller.isLoading.value) ...[
+                SizedBox(height: 20),
+                CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(AppColors.appColor),
                 ),
-              ),
-              SizedBox(height: 8),
-              Text('${(progress * 100).toStringAsFixed(1)}%', style: TextStyle(fontSize: 14, color: Colors.grey.shade700)),
-            ],
-          ),
-        ),
-      );
-    },
-  );
-}
-
-void _updateProgressDialog(BuildContext context, String message, double progress) {
-  if (Navigator.canPop(context)) {
-    Navigator.pop(context); // Close the previous dialog
-    _showProgressDialog(context, message, progress: progress);
-  }
-}
-
-void _showLoadingDialog(BuildContext context, String message) {
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (BuildContext context) {
-      return Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Row(
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  message,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ],
+              if (controller.progress.value != null && !controller.showContinue.value && !controller.showTryAgain.value) ...[
+                SizedBox(height: 20),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: LinearProgressIndicator(
+                    value: controller.progress.value,
+                    minHeight: 10,
+                    backgroundColor: Colors.grey.shade300,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.blue.shade700),
+                  ),
                 ),
-              ),
+                SizedBox(height: 8),
+                Text(
+                  "${(controller.progress.value! * 100).toStringAsFixed(1)}% complete",
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.blue.shade700,
+                  ),
+                ),
+              ],
+              if (controller.showContinue.value) ...[
+                SizedBox(height: 20),
+                CustomButton(
+                  borderRadius: 30,
+                  width: 160,
+                  text: 'Continue',
+                  onPressed: () {
+                    Get.back();
+                  },
+                ),
+              ],
+              if (controller.showTryAgain.value) ...[
+                SizedBox(height: 20),
+                CustomButton(
+                  borderRadius: 30,
+                  width: 160,
+                  text: 'Try Again',
+                  onPressed: () async {
+                    controller.updateDialog(showTryAgain: false); // Reset try again state
+                    Get.back();
+                    await connectUsbDevice(context); // Restart the process within the same dialog
+                  },
+                ),
+              ],
             ],
           ),
         ),
-      );
-    },
+      )),
+    ),
+    barrierDismissible: false, // Prevents closing by tapping outside
   );
+
+  return controller;
 }

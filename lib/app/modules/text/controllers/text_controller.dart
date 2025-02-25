@@ -7,10 +7,6 @@ import '../../../data/services/api_services.dart';
 import '../../audio/controllers/audio_controller.dart';
 
 class ConvertToTextController extends GetxController {
-  final String? filePath;
-
-  ConvertToTextController({this.filePath});
-
   var messages = <Map<String, String>>[].obs;
   var highlightedTimestamp = ''.obs;
   var currentHighlightedIndex = (-1).obs;
@@ -26,7 +22,7 @@ class ConvertToTextController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchMessages(filePath!);
+    //fetchMessages(filePath!);
   }
 
   Future<void> fetchMessages(String filePath) async {
@@ -149,7 +145,7 @@ class ConvertToTextController extends GetxController {
     descControllers = messages.map((msg) => TextEditingController(text: msg['description'])).toList();
   }
 
-  Future<void> saveTranscription() async {
+  Future<void> saveTranscription(String filePath) async {
     final dbHelper = DatabaseHelper();
     final db = await dbHelper.database;
 
@@ -183,7 +179,7 @@ class ConvertToTextController extends GetxController {
     isEditing.value = false;
   }
 
-  Future<void> translateText() async {
+  Future<void> translateText(String filePath) async {
     try {
       isLoading.value = true;
       final textToTranslate = json.encode(messages.map((msg) {
@@ -229,7 +225,7 @@ class ConvertToTextController extends GetxController {
 
         _updateMessages(translatedData);
         currentLanguage.value = selectedLanguage.value;
-        await saveTranscription();
+        await saveTranscription(filePath);
         Get.snackbar('Success', 'Translated to ${selectedLanguage.value}');
       } else {
         Get.snackbar('Error', 'Translation failed: ${response.body}');

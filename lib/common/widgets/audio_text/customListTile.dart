@@ -153,6 +153,10 @@ void navigateBasedOnTranscription(BuildContext context, String fileName, String 
   final dbHelper = DatabaseHelper();
   final hasText = await dbHelper.hasTranscription(fileName);
 
+  print(':::::::::::::::::::check $hasText');
+  print(':::::::::::::::::::fileName $fileName');
+  print(':::::::::::::::::::filePath $filePath');
+
   if (hasText) {
     Get.to(() => ConvertToTextView(fileName: fileName, filePath: filePath));
   } else {

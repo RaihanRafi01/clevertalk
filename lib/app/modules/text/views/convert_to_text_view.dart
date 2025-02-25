@@ -19,7 +19,8 @@ class ConvertToTextView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final audioController = Get.put(AudioPlayerController(), permanent: true);
-    final textController = Get.put(ConvertToTextController(filePath: filePath));
+    final textController = Get.put(ConvertToTextController());
+    textController.fetchMessages(filePath);
 
     // Start transcription fetching and audio playback
     audioController.fetchAudioFiles().then((_) {
@@ -84,7 +85,7 @@ class ConvertToTextView extends StatelessWidget {
                           GestureDetector(
                             onTap: () {
                               if (textController.isEditing.value) {
-                                textController.saveTranscription();
+                                textController.saveTranscription(filePath);
                               }
                               textController.isTranslate.value = false;
                               textController.isEditing.toggle();
@@ -158,7 +159,7 @@ class ConvertToTextView extends StatelessWidget {
                               const Spacer(),
                               CustomButton(
                                 text: 'Translate',
-                                onPressed: () => textController.translateText(),
+                                onPressed: () => textController.translateText(filePath),
                                 height: 26,
                                 width: 70,
                                 fontSize: 12,

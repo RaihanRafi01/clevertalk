@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ffi';
 import 'package:clevertalk/app/modules/audio/controllers/audio_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -66,7 +67,7 @@ class DatabaseHelper {
   }
 
 
-  Future<void> insertAudioFile(
+  Future<void> insertAudioFile(bool snackBar,
       BuildContext context, String fileName, String filePath, String duration, bool isLocal , String localParsedDate) async {
     final db = await database;
     final date = DateTime.now().toIso8601String();
@@ -84,9 +85,12 @@ class DatabaseHelper {
       'language_summary': "English",
       'language_transcription': "English",
     });
-    ScaffoldMessenger.of(context).showSnackBar(
+    /*ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Audio file "$fileName" inserted successfully!')),
-    );
+    );*/
+    if(snackBar) {
+      Get.snackbar('Success', 'Audio file "$fileName" saved successfully!');
+    }
     //audioPlayerController.fetchAudioFiles();
   }
 
@@ -114,9 +118,7 @@ class DatabaseHelper {
       where: 'id = ?',
       whereArgs: [id],
     );
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Audio file deleted successfully!')),
-    );
+    Get.snackbar('Deleted!', 'Audio file deleted successfully!');
   }
 
   Future<void> renameAudioFile(BuildContext context, int id, String newFileName) async {
@@ -129,9 +131,7 @@ class DatabaseHelper {
       where: 'id = ?',
       whereArgs: [id],
     );
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Audio file renamed successfully!')),
-    );
+    Get.snackbar('Success', 'Audio file renamed successfully!');
   }
 
   Future<void> updateFileParsedDate(int id, String parsedDate) async {

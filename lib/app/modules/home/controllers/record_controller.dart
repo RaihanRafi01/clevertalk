@@ -157,7 +157,7 @@ class RecordController extends GetxController {
       String formattedDate =
           DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
 
-      await DatabaseHelper().insertAudioFile(Get.context!, '$filename.WAV',
+      await DatabaseHelper().insertAudioFile(true,Get.context!, '$filename.WAV',
           _filePath!, duration, true, formattedDate);
       await stopRecording();
       audioPlayerController.fetchAudioFiles();

@@ -159,6 +159,7 @@ class _UsbFilePickerState extends State<UsbFilePicker> {
           final duration = await _getAudioDuration(localFilePath);
 
           await dbHelper.insertAudioFile(
+            false,
             context,
             localFilePath.split('/').last, // File name
             localFilePath,                // Local file path

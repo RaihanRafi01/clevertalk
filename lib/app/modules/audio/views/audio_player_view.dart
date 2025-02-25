@@ -15,7 +15,7 @@ class AudioPlayerView extends StatelessWidget {
   final String fileName; // Parameter to accept the selected file
   final String filepath;
 
-  const AudioPlayerView({Key? key, required this.fileName,required this.filepath}) : super(key: key);
+  const AudioPlayerView({super.key, required this.fileName,required this.filepath});
 
   @override
   Widget build(BuildContext context) {
