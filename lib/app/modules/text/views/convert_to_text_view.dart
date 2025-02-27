@@ -85,7 +85,7 @@ class ConvertToTextView extends StatelessWidget {
                           GestureDetector(
                             onTap: () {
                               if (textController.isEditing.value) {
-                                textController.saveTranscription(filePath);
+                                textController.saveTranscription(filePath,true);
                               }
                               textController.isTranslate.value = false;
                               textController.isEditing.toggle();
@@ -159,7 +159,7 @@ class ConvertToTextView extends StatelessWidget {
                               const Spacer(),
                               CustomButton(
                                 text: 'Translate',
-                                onPressed: () => textController.translateText(filePath),
+                                onPressed: () => textController.translateText(filePath,fileName),
                                 height: 26,
                                 width: 70,
                                 fontSize: 12,

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import '../../../data/database_helper.dart';
 import '../../../data/services/api_services.dart';
+import '../../../data/services/notification_services.dart';
 import '../../audio/controllers/audio_controller.dart';
 
 class ConvertToTextController extends GetxController {
@@ -42,9 +43,11 @@ class ConvertToTextController extends GetxController {
 
       if (result.isNotEmpty) {
         final existingTranscription = result.first['transcription'];
-        currentLanguage.value = result.first['language_transcription']?.toString() ?? 'English';
+        currentLanguage.value =
+            result.first['language_transcription']?.toString() ?? 'English';
 
-        if (existingTranscription != null && existingTranscription.toString().isNotEmpty) {
+        if (existingTranscription != null &&
+            existingTranscription.toString().isNotEmpty) {
           // Parse existing transcription
           final data = json.decode(existingTranscription.toString()) as List;
           _updateMessages(data);
@@ -57,17 +60,22 @@ class ConvertToTextController extends GetxController {
             final data = jsonData['Data'] as List;
             await db.update(
               'audio_files',
-              {'transcription': json.encode(data), 'language_transcription': 'English'},
+              {
+                'transcription': json.encode(data),
+                'language_transcription': 'English'
+              },
               where: 'file_path = ?',
               whereArgs: [filePath],
             );
             _updateMessages(data);
           } else {
-            Get.snackbar('Error', 'Failed to fetch data: ${response.reasonPhrase}');
+            Get.snackbar(
+                'Error', 'Failed to fetch data: ${response.reasonPhrase}');
           }
         }
       } else {
-        Get.snackbar('Error', 'File not found in the database. Please add the file first.');
+        Get.snackbar('Error',
+            'File not found in the database. Please add the file first.');
       }
     } catch (e) {
       Get.snackbar('Error', 'Error fetching messages: $e');
@@ -84,7 +92,8 @@ class ConvertToTextController extends GetxController {
       final startTime = (entry['Start_time'] as num).toDouble();
       final endTime = (entry['End_time'] as num).toDouble();
       final duration = endTime - startTime;
-      final speakerName = (entry['Speaker_Name'] ?? 'Unknown Speaker') as String;
+      final speakerName =
+          (entry['Speaker_Name'] ?? 'Unknown Speaker') as String;
       final transcript = (entry['Transcript'] ?? '') as String;
 
       // Split transcript into sentences based on . ! ?
@@ -125,10 +134,13 @@ class ConvertToTextController extends GetxController {
     }
 
     messages.value = splitData.map<Map<String, String>>((entry) {
-      final speakerName = (entry['Speaker_Name'] ?? 'Unknown Speaker') as String;
+      final speakerName =
+          (entry['Speaker_Name'] ?? 'Unknown Speaker') as String;
       final transcript = (entry['Transcript'] ?? '') as String;
-      final startTimeFormatted = formatTimestamp((entry['Start_time'] as num).toDouble());
-      final endTimeFormatted = formatTimestamp((entry['End_time'] as num).toDouble());
+      final startTimeFormatted =
+          formatTimestamp((entry['Start_time'] as num).toDouble());
+      final endTimeFormatted =
+          formatTimestamp((entry['End_time'] as num).toDouble());
 
       return {
         'name': speakerName,
@@ -141,19 +153,25 @@ class ConvertToTextController extends GetxController {
   }
 
   void _initializeControllers() {
-    nameControllers = messages.map((msg) => TextEditingController(text: msg['name'])).toList();
-    descControllers = messages.map((msg) => TextEditingController(text: msg['description'])).toList();
+    nameControllers = messages
+        .map((msg) => TextEditingController(text: msg['name']))
+        .toList();
+    descControllers = messages
+        .map((msg) => TextEditingController(text: msg['description']))
+        .toList();
   }
 
-  Future<void> saveTranscription(String filePath) async {
+  Future<void> saveTranscription(String filePath,bool snackBar) async {
     final dbHelper = DatabaseHelper();
     final db = await dbHelper.database;
 
-    messages.value = List.generate(messages.length, (i) => {
-      'name': nameControllers[i].text,
-      'time': messages[i]['time']!,
-      'description': descControllers[i].text,
-    });
+    messages.value = List.generate(
+        messages.length,
+        (i) => {
+              'name': nameControllers[i].text,
+              'time': messages[i]['time']!,
+              'description': descControllers[i].text,
+            });
 
     final updatedData = messages.map((msg) {
       final times = msg['time']!.split(' - ');
@@ -174,14 +192,15 @@ class ConvertToTextController extends GetxController {
       where: 'file_path = ?',
       whereArgs: [filePath],
     );
-
-    Get.snackbar("Success", "Transcription saved!");
+    if(snackBar){
+      Get.snackbar("Success", "Transcription saved!");
+    }
     isEditing.value = false;
   }
 
-  Future<void> translateText(String filePath) async {
+  Future<void> translateText(String filePath, String fileName) async {
+    Get.snackbar('Translation in progress...', 'This may take some time, but don\'t worry! We\'ll notify you as soon as it\'s ready. Feel free to using the app while you wait.');
     try {
-      isLoading.value = true;
       final textToTranslate = json.encode(messages.map((msg) {
         final times = msg['time']!.split(' - ');
         return {
@@ -192,7 +211,8 @@ class ConvertToTextController extends GetxController {
         };
       }).toList());
 
-      const apiKey = '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'; // Replace with your OpenAI API key
+      const apiKey =
+          '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'; // Replace with your OpenAI API key
       const apiUrl = 'https://api.openai.com/v1/chat/completions';
 
       final response = await http.post(
@@ -206,12 +226,13 @@ class ConvertToTextController extends GetxController {
           'messages': [
             {
               'role': 'system',
-              'content': 'You are a precise JSON translator. Return only valid JSON without any additional text or markdown.'
+              'content':
+                  'You are a precise JSON translator. Return only valid JSON without any additional text or markdown.'
             },
             {
               'role': 'user',
               'content':
-              'Translate the following JSON content from ${currentLanguage.value} to ${selectedLanguage.value} and return only the translated JSON:\n\n$textToTranslate',
+                  'Translate the following JSON content from ${currentLanguage.value} to ${selectedLanguage.value} and return only the translated JSON:\n\n$textToTranslate',
             },
           ],
           'max_tokens': 8000,
@@ -224,7 +245,8 @@ class ConvertToTextController extends GetxController {
 
         final responseBody = utf8.decode(response.bodyBytes);
         final jsonData = json.decode(responseBody);
-        final translatedText = jsonData['choices'][0]['message']['content'].trim();
+        final translatedText = jsonData['choices'][0]['message']['content']
+          ..replaceAll('```json', '').replaceAll('```', '').trim();
 
         // Print processed text for debugging
         print('Processed text: $translatedText');
@@ -234,23 +256,32 @@ class ConvertToTextController extends GetxController {
 
         _updateMessages(translatedData);
         currentLanguage.value = selectedLanguage.value;
-        await saveTranscription(filePath);
-        Get.snackbar('Success', 'Translated to ${selectedLanguage.value}');
+        await saveTranscription(filePath,false);
+        NotificationService.showNotification(
+          title: "Translation Ready!",
+          body: "Click to view Conversion",
+          payload: "Conversion",
+          keyPoints: filePath,
+          fileName: fileName,
+          filePath: filePath,
+        );
+        // Get.snackbar('Success', 'Translated to ${selectedLanguage.value}');
       } else {
-        Get.snackbar('Error', 'Translation failed: ${response.statusCode} - ${response.body}');
+        Get.snackbar('Error',
+            'Translation failed: ${response.statusCode} \nPlease Try again later.');
       }
     } catch (e) {
       Get.snackbar('Error', 'Translation error: $e');
       print('Error: $e');
-    } finally {
-      isLoading.value = false;
     }
   }
 
   void editFullTranscription(BuildContext context, String filePath) {
     TextEditingController transcriptionController = TextEditingController();
 
-    String fullText = messages.map((msg) => "${msg['name']}: ${msg['description']}").join('\n');
+    String fullText = messages
+        .map((msg) => "${msg['name']}: ${msg['description']}")
+        .join('\n');
     transcriptionController.text = fullText;
 
     Get.dialog(
@@ -259,7 +290,8 @@ class ConvertToTextController extends GetxController {
         content: TextField(
           controller: transcriptionController,
           maxLines: 10,
-          decoration: const InputDecoration(labelText: 'Edit Full Transcription'),
+          decoration:
+              const InputDecoration(labelText: 'Edit Full Transcription'),
         ),
         actions: [
           TextButton(
@@ -273,16 +305,17 @@ class ConvertToTextController extends GetxController {
                 return;
               }
 
-              List<Map<String, dynamic>> updatedMessages = transcriptionController.text
-                  .split('\n')
-                  .where((line) => line.contains(': '))
-                  .map((line) {
+              List<Map<String, dynamic>> updatedMessages =
+                  transcriptionController.text
+                      .split('\n')
+                      .where((line) => line.contains(': '))
+                      .map((line) {
                 final parts = line.split(': ');
                 final speakerName = parts[0].trim();
                 final transcript = parts.sublist(1).join(': ').trim();
 
                 final originalEntry = messages.firstWhere(
-                      (msg) => msg['name'] == speakerName,
+                  (msg) => msg['name'] == speakerName,
                   orElse: () => {'time': '00:00:00 - 00:00:00'},
                 );
 
@@ -303,11 +336,14 @@ class ConvertToTextController extends GetxController {
                 return;
               }
 
-              messages.value = updatedMessages.map<Map<String, String>>((entry) => {
-                'name': entry['Speaker_Name'].toString(),
-                'time': '${formatTimestamp(entry['Start_time'] as double)} - ${formatTimestamp(entry['End_time'] as double)}',
-                'description': entry['Transcript'].toString(),
-              }).toList();
+              messages.value = updatedMessages
+                  .map<Map<String, String>>((entry) => {
+                        'name': entry['Speaker_Name'].toString(),
+                        'time':
+                            '${formatTimestamp(entry['Start_time'] as double)} - ${formatTimestamp(entry['End_time'] as double)}',
+                        'description': entry['Transcript'].toString(),
+                      })
+                  .toList();
 
               messages.refresh();
 
@@ -333,7 +369,8 @@ class ConvertToTextController extends GetxController {
   void editSpeakerName(BuildContext context, String filePath) {
     TextEditingController speakerNameController = TextEditingController();
     Set<String> uniqueSpeakers = messages.map((msg) => msg['name']!).toSet();
-    String selectedSpeaker = uniqueSpeakers.isNotEmpty ? uniqueSpeakers.first : "";
+    String selectedSpeaker =
+        uniqueSpeakers.isNotEmpty ? uniqueSpeakers.first : "";
 
     Get.dialog(
       AlertDialog(
@@ -389,8 +426,10 @@ class ConvertToTextController extends GetxController {
 
               if (result.isNotEmpty) {
                 final existingTranscription = result.first['transcription'];
-                if (existingTranscription != null && existingTranscription.toString().isNotEmpty) {
-                  List<dynamic> data = json.decode(existingTranscription.toString());
+                if (existingTranscription != null &&
+                    existingTranscription.toString().isNotEmpty) {
+                  List<dynamic> data =
+                      json.decode(existingTranscription.toString());
                   for (var entry in data) {
                     if (entry['Speaker_Name'] == selectedSpeaker) {
                       entry['Speaker_Name'] = newSpeakerName;
@@ -422,7 +461,8 @@ class ConvertToTextController extends GetxController {
         final times = msg['time']!.split(' - ');
         final startTime = parseTimeToSeconds(times[0]);
         final endTime = parseTimeToSeconds(times[1]);
-        return currentTimestamp >= startTime && currentTimestamp <= (endTime + 0.5);
+        return currentTimestamp >= startTime &&
+            currentTimestamp <= (endTime + 0.5);
       });
 
       if (index != -1 && currentHighlightedIndex.value != index) {

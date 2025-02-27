@@ -208,13 +208,16 @@ class NotificationService {
     try {
       final Map<String, dynamic> data = jsonDecode(payload);
       String? type = data['type'];
-      String? keyPoints = data['keyPoints'];
       String? fileName = data['fileName'];
       String? filePath = data['filePath'];
+
+
 
       if (type == "notification_page") {
         Get.to(ProfileView());
       } else if (type == "Summary") {
+        print('REGENERATE noti ::::: filePath ::::::::: $filePath');
+        print('REGENERATE noti ::::: fileName ::::::::: $fileName');
         Get.to(() => SummaryKeyPointView(
           //keyPoints: keyPoints ?? "No Key Points",
           fileName: fileName ?? "Unknown File",
@@ -222,7 +225,7 @@ class NotificationService {
         ));
       } else if (type == "Conversion") {
         Get.to(() => ConvertToTextView(
-          filePath: keyPoints ?? "No file path",
+          filePath: filePath ?? "No file path",
           fileName: fileName ?? "Unknown File",
         ));
       } else {

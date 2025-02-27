@@ -363,6 +363,7 @@ class AudioPlayerController extends GetxController {
               payload: "Summary",
               keyPoints: keyPointText,
               fileName: fileName,
+              filePath: filePath,
             );
 
             //Get.to(() => SummaryKeyPointView(keyPoints: keyPointText, fileName: fileName,));

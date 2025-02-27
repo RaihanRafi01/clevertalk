@@ -136,6 +136,7 @@ class AudioPlayerView extends StatelessWidget {
                                 payload: "Conversion",
                                 keyPoints: filepath,
                                 fileName: fileName,
+                                filePath: filepath,
                               );
                             });
                             //Get.to(ConvertToTextView(fileName: fileName, filePath: filepath,));

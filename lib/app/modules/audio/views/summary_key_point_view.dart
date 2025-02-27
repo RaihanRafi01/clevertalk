@@ -65,7 +65,7 @@ class SummaryKeyPointView extends StatelessWidget {
                     GestureDetector(
                       onTap: () {
                         if (controller.isEditing.value) {
-                          controller.saveKeyPoints();
+                          controller.saveKeyPoints(true);
                         }
                         controller.isTranslate.value = false;
                         controller.isEditing.toggle();
@@ -142,7 +142,7 @@ class SummaryKeyPointView extends StatelessWidget {
                             const Spacer(),
                             CustomButton(
                               text: 'Translate',
-                              onPressed: () => controller.translateText(),
+                              onPressed: () => controller.translateText(filePath,fileName),
                               height: 26,
                               width: 70,
                               fontSize: 12,
