@@ -48,13 +48,14 @@ class ConvertToTextView extends StatelessWidget {
         ),
         body: Stack(
           children: [
+            // Scrollable content
             Obx(() {
               if (textController.isLoading.value) {
                 return const Center(child: CircularProgressIndicator());
               }
 
               return Positioned.fill(
-                top: 260,
+                top: textController.isTranslate.value ? 330 : 290,
                 bottom: 100,
                 child: SingleChildScrollView(
                   controller: textController.scrollController,
@@ -62,113 +63,6 @@ class ConvertToTextView extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          if (!textController.isEditing.value) ...[
-                            GestureDetector(
-                              onTap: () => textController.editSpeakerName(context, filePath),
-                              child: SvgPicture.asset('assets/images/summary/speaker_edit_icon.svg'),
-                            ),
-                            const SizedBox(width: 16),
-                            /*GestureDetector(
-                              onTap: () => textController.editFullTranscription(context, filePath),
-                              child: SvgPicture.asset('assets/images/audio/edit_icon.svg'),
-                            ),
-                            const SizedBox(width: 16),*/
-                            GestureDetector(
-                              onTap: () => textController.isTranslate.toggle(),
-                              child: SvgPicture.asset('assets/images/summary/translate_icon.svg'),
-                            ),
-                            const SizedBox(width: 16),
-                          ],
-                          GestureDetector(
-                            onTap: () {
-                              if (textController.isEditing.value) {
-                                textController.saveTranscription(filePath,true);
-                              }
-                              textController.isTranslate.value = false;
-                              textController.isEditing.toggle();
-                            },
-                            child: SvgPicture.asset(
-                              textController.isEditing.value
-                                  ? 'assets/images/summary/save_icon.svg'
-                                  : 'assets/images/summary/edit_icon.svg',
-                            ),
-                          ),
-                        ],
-                      ),
-                      AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 100),
-                        transitionBuilder: (Widget child, Animation<double> animation) {
-                          final offsetAnimation = Tween<Offset>(
-                            begin: const Offset(0.0, -0.5),
-                            end: const Offset(0.0, 0.0),
-                          ).animate(animation);
-                          return SlideTransition(position: offsetAnimation, child: child);
-                        },
-                        child: textController.isTranslate.value
-                            ? Container(
-                          key: const ValueKey('translateRow'),
-                          padding: const EdgeInsets.symmetric(vertical: 20),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              CustomButton(
-                                text: textController.currentLanguage.value.isEmpty
-                                    ? 'English'
-                                    : textController.currentLanguage.value,
-                                onPressed: () {},
-                                height: 26,
-                                width: 70,
-                                fontSize: 12,
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16),
-                                child: SvgPicture.asset('assets/images/summary/arrow_icon.svg'),
-                              ),
-                              Obx(() => Container(
-                                height: 30,
-                                width: 120,
-                                decoration: BoxDecoration(
-                                  color: AppColors.appColor,
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: DropdownButton<String>(
-                                  value: textController.selectedLanguage.value,
-                                  onChanged: (value) => textController.selectedLanguage.value = value!,
-                                  borderRadius: BorderRadius.circular(20),
-                                  dropdownColor: AppColors.appColor,
-                                  underline: const SizedBox(),
-                                  isExpanded: true,
-                                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                                  items: <String>[
-                                    'English', 'Spanish', 'French', 'German', 'Italian',
-                                    'Portuguese', 'Chinese', 'Hindi', 'Dutch', 'Ukrainian', 'Russian'
-                                  ].map((String value) {
-                                    return DropdownMenuItem<String>(
-                                      value: value,
-                                      child: Text(
-                                        value,
-                                        style: h4.copyWith(fontSize: 12, color: Colors.white),
-                                      ),
-                                    );
-                                  }).toList(),
-                                ),
-                              )),
-                              const Spacer(),
-                              CustomButton(
-                                text: 'Translate',
-                                onPressed: () => textController.translateText(filePath,fileName),
-                                height: 26,
-                                width: 70,
-                                fontSize: 12,
-                              ),
-                            ],
-                          ),
-                        )
-                            : const SizedBox(height: 20, key: ValueKey('empty')),
-                      ),
                       Obx(() => textController.isEditing.value
                           ? _buildEditableList(textController)
                           : _buildReadOnlyList(textController)),
@@ -200,7 +94,8 @@ class ConvertToTextView extends StatelessWidget {
                             child: Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 10),
                               child: Text(
-                                audioController.audioFiles.isNotEmpty && audioController.currentIndex.value >= 0
+                                audioController.audioFiles.isNotEmpty &&
+                                    audioController.currentIndex.value >= 0
                                     ? audioController.audioFiles[audioController.currentIndex.value]['file_name']
                                     : 'No File Selected',
                                 style: h1.copyWith(fontSize: 20, color: AppColors.textHeader),
@@ -288,6 +183,122 @@ class ConvertToTextView extends StatelessWidget {
               ),
             ),
 
+            // Fixed editing and translation controls
+            Positioned(
+              top: 250, // Positioned below the audio player
+              left: 10,
+              right: 10,
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (!textController.isEditing.value) ...[
+                        GestureDetector(
+                          onTap: () => textController.editSpeakerName(context, filePath),
+                          child: SvgPicture.asset('assets/images/summary/speaker_edit_icon.svg'),
+                        ),
+                        const SizedBox(width: 16),
+                        GestureDetector(
+                          onTap: () {
+                            textController.isTranslate.toggle();
+                            print('isTranslate toggled to: ${textController.isTranslate.value}'); // Debug
+                          },
+                          child: SvgPicture.asset('assets/images/summary/translate_icon.svg'),
+                        ),
+                        const SizedBox(width: 16),
+                      ],
+                      GestureDetector(
+                        onTap: () {
+                          if (textController.isEditing.value) {
+                            textController.saveTranscription(filePath, true);
+                          }
+                          textController.isTranslate.value = false;
+                          textController.isEditing.toggle();
+                        },
+                        child: SvgPicture.asset(
+                          textController.isEditing.value
+                              ? 'assets/images/summary/save_icon.svg'
+                              : 'assets/images/summary/edit_icon.svg',
+                        ),
+                      ),
+                    ],
+                  ),
+                  Obx(() => AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300), // Increased duration for visibility
+                    transitionBuilder: (Widget child, Animation<double> animation) {
+                      final offsetAnimation = Tween<Offset>(
+                        begin: const Offset(0.0, -0.5),
+                        end: const Offset(0.0, 0.0),
+                      ).animate(animation);
+                      return SlideTransition(position: offsetAnimation, child: child);
+                    },
+                    child: textController.isTranslate.value
+                        ? Container(
+                      key: const ValueKey('translateRow'),
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          CustomButton(
+                            text: textController.currentLanguage.value.isEmpty
+                                ? 'English'
+                                : textController.currentLanguage.value,
+                            onPressed: () {},
+                            height: 26,
+                            width: 70,
+                            fontSize: 12,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: SvgPicture.asset('assets/images/summary/arrow_icon.svg'),
+                          ),
+                          Obx(() => Container(
+                            height: 30,
+                            width: 120,
+                            decoration: BoxDecoration(
+                              color: AppColors.appColor,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: DropdownButton<String>(
+                              value: textController.selectedLanguage.value,
+                              onChanged: (value) => textController.selectedLanguage.value = value!,
+                              borderRadius: BorderRadius.circular(20),
+                              dropdownColor: AppColors.appColor,
+                              underline: const SizedBox(),
+                              isExpanded: true,
+                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                              items: <String>[
+                                'English', 'Spanish', 'French', 'German', 'Italian',
+                                'Portuguese', 'Chinese', 'Hindi', 'Dutch', 'Ukrainian', 'Russian'
+                              ].map((String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(
+                                    value,
+                                    style: h4.copyWith(fontSize: 12, color: Colors.white),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          )),
+                          const Spacer(),
+                          CustomButton(
+                            text: 'Translate',
+                            onPressed: () => textController.translateText(filePath, fileName),
+                            height: 26,
+                            width: 70,
+                            fontSize: 12,
+                          ),
+                        ],
+                      ),
+                    )
+                        : const SizedBox(height: 20, key: ValueKey('empty')),
+                  )),
+                ],
+              ),
+            ),
+
             // Fixed bottom buttons
             Positioned(
               bottom: 20,
@@ -308,6 +319,8 @@ class ConvertToTextView extends StatelessWidget {
                 ],
               ),
             ),
+
+            // Loading overlay
             Positioned(
               left: 10,
               right: 10,

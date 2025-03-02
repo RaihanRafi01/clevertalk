@@ -199,7 +199,9 @@ class ConvertToTextController extends GetxController {
   }
 
   Future<void> translateText(String filePath, String fileName) async {
-    Get.snackbar('Translation in progress...', 'This may take some time, but don\'t worry! We\'ll notify you as soon as it\'s ready. Feel free to using the app while you wait.');
+    Get.snackbar(
+        'Translation in progress...',
+        'This may take some time, but don\'t worry! We\'ll notify you as soon as it\'s ready. Feel free to use the app while you wait.');
     try {
       final textToTranslate = json.encode(messages.map((msg) {
         final times = msg['time']!.split(' - ');
@@ -212,7 +214,7 @@ class ConvertToTextController extends GetxController {
       }).toList());
 
       const apiKey =
-          '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'; // Replace with your OpenAI API key
+          'sk--WnXhUylq4uuJb2d8m4EidGSpKbRYsA'; // Replace with your OpenAI API key
       const apiUrl = 'https://api.openai.com/v1/chat/completions';
 
       final response = await http.post(
@@ -227,15 +229,15 @@ class ConvertToTextController extends GetxController {
             {
               'role': 'system',
               'content':
-                  'You are a precise JSON translator. Return only valid JSON without any additional text or markdown.'
+              'You are a precise JSON translator. Return only valid JSON without any additional text or markdown. If the input is too large, process it and return a valid JSON response, even if partial.'
             },
             {
               'role': 'user',
               'content':
-                  'Translate the following JSON content from ${currentLanguage.value} to ${selectedLanguage.value} and return only the translated JSON:\n\n$textToTranslate',
+              'Translate the following JSON content from ${currentLanguage.value} to ${selectedLanguage.value} and return only the translated JSON:\n\n$textToTranslate',
             },
           ],
-          'max_tokens': 8000,
+          'max_tokens': 16000, // Increased to handle larger responses
         }),
       );
 
@@ -245,30 +247,34 @@ class ConvertToTextController extends GetxController {
 
         final responseBody = utf8.decode(response.bodyBytes);
         final jsonData = json.decode(responseBody);
-        final translatedText = jsonData['choices'][0]['message']['content']
-          ..replaceAll('```json', '').replaceAll('```', '').trim();
+        final translatedText = jsonData['choices'][0]['message']['content'];
 
         // Print processed text for debugging
         print('Processed text: $translatedText');
 
-        // Attempt to decode translatedText as JSON
-        final translatedData = json.decode(translatedText) as List;
-
-        _updateMessages(translatedData);
-        currentLanguage.value = selectedLanguage.value;
-        await saveTranscription(filePath,false);
-        NotificationService.showNotification(
-          title: "Translation Ready!",
-          body: "Click to view Conversion",
-          payload: "Conversion",
-          keyPoints: filePath,
-          fileName: fileName,
-          filePath: filePath,
-        );
-        // Get.snackbar('Success', 'Translated to ${selectedLanguage.value}');
+        // Validate JSON before decoding
+        try {
+          final translatedData = json.decode(translatedText) as List;
+          _updateMessages(translatedData);
+          currentLanguage.value = selectedLanguage.value;
+          await saveTranscription(filePath, false);
+          NotificationService.showNotification(
+            title: "Translation Ready!",
+            body: "Click to view Conversion",
+            payload: "Conversion",
+            keyPoints: filePath,
+            fileName: fileName,
+            filePath: filePath,
+          );
+        } catch (e) {
+          print('JSON decode error: $e');
+          Get.snackbar('Error',
+              'Translation response was incomplete or invalid. Please try again.');
+          return;
+        }
       } else {
         Get.snackbar('Error',
-            'Translation failed: ${response.statusCode} \nPlease Try again later.');
+            'Translation failed: ${response.statusCode} \nPlease try again later.');
       }
     } catch (e) {
       Get.snackbar('Error', 'Translation error: $e');
