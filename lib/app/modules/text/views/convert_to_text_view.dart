@@ -55,7 +55,7 @@ class ConvertToTextView extends StatelessWidget {
               }
 
               return Positioned.fill(
-                top: textController.isTranslate.value ? 330 : 290,
+                top: textController.isTranslate.value ? 350 : 290,
                 bottom: 100,
                 child: SingleChildScrollView(
                   controller: textController.scrollController,
@@ -179,17 +179,7 @@ class ConvertToTextView extends StatelessWidget {
                       const Spacer(),
                     ],
                   ),
-                ],
-              ),
-            ),
-
-            // Fixed editing and translation controls
-            Positioned(
-              top: 250, // Positioned below the audio player
-              left: 10,
-              right: 10,
-              child: Column(
-                children: [
+                  SizedBox(height: 6),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -245,8 +235,8 @@ class ConvertToTextView extends StatelessWidget {
                                 ? 'English'
                                 : textController.currentLanguage.value,
                             onPressed: () {},
-                            height: 26,
-                            width: 70,
+                            height: 40,
+                            width: 80,
                             fontSize: 12,
                           ),
                           Padding(
@@ -254,7 +244,7 @@ class ConvertToTextView extends StatelessWidget {
                             child: SvgPicture.asset('assets/images/summary/arrow_icon.svg'),
                           ),
                           Obx(() => Container(
-                            height: 30,
+                            height: 40,
                             width: 120,
                             decoration: BoxDecoration(
                               color: AppColors.appColor,
@@ -286,8 +276,8 @@ class ConvertToTextView extends StatelessWidget {
                           CustomButton(
                             text: 'Translate',
                             onPressed: () => textController.translateText(filePath, fileName),
-                            height: 26,
-                            width: 70,
+                            height: 40,
+                            width: 80,
                             fontSize: 12,
                           ),
                         ],
@@ -298,6 +288,18 @@ class ConvertToTextView extends StatelessWidget {
                 ],
               ),
             ),
+
+            // Fixed editing and translation controls
+            /*Positioned(
+              top: 250, // Positioned below the audio player
+              left: 10,
+              right: 10,
+              child: Column(
+                children: [
+
+                ],
+              ),
+            ),*/
 
             // Fixed bottom buttons
             Positioned(

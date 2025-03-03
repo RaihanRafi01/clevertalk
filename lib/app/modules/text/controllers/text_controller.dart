@@ -214,7 +214,7 @@ class ConvertToTextController extends GetxController {
       }).toList());
 
       const apiKey =
-          'sk--WnXhUylq4uuJb2d8m4EidGSpKbRYsA'; // Replace with your OpenAI API key
+          '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'; // Replace with your OpenAI API key
       const apiUrl = 'https://api.openai.com/v1/chat/completions';
 
       final response = await http.post(

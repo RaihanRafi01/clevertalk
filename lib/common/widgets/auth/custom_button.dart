@@ -40,7 +40,7 @@ class CustomButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: height,
-      width: width, // Full-width button
+      width: width,
       child: !isEditPage
           ? ElevatedButton(
         onPressed: onPressed,
@@ -51,20 +51,25 @@ class CustomButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(borderRadius),
           ),
         ),
-        child: isGem ? textWithIcon() : Text(
-          text,
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: fontSize, color: textColor),
+        child: Center( // Wrap the child in a Center widget
+          child: isGem ? textWithIcon() : Text(
+            text,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: fontSize, color: textColor),
+          ),
         ),
       )
           : OutlinedButton(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
-          side: BorderSide(color: borderColor), // Border color
-          backgroundColor: backgroundColor, // Background color
+          side: BorderSide(color: borderColor),
+          backgroundColor: backgroundColor,
+          padding: padding, // Ensure padding is consistent
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(borderRadius),
+          ),
         ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Center( // Wrap the child in a Center widget
           child: isGem ? textWithIcon() : Text(
             text.toUpperCase(),
             textAlign: TextAlign.center,
@@ -77,15 +82,16 @@ class CustomButton extends StatelessWidget {
 
   Widget textWithIcon() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min, // Ensure Row takes only the space it needs
+      mainAxisAlignment: MainAxisAlignment.center, // Center the Row contents
       children: [
         if (isGem && svgAsset.isNotEmpty)
           Padding(
-            padding: const EdgeInsets.only(right: 3),
+            padding: const EdgeInsets.only(right: 8.0), // Consistent spacing
             child: SvgPicture.asset(
-              svgAsset, // SVG asset path
-              width: 20.0, // Adjust the size as needed
-              height: 20.0, // Adjust the size as needed
+              svgAsset,
+              width: 20.0,
+              height: 20.0,
             ),
           ),
         Text(
