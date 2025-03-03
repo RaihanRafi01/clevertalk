@@ -109,6 +109,27 @@ class ConvertToTextView extends StatelessWidget {
                             max: audioController.totalDuration.value,
                             onChanged: (value) async {
                               await audioController.seekAudio(Duration(seconds: value.toInt()));
+                              final textController = Get.find<ConvertToTextController>();
+                              if (textController.scrollController.hasClients) {
+                                final totalDuration = audioController.totalDuration.value;
+                                // Add 10-second offset
+                                final adjustedValue = (value + 30).clamp(0.0, totalDuration.toDouble());
+                                final proportion = adjustedValue / totalDuration;
+                                final maxScrollExtent = textController.scrollController.position.maxScrollExtent;
+                                final viewportHeight = textController.scrollController.position.viewportDimension;
+                                final scrollOffset = (proportion * maxScrollExtent - (viewportHeight / 2))
+                                    .clamp(0.0, maxScrollExtent);
+
+                                textController.scrollController.jumpTo(scrollOffset);
+                                // Highlight still based on actual value
+                                final highlightProportion = value / totalDuration;
+                                final newIndex = (highlightProportion * (textController.messages.length - 1))
+                                    .round()
+                                    .clamp(0, textController.messages.length - 1);
+                                textController.currentHighlightedIndex.value = newIndex;
+                                textController.messages.refresh();
+                                print('Seeked to $value, Adjusted to $adjustedValue, jumped to $scrollOffset, index: $newIndex');
+                              }
                             },
                             activeColor: AppColors.appColor,
                             inactiveColor: Colors.grey,
@@ -137,10 +158,28 @@ class ConvertToTextView extends StatelessWidget {
                                     : 'assets/images/audio/play_icon.svg',
                                 color: audioController.isPlaying.value ? null : AppColors.appColor,
                                 onTap: () async {
-                                  if (audioController.isPlaying.value) {
-                                    await audioController.pauseAudio();
-                                  } else {
-                                    await audioController.playAudio();
+                                  try {
+                                    if (audioController.isPlaying.value) {
+                                      print('Pausing audio... Current position: ${audioController.currentPosition.value}');
+                                      await audioController.pauseAudio();
+                                      print('Audio paused. Position: ${audioController.currentPosition.value}');
+                                    } else {
+                                      print('Attempting to play/resume audio. isPlaying: ${audioController.isPlaying.value}, '
+                                          'Current position: ${audioController.currentPosition.value}, '
+                                          'FilePath: $filePath');
+                                      if (audioController.currentPosition.value > 0) {
+                                        print('Resuming audio from position: ${audioController.currentPosition.value}');
+                                        await audioController.resumeAudio(filePath: filePath);
+                                        print('Resume completed. isPlaying: ${audioController.isPlaying.value}');
+                                      } else {
+                                        print('Starting fresh playback with filePath: $filePath');
+                                        await audioController.playAudio(filePath: filePath);
+                                        print('Fresh playback started. isPlaying: ${audioController.isPlaying.value}');
+                                      }
+                                    }
+                                  } catch (e) {
+                                    print('Error toggling play/pause/resume: $e');
+                                    Get.snackbar('Error', 'Failed to toggle audio: $e');
                                   }
                                 },
                               ),
@@ -151,6 +190,27 @@ class ConvertToTextView extends StatelessWidget {
                                   final newPosition = (audioController.currentAudioPosition.inSeconds + 10)
                                       .clamp(0, audioController.totalDuration.value.toInt());
                                   await audioController.seekAudio(Duration(seconds: newPosition));
+                                  final textController = Get.find<ConvertToTextController>();
+                                  if (textController.scrollController.hasClients) {
+                                    final totalDuration = audioController.totalDuration.value;
+                                    // Add 10-second offset
+                                    final adjustedPosition = (newPosition + 10).clamp(0.0, totalDuration.toDouble());
+                                    final proportion = adjustedPosition / totalDuration;
+                                    final maxScrollExtent = textController.scrollController.position.maxScrollExtent;
+                                    final viewportHeight = textController.scrollController.position.viewportDimension;
+                                    final scrollOffset = (proportion * maxScrollExtent - (viewportHeight / 2))
+                                        .clamp(0.0, maxScrollExtent);
+
+                                    textController.scrollController.jumpTo(scrollOffset);
+                                    // Highlight still based on actual position
+                                    final highlightProportion = newPosition / totalDuration;
+                                    final newIndex = (highlightProportion * (textController.messages.length - 1))
+                                        .round()
+                                        .clamp(0, textController.messages.length - 1);
+                                    textController.currentHighlightedIndex.value = newIndex;
+                                    textController.messages.refresh();
+                                    print('Seeked forward to $newPosition, Adjusted to $adjustedPosition, jumped to $scrollOffset, index: $newIndex');
+                                  }
                                 },
                               ),
                               SvgIcon(
@@ -380,20 +440,22 @@ class ConvertToTextView extends StatelessWidget {
   }
 
   Widget _buildReadOnlyList(ConvertToTextController controller) {
-    return Column(
+    return Obx(() => Column(
       children: List.generate(controller.messages.length, (index) {
         final msg = controller.messages[index];
-        return Obx(() {
-          bool isHighlighted = index == controller.currentHighlightedIndex.value;
-          return CustomUserText(
-            name: msg['name']!,
-            time: msg['time']!,
-            UserColor: msg['name'] == 'l' ? AppColors.green : AppColors.textUserColor,
-            description: msg['description']!,
-            isHighlighted: isHighlighted,
-          );
-        });
+        final isHighlighted = controller.currentHighlightedIndex.value == index;
+        // Debug: Log rebuilding
+        print(':::::::::::::::::::::::Rebuilding index $index, isHighlighted: $isHighlighted');
+        return CustomUserText(
+          name: msg['name']!,
+          time: msg['time']!,
+          UserColor: msg['name'] == 'l' ? AppColors.green : AppColors.textUserColor,
+          description: msg['description']!,
+          isHighlighted: isHighlighted,
+        );
       }),
-    );
+    ));
   }
+
+
 }

@@ -21,6 +21,7 @@ class AudioPlayerController extends GetxController {
   RxList<Map<String, dynamic>> audioFiles = <Map<String, dynamic>>[].obs;
   RxInt currentIndex = (-1).obs; // Default to -1 (no file selected)
   RxBool isLoading = false.obs; // Observable for loading state
+  String? _currentFilePath;
 
   @override
   void onInit() {
@@ -58,11 +59,15 @@ class AudioPlayerController extends GetxController {
   Duration get currentAudioPosition => _audioPlayer.position;
 
   Future<void> seekAudio(Duration position) async {
+    print('Seeking to: ${position.inSeconds}');
     await _audioPlayer.seek(position);
   }
 
   Future<void> pauseAudio() async {
+    print('Pausing audio... Current position: ${currentPosition.value}');
     await _audioPlayer.pause();
+    isPlaying.value = false;
+    print('Paused. Position: ${currentPosition.value}');
   }
 
   Future<void> playAudio({String? filePath}) async {
@@ -75,11 +80,38 @@ class AudioPlayerController extends GetxController {
     }
 
     if (await File(filePath!).exists()) {
+      print('Setting file path: $filePath');
+      _currentFilePath = filePath; // Store the current file path
       await _audioPlayer.setFilePath(filePath);
+      print('Starting playback...');
       await _audioPlayer.play();
+      isPlaying.value = true;
     } else {
+      print('File does not exist: $filePath');
       Get.snackbar('Error', 'File does not exist');
     }
+  }
+
+  Future<void> resumeAudio({String? filePath}) async {
+    if (_audioPlayer.audioSource == null || (filePath != null && filePath != _currentFilePath)) {
+      print('Audio source not set or file changed. Re-setting file path: $filePath');
+      if (filePath == null) {
+        if (audioFiles.isNotEmpty && currentIndex.value >= 0) {
+          filePath = audioFiles[currentIndex.value]['file_path'];
+        } else {
+          Get.snackbar('Error', 'No audio file available to resume');
+          return;
+        }
+      }
+      await playAudio(filePath: filePath); // Re-start playback if source is lost
+      return;
+    }
+
+    print('Resuming audio from position: ${currentPosition.value}');
+    await _audioPlayer.seek(Duration(seconds: currentPosition.value.toInt())); // Ensure position
+    await _audioPlayer.play();
+    isPlaying.value = true;
+    print('Resume completed. Position: ${currentPosition.value}');
   }
 
   void playPrevious() {
@@ -101,47 +133,12 @@ class AudioPlayerController extends GetxController {
   }
 
   Future<void> stopAudio() async {
+    print('Stopping audio...');
     await _audioPlayer.stop();
+    currentPosition.value = 0.0;
+    isPlaying.value = false;
+    _currentFilePath = null; // Clear the current file path
   }
-
-  /*Future<void> convertToText() async {
-    try {
-      if (audioFiles.isEmpty || currentIndex.value < 0) {
-        throw Exception('No audio file selected');
-      }
-
-      final audioFile = audioFiles[currentIndex.value];
-      final filePath = audioFile['file_path'];
-      final fileName = audioFile['file_name'];
-
-
-      print('::::::::::::::::::::::::::::::::::::filePath: $filePath');
-      print('::::::::::::::::::::::::::::::::::::fileName: $fileName');
-
-      isLoading.value = true; // Start loading
-
-      final response = await _apiService.fetchTranscription(filePath);
-
-      print('::::::::::::::::::::::::::::::::::::CODE: ${response.statusCode}');
-      print('::::::::::::::::::::::::::::::::::::body: ${response.body}');
-
-      if (response.statusCode == 200) {
-        final result = json.decode(response.body);
-        final extractedData = result['Data'];
-        Get.to(() => ConvertView(text: extractedData, filePath: filePath, fileName: fileName,));
-
-        Get.snackbar('Success', 'Text Conversion Success');
-      } else {
-        Get.snackbar('Error', 'Text Conversion Failed: ${response.body}');
-      }
-    } catch (e) {
-      Get.snackbar('Error', 'Error: $e');
-    }
-    finally {
-      isLoading.value = false; // Stop loading
-    }
-  }*/
-
 
   Future<void> convertToText() async {
     try {
@@ -232,86 +229,6 @@ class AudioPlayerController extends GetxController {
     }
   }
 
-
-
-
-  /*Future<void> fetchSummary(String filePath, String fileName) async {
-    try {
-      isLoading.value = true; // Start loading
-      final response = await _apiService.fetchSummary(filePath, fileName);
-
-      if (response.statusCode == 200) {
-        final result = json.decode(response.body);
-
-        // Extract the "content" field from the "Data" object
-        final summaryText = result['Data']['content'];
-
-        // Navigate to SummaryKeyPointView with the extracted summary
-        Get.to(() => SummaryKeyPointView(summary: summaryText, keyPoints: ''));
-      } else {
-        Get.snackbar('Error', 'Failed to fetch summary: ${response.body}');
-      }
-    } catch (e) {
-      Get.snackbar('Error', 'Error: $e');
-    } finally {
-      isLoading.value = false; // Stop loading
-    }
-  }*/
-
-  /*Future<void> fetchSummary(String filePath, String fileName) async {
-    try {
-      isLoading.value = true; // Start loading
-      final dbHelper = DatabaseHelper();
-      final db = await dbHelper.database;
-
-      // Check if the file exists in the database
-      final result = await db.query(
-        'audio_files',
-        where: 'file_name = ?',
-        whereArgs: [fileName],
-      );
-
-      if (result.isNotEmpty) {
-        final existingSummary = result.first['summary'];
-
-        if (existingSummary != null && existingSummary.toString().isNotEmpty) {
-          // If the summary already exists, show it
-          Get.to(() => SummaryKeyPointView(summary: existingSummary.toString(), keyPoints: ''));
-        } else {
-          // If the summary is not available, fetch it from the API
-          final response = await _apiService.fetchSummary(filePath, fileName);
-
-          if (response.statusCode == 200) {
-            final jsonResponse = json.decode(response.body);
-            final summaryText = jsonResponse['Data']['content'];
-
-            // Update the summary in the database
-            await db.update(
-              'audio_files',
-              {'summary': summaryText},
-              where: 'file_name = ?',
-              whereArgs: [fileName],
-            );
-
-            // Navigate to SummaryKeyPointView with the new summary
-            Get.to(() => SummaryKeyPointView(summary: summaryText, keyPoints: ''));
-          } else {
-            Get.snackbar('Error', 'Failed to fetch summary: ${response.body}');
-          }
-        }
-      } else {
-        // If the file doesn't exist in the database, show an error
-        Get.snackbar('Error', 'File not found in the database. Please add the file first.');
-      }
-    } catch (e) {
-      Get.snackbar('Error', 'Error: $e');
-    } finally {
-      isLoading.value = false; // Stop loading
-    }
-  }*/
-
-
-
   Future<void> fetchKeyPoints(String filePath, String fileName) async {
     try {
       //isLoading.value = true; // Start loading
@@ -366,7 +283,6 @@ class AudioPlayerController extends GetxController {
               filePath: filePath,
             );
 
-            //Get.to(() => SummaryKeyPointView(keyPoints: keyPointText, fileName: fileName,));
           } else {
             Get.snackbar('Error', 'Failed to fetch keyPoint: ${response.body}');
           }
@@ -380,24 +296,6 @@ class AudioPlayerController extends GetxController {
     }
   }
 
-  /*Future<void> fetchKeyPoints(String filePath, String fileName) async {
-    try {
-      isLoading.value = true; // Start loading
-      final response = await _apiService.fetchKeyPoints(filePath, fileName);
-
-      if (response.statusCode == 200) {
-        final result = json.decode(response.body);
-        final keyPointsText = result['Data']['content'];
-        Get.to(() => SummaryKeyPointView(isKey: true, keyPoints: keyPointsText, summary: '',));
-      } else {
-        Get.snackbar('Error', 'Failed to fetch key points: ${response.body}');
-      }
-    } catch (e) {
-      Get.snackbar('Error', 'Error: $e');
-    } finally {
-      isLoading.value = false; // Stop loading
-    }
-  }*/
 
   @override
   void onClose() {

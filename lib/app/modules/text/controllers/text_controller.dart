@@ -214,7 +214,7 @@ class ConvertToTextController extends GetxController {
       }).toList());
 
       const apiKey =
-          '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'; // Replace with your OpenAI API key
+          'sk-CT3BlbkFJCfJvQqqTCYGdK4Feq9HDwbc1_CaIMXannJRYs'; // Replace with your OpenAI API key
       const apiUrl = 'https://api.openai.com/v1/chat/completions';
 
       final response = await http.post(
@@ -459,29 +459,251 @@ class ConvertToTextController extends GetxController {
     );
   }
 
-  void syncScrollingWithAudio(AudioPlayerController audioController) {
-    audioController.currentPosition.listen((position) {
-      final currentTimestamp = position;
+  /*void syncScrollingWithAudio(AudioPlayerController audioController) {
+    // Sync highlighting and scrolling with audio position
+    audioController.currentPosition.listen((position) async {
+      final currentTimestamp = position.toDouble(); // Audio position in seconds
+      final totalDuration = audioController.totalDuration.value;
 
-      final index = messages.indexWhere((msg) {
-        final times = msg['time']!.split(' - ');
+      // Dynamic offset calculation
+      double dynamicOffset;
+      const halfHourInSeconds = 1800.0; // 30 minutes in seconds
+      if (currentTimestamp <= halfHourInSeconds) {
+        // First half hour: increase by 0.3s every 10s
+        dynamicOffset = 10.0 + (currentTimestamp / 10).floor() * 0.1;
+      } else {
+        // Second half hour: base from 30min + increase by 0.05s every 10s
+        final offsetAtHalfHour = 10.0 + (1800.0 / 10).floor() * 0.2; // Offset at 1800s = 64.0s
+        final additionalTime = currentTimestamp - halfHourInSeconds;
+        dynamicOffset = offsetAtHalfHour + (additionalTime / 10).floor() * 0.05;
+      }
+
+      final adjustedTimestamp = (currentTimestamp + dynamicOffset).clamp(0.0, totalDuration.toDouble());
+
+      print('Audio position: $currentTimestamp, Offset: $dynamicOffset, Adjusted: $adjustedTimestamp, Total: $totalDuration');
+
+      // Find the message index for highlighting based on currentTimestamp (no offset for highlight)
+      int newHighlightIndex = -1;
+      for (int i = 0; i < messages.length; i++) {
+        final times = messages[i]['time']!.split(' - ');
         final startTime = parseTimeToSeconds(times[0]);
         final endTime = parseTimeToSeconds(times[1]);
-        return currentTimestamp >= startTime &&
-            currentTimestamp <= (endTime + 0.5);
-      });
-
-      if (index != -1 && currentHighlightedIndex.value != index) {
-        currentHighlightedIndex.value = index;
-        final scrollPosition = index * 125.0;
-        scrollController.animateTo(
-          scrollPosition,
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeInOut,
-        );
+        if (currentTimestamp >= startTime && currentTimestamp <= (endTime + 0.5)) {
+          newHighlightIndex = i;
+          break;
+        }
       }
+
+      // Fallback near the end of the audio
+      if (newHighlightIndex == -1 && currentTimestamp >= totalDuration - 1.0) {
+        newHighlightIndex = messages.length - 1;
+        print('Near end detected, forcing highlight to last: $newHighlightIndex');
+      }
+
+      // Update highlighted index if changed
+      if (currentHighlightedIndex.value != newHighlightIndex) {
+        currentHighlightedIndex.value = newHighlightIndex;
+        messages.refresh();
+        print('Highlighted index updated to: $newHighlightIndex at timestamp: $currentTimestamp');
+      }
+
+      // Ensure scroll controller is attached
+      if (!scrollController.hasClients) {
+        print('ScrollController not attached yet');
+        return;
+      }
+
+      // Calculate scroll position based on adjustedTimestamp
+      final maxScrollExtent = scrollController.position.maxScrollExtent;
+      final viewportHeight = scrollController.position.viewportDimension;
+      final currentScrollPosition = scrollController.offset;
+
+      final proportion = adjustedTimestamp / totalDuration;
+      double scrollOffset = proportion * maxScrollExtent - (viewportHeight / 2);
+      scrollOffset = scrollOffset.clamp(0.0, maxScrollExtent);
+
+      const animationDurationMs = 300; // Smooth scrolling
+
+      print('Scroll details - Proportion: $proportion, Offset: $scrollOffset, '
+          'Viewport: $viewportHeight, Max: $maxScrollExtent, Current: $currentScrollPosition');
+
+      if ((scrollOffset - currentScrollPosition).abs() > 5.0) {
+        await scrollController.animateTo(
+          scrollOffset,
+          duration: const Duration(milliseconds: animationDurationMs),
+          curve: Curves.easeOut,
+        );
+        print('Scrolled to: $scrollOffset with duration: $animationDurationMs ms');
+      } else {
+        print('No scroll needed, already near: $scrollOffset');
+      }
+    }, onError: (error) {
+      print('Error in position listener: $error');
+    });
+
+    // Optional: Scroll immediately when highlighted index changes
+    ever(currentHighlightedIndex, (index) {
+      if (index == -1 || !scrollController.hasClients) {
+        print('No valid index ($index) or scroll controller not attached');
+        return;
+      }
+
+      const itemHeightEstimate = 100.0; // Adjust based on CustomUserText height
+      final maxScrollExtent = scrollController.position.maxScrollExtent;
+      final viewportHeight = scrollController.position.viewportDimension;
+
+      double scrollOffset = index * itemHeightEstimate - (viewportHeight / 2);
+      scrollOffset = scrollOffset.clamp(0.0, maxScrollExtent);
+
+      print('Highlighted scroll - Index: $index, Offset: $scrollOffset, '
+          'Viewport: $viewportHeight, Max: $maxScrollExtent');
+
+      scrollController.animateTo(
+        scrollOffset,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      ).then((_) {
+        print('Scrolled to offset: $scrollOffset for highlighted index: $index');
+      });
+    });
+  }*/
+
+  void syncScrollingWithAudio(AudioPlayerController audioController) {
+    audioController.currentPosition.listen((position) async {
+      final currentTimestamp = position.toDouble(); // Audio position in seconds
+      final totalDuration = audioController.totalDuration.value;
+
+      // Find the message index for highlighting based on currentTimestamp
+      int newHighlightIndex = -1;
+      for (int i = 0; i < messages.length; i++) {
+        final times = messages[i]['time']!.split(' - ');
+        final startTime = parseTimeToSeconds(times[0]);
+        final endTime = parseTimeToSeconds(times[1]);
+        if (currentTimestamp >= startTime && currentTimestamp <= (endTime + 0.5)) {
+          newHighlightIndex = i;
+          break;
+        }
+      }
+
+      // Fallback near the end of the audio
+      if (newHighlightIndex == -1 && currentTimestamp >= totalDuration - 1.0) {
+        newHighlightIndex = messages.length - 1;
+        print('Near end detected, forcing highlight to last: $newHighlightIndex');
+      }
+
+      // Update highlighted index if changed
+      if (currentHighlightedIndex.value != newHighlightIndex) {
+        currentHighlightedIndex.value = newHighlightIndex;
+        messages.refresh();
+        print('Highlighted index updated to: $newHighlightIndex at timestamp: $currentTimestamp');
+      }
+
+      // Ensure scroll controller is attached and has content to scroll
+      if (!scrollController.hasClients) {
+        print('ScrollController not attached yet, skipping scroll');
+        return;
+      }
+
+      if (messages.isEmpty) {
+        print('Messages list is empty, cannot scroll');
+        return;
+      }
+
+      final maxScrollExtent = scrollController.position.maxScrollExtent;
+      if (maxScrollExtent <= 0) {
+        print('Max scroll extent is 0, no scrolling possible');
+        return;
+      }
+
+      final viewportHeight = scrollController.position.viewportDimension;
+      final currentScrollPosition = scrollController.offset;
+
+      // Divide 1 hour into 5 parts (720s each) and calculate dynamic offset
+      double dynamicOffset;
+      const partDuration = 720.0; // 12 minutes per part
+      if (currentTimestamp <= partDuration) {
+        // Part 1: 0-12 minutes
+        dynamicOffset = 10.0 + (currentTimestamp / 10).floor() * 0.05;
+      } else if (currentTimestamp <= 2 * partDuration) {
+        // Part 2: 12-24 minutes
+        final offsetAtPart1 = 10.0 + (partDuration / 10).floor() * 0.05; // 13.6 at 720s
+        final additionalTime = currentTimestamp - partDuration;
+        dynamicOffset = offsetAtPart1 + (additionalTime / 10).floor() * 0.05;
+      } else if (currentTimestamp <= 3 * partDuration) {
+        // Part 3: 24-36 minutes (includes 30min mark)
+        final offsetAtPart2 = 10.0 + (2 * partDuration / 10).floor() * 0.05; // 17.2 at 1440s
+        final additionalTime = currentTimestamp - 2 * partDuration;
+        dynamicOffset = offsetAtPart2 + (additionalTime / 10).floor() * 0.05;
+      } else if (currentTimestamp <= 4 * partDuration) {
+        // Part 4: 36-48 minutes
+        final offsetAtPart3 = 10.0 + (3 * partDuration / 10).floor() * 0.05; // 20.8 at 2160s
+        final additionalTime = currentTimestamp - 3 * partDuration;
+        dynamicOffset = offsetAtPart3 + (additionalTime / 10).floor() * 0.05;
+      } else {
+        // Part 5: 48-60 minutes
+        final offsetAtPart4 = 10.0 + (4 * partDuration / 10).floor() * 0.03; // 24.4 at 2880s
+        final additionalTime = currentTimestamp - 4 * partDuration;
+        dynamicOffset = offsetAtPart4 + (additionalTime / 10).floor() * 0.05;
+      }
+
+      // Adjust timestamp with dynamic offset
+      final adjustedTimestamp = (currentTimestamp + dynamicOffset).clamp(0.0, totalDuration);
+
+      // Calculate the proportional scroll position
+      final proportion = adjustedTimestamp / totalDuration;
+      double proportionalScrollOffset = proportion * maxScrollExtent;
+
+      // Adjust scroll to prioritize the highlighted item
+      double targetScrollOffset;
+      if (newHighlightIndex != -1) {
+        final estimatedItemHeight = maxScrollExtent / messages.length;
+        double highlightScrollOffset = newHighlightIndex * estimatedItemHeight - (viewportHeight / 2);
+
+        // At or beyond 30 minutes (middle of Part 3), prioritize highlight
+        if (currentTimestamp >= 3 * partDuration / 2) { // 1080s (18min)
+          targetScrollOffset = 0.7 * highlightScrollOffset + 0.3 * proportionalScrollOffset;
+        } else {
+          targetScrollOffset = (highlightScrollOffset + proportionalScrollOffset) / 2;
+        }
+      } else {
+        targetScrollOffset = proportionalScrollOffset;
+      }
+
+      // Clamp the offset
+      targetScrollOffset = targetScrollOffset.clamp(0.0, maxScrollExtent);
+
+      print('Scroll calculation - '
+          'Timestamp: $currentTimestamp / $totalDuration, '
+          'Dynamic Offset: $dynamicOffset, '
+          'Adjusted Timestamp: $adjustedTimestamp, '
+          'Proportion: $proportion, '
+          'Proportional Offset: $proportionalScrollOffset, '
+          'Highlighted Index: $newHighlightIndex, '
+          'Target Offset: $targetScrollOffset, '
+          'Viewport Height: $viewportHeight, '
+          'Max Scroll Extent: $maxScrollExtent, '
+          'Current Position: $currentScrollPosition');
+
+      // Scroll if significant difference
+      if ((targetScrollOffset - currentScrollPosition).abs() > 20.0) {
+        try {
+          await scrollController.animateTo(
+            targetScrollOffset,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+          print('Successfully scrolled to: $targetScrollOffset');
+        } catch (e) {
+          print('Error during scroll animation: $e');
+        }
+      } else {
+        print('No scroll needed, already near target: $targetScrollOffset');
+      }
+    }, onError: (error) {
+      print('Error in position listener: $error');
     });
   }
+
 
   double parseTimeToSeconds(String time) {
     final parts = time.split(':');
