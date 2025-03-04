@@ -1,7 +1,13 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../data/database_helper.dart';
 import '../../../data/services/api_services.dart';
 import '../../../data/services/notification_services.dart';
@@ -16,6 +22,7 @@ class ConvertToTextController extends GetxController {
   var isTranslate = false.obs;
   var selectedLanguage = 'English'.obs;
   var currentLanguage = 'English'.obs;
+  var title = ''.obs;
   final ScrollController scrollController = ScrollController();
   List<TextEditingController> nameControllers = [];
   List<TextEditingController> descControllers = [];
@@ -43,6 +50,7 @@ class ConvertToTextController extends GetxController {
 
       if (result.isNotEmpty) {
         final existingTranscription = result.first['transcription'];
+        title.value = result.first['file_name'].toString();
         currentLanguage.value =
             result.first['language_transcription']?.toString() ?? 'English';
 
@@ -93,7 +101,7 @@ class ConvertToTextController extends GetxController {
       final endTime = (entry['End_time'] as num).toDouble();
       final duration = endTime - startTime;
       final speakerName =
-          (entry['Speaker_Name'] ?? 'Unknown Speaker') as String;
+      (entry['Speaker_Name'] ?? 'Unknown Speaker') as String;
       final transcript = (entry['Transcript'] ?? '') as String;
 
       // Split transcript into sentences based on . ! ?
@@ -135,12 +143,12 @@ class ConvertToTextController extends GetxController {
 
     messages.value = splitData.map<Map<String, String>>((entry) {
       final speakerName =
-          (entry['Speaker_Name'] ?? 'Unknown Speaker') as String;
+      (entry['Speaker_Name'] ?? 'Unknown Speaker') as String;
       final transcript = (entry['Transcript'] ?? '') as String;
       final startTimeFormatted =
-          formatTimestamp((entry['Start_time'] as num).toDouble());
+      formatTimestamp((entry['Start_time'] as num).toDouble());
       final endTimeFormatted =
-          formatTimestamp((entry['End_time'] as num).toDouble());
+      formatTimestamp((entry['End_time'] as num).toDouble());
 
       return {
         'name': speakerName,
@@ -167,11 +175,11 @@ class ConvertToTextController extends GetxController {
 
     messages.value = List.generate(
         messages.length,
-        (i) => {
-              'name': nameControllers[i].text,
-              'time': messages[i]['time']!,
-              'description': descControllers[i].text,
-            });
+            (i) => {
+          'name': nameControllers[i].text,
+          'time': messages[i]['time']!,
+          'description': descControllers[i].text,
+        });
 
     final updatedData = messages.map((msg) {
       final times = msg['time']!.split(' - ');
@@ -200,11 +208,21 @@ class ConvertToTextController extends GetxController {
 
   Future<void> translateText(String filePath, String fileName) async {
     Get.snackbar(
-        duration: Duration(seconds: 4),
-        'Translation in progress...',
-        'This may take some time, but don\'t worry! We\'ll notify you as soon as it\'s ready. Feel free to use the app while you wait.');
+      duration: Duration(seconds: 4),
+      'Translation in progress...',
+      'This may take some time, but don\'t worry! We\'ll notify you as soon as it\'s ready. Feel free to use the app while you wait.',
+    );
+
+    ;
+
     try {
-      final textToTranslate = json.encode(messages.map((msg) {
+      const apiKey =
+          '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';
+      const apiUrl = 'https://api.openai.com/v1/chat/completions';
+      const chunkSize = 20; // Adjust based on testing (e.g., 5 messages per chunk)
+
+      // Prepare the full list of messages
+      final allMessages = messages.map((msg) {
         final times = msg['time']!.split(' - ');
         return {
           'Speaker_Name': msg['name'],
@@ -212,74 +230,205 @@ class ConvertToTextController extends GetxController {
           'Start_time': parseTimeToSeconds(times[0]),
           'End_time': parseTimeToSeconds(times[1]),
         };
-      }).toList());
+      }).toList();
 
-      const apiKey =
-          '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'; // Replace with your OpenAI API key
-      const apiUrl = 'https://api.openai.com/v1/chat/completions';
+      print('::::::::::::::::::::::::::::::::::::::::::::::: TOTAL messages ${allMessages.length}');
 
-      final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {
-          'Authorization': 'Bearer $apiKey',
-          'Content-Type': 'application/json; charset=utf-8',
-        },
-        body: json.encode({
-          'model': 'gpt-4o-mini',
-          'messages': [
-            {
-              'role': 'system',
-              'content':
-                  'You are a precise JSON translator. Return only valid JSON without any additional text or markdown. If the input is too large, process it and return a valid JSON response, even if partial.'
-            },
-            {
-              'role': 'user',
-              'content':
-                  'Translate the following JSON content from ${currentLanguage.value} to ${selectedLanguage.value} and return only the translated JSON:\n\n$textToTranslate',
-            },
-          ],
-          'max_tokens': 16000, // Increased to handle larger responses
-        }),
-      );
+      // Split into chunks
+      List<List<Map<String, dynamic>>> chunks = [];
+      for (int i = 0; i < allMessages.length; i += chunkSize) {
+        final end = (i + chunkSize < allMessages.length) ? i + chunkSize : allMessages.length;
+        chunks.add(allMessages.sublist(i, end));
+      }
 
-      if (response.statusCode == 200) {
-        // Print raw response for debugging
-        print('Raw response: ${response.body}');
+      // Translate each chunk
+      List<Map<String, dynamic>> translatedData = [];
+      for (var chunk in chunks) {
+        final textToTranslate = json.encode(chunk);
 
-        final responseBody = utf8.decode(response.bodyBytes);
-        final jsonData = json.decode(responseBody);
-        final translatedText = jsonData['choices'][0]['message']['content'];
+        final response = await http.post(
+          Uri.parse(apiUrl),
+          headers: {
+            'Authorization': 'Bearer $apiKey',
+            'Content-Type': 'application/json; charset=utf-8',
+          },
+          body: json.encode({
+            'model': 'gpt-4o-mini',
+            'messages': [
+              {
+                'role': 'system',
+                'content':
+                'You are a precise JSON translator. Return only valid JSON without any additional text or markdown. If the input is too long, process it and return a valid JSON response, even if partial.',
+              },
+              {
+                'role': 'user',
+                'content':
+                'Translate the following JSON content from ${currentLanguage.value} to ${selectedLanguage.value} and return only the translated JSON:\n\n$textToTranslate',
+              },
+            ],
+            'max_tokens': 8000, // Lowered to ensure response fits (adjust as needed)
+          }),
+        );
 
-        // Print processed text for debugging
-        print('Processed text: $translatedText');
+        if (response.statusCode == 200) {
+          print('Raw response for chunk: ${response.body}');
+          final responseBody = utf8.decode(response.bodyBytes);
+          final jsonData = json.decode(responseBody);
+          final translatedText = jsonData['choices'][0]['message']['content'];
 
-        // Validate JSON before decoding
-        try {
-          final translatedData = json.decode(translatedText) as List;
-          _updateMessages(translatedData);
-          currentLanguage.value = selectedLanguage.value;
-          await saveTranscription(filePath, false);
-          NotificationService.showNotification(
-            title: "Translation Ready!",
-            body: "Click to view Conversion",
-            payload: "Conversion",
-            keyPoints: filePath,
-            fileName: fileName,
-            filePath: filePath,
-          );
-        } catch (e) {
-          print('JSON decode error: $e');
-          Get.snackbar('Error',
-              'Translation response was incomplete or invalid. Please try again.');
+          print('Processed text for chunk: $translatedText');
+
+          try {
+            final chunkData = json.decode(translatedText) as List;
+            translatedData.addAll(chunkData.cast<Map<String, dynamic>>());
+          } catch (e) {
+            print('JSON decode error for chunk: $e');
+            Get.snackbar('Error', 'Partial translation failed: $e');
+            return;
+          }
+        } else {
+          Get.snackbar('Error', 'Translation failed for chunk: ${response.statusCode}');
           return;
         }
-      } else {
-        Get.snackbar('Error',
-            'Translation failed: ${response.statusCode} \nPlease try again later.');
       }
+
+      // Update messages with the combined translated data
+      _updateMessages(translatedData);
+      currentLanguage.value = selectedLanguage.value;
+      await saveTranscription(filePath, false);
+      NotificationService.showNotification(
+        title: "Translation Ready!",
+        body: "Click to view Translation",
+        payload: "Conversion",
+        keyPoints: filePath,
+        fileName: fileName,
+        filePath: filePath,
+      );
     } catch (e) {
       Get.snackbar('Error', 'Translation error: $e');
       print('Error: $e');
+    }
+  }
+
+  Future<void> generateAndSharePdf() async {
+    final pdf = pw.Document();
+
+    // Load fonts from assets
+    final notoSansFont = pw.Font.ttf(await rootBundle.load("assets/fonts/NotoSans-Regular.ttf"));
+    final notoSansSCFont = pw.Font.ttf(await rootBundle.load("assets/fonts/NotoSansSC-Regular.ttf"));
+    final notoSansDevanagariFont = pw.Font.ttf(await rootBundle.load("assets/fonts/NotoSansDevanagari-Regular.ttf"));
+
+    print('Generating PDF with messages: $messages');
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(32), // Add margins for better layout
+        build: (pw.Context context) {
+          final List<pw.Widget> pageContent = [];
+          final double pageHeight = PdfPageFormat.a4.height - 64; // 778 points
+          const double titleHeight = 60.0; // Estimated height for title section
+          const double itemSpacing = 10.0; // Space between items
+          double currentHeight = 0.0;
+          List<pw.Widget> currentPageItems = [];
+          bool isFirstPage = true; // Track if title has been added
+
+          // Add title only on the first page
+          if (isFirstPage) {
+            currentPageItems.add(
+              pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Text(
+                    'Transcription of ${title.value}',
+                    style: pw.TextStyle(
+                      fontSize: 20,
+                      fontWeight: pw.FontWeight.bold,
+                      font: notoSansFont,
+                      fontFallback: [notoSansSCFont, notoSansDevanagariFont],
+                    ),
+                  ),
+                  pw.SizedBox(height: 20),
+                ],
+              ),
+            );
+            currentHeight += titleHeight;
+            isFirstPage = false; // Ensure title is only added once
+          }
+
+          for (var msg in messages) {
+            final item = pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Row(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(
+                      '• ',
+                      style: pw.TextStyle(
+                        fontSize: 16,
+                        fontWeight: pw.FontWeight.bold,
+                        font: notoSansFont,
+                        fontFallback: [notoSansSCFont, notoSansDevanagariFont],
+                      ),
+                    ),
+                    pw.Flexible(
+                      child: pw.Text(
+                        '${msg['name']}: ${msg['description'] ?? 'No description'}',
+                        style: pw.TextStyle(
+                          fontSize: 15,
+                          font: notoSansFont,
+                          fontFallback: [notoSansSCFont, notoSansDevanagariFont],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.only(left: 20, top: 4),
+                  child: pw.Text(
+                    msg['time'] ?? 'No time',
+                    style: pw.TextStyle(
+                      fontSize: 12,
+                      font: notoSansFont,
+                      fontFallback: [notoSansSCFont, notoSansDevanagariFont],
+                    ),
+                  ),
+                ),
+              ],
+            );
+
+            // Estimate item height (rough approximation)
+            const estimatedItemHeight = 50.0; // Adjust based on testing
+            if (currentHeight + estimatedItemHeight + itemSpacing > pageHeight) {
+              pageContent.add(pw.Column(children: currentPageItems));
+              currentPageItems = [item];
+              currentHeight = estimatedItemHeight;
+            } else {
+              currentPageItems.add(item);
+              currentHeight += estimatedItemHeight + itemSpacing;
+            }
+          }
+
+          // Add the last page if there are remaining items
+          if (currentPageItems.isNotEmpty) {
+            pageContent.add(pw.Column(children: currentPageItems));
+          }
+
+          print('Total pages generated: ${pageContent.length}');
+          return pageContent;
+        },
+        // maxPages: 100, // Removed for now; reintroduce if needed
+      ),
+    );
+
+    final file = File("${(await getTemporaryDirectory()).path}/transcription.pdf");
+    try {
+      await file.writeAsBytes(await pdf.save());
+      await Share.shareXFiles([XFile(file.path)], text: "Transcription PDF");
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to generate or share PDF: $e');
+      print('PDF generation/share error: $e');
     }
   }
 
@@ -298,7 +447,7 @@ class ConvertToTextController extends GetxController {
           controller: transcriptionController,
           maxLines: 10,
           decoration:
-              const InputDecoration(labelText: 'Edit Full Transcription'),
+          const InputDecoration(labelText: 'Edit Full Transcription'),
         ),
         actions: [
           TextButton(
@@ -313,16 +462,16 @@ class ConvertToTextController extends GetxController {
               }
 
               List<Map<String, dynamic>> updatedMessages =
-                  transcriptionController.text
-                      .split('\n')
-                      .where((line) => line.contains(': '))
-                      .map((line) {
+              transcriptionController.text
+                  .split('\n')
+                  .where((line) => line.contains(': '))
+                  .map((line) {
                 final parts = line.split(': ');
                 final speakerName = parts[0].trim();
                 final transcript = parts.sublist(1).join(': ').trim();
 
                 final originalEntry = messages.firstWhere(
-                  (msg) => msg['name'] == speakerName,
+                      (msg) => msg['name'] == speakerName,
                   orElse: () => {'time': '00:00:00 - 00:00:00'},
                 );
 
@@ -345,11 +494,11 @@ class ConvertToTextController extends GetxController {
 
               messages.value = updatedMessages
                   .map<Map<String, String>>((entry) => {
-                        'name': entry['Speaker_Name'].toString(),
-                        'time':
-                            '${formatTimestamp(entry['Start_time'] as double)} - ${formatTimestamp(entry['End_time'] as double)}',
-                        'description': entry['Transcript'].toString(),
-                      })
+                'name': entry['Speaker_Name'].toString(),
+                'time':
+                '${formatTimestamp(entry['Start_time'] as double)} - ${formatTimestamp(entry['End_time'] as double)}',
+                'description': entry['Transcript'].toString(),
+              })
                   .toList();
 
               messages.refresh();
@@ -377,7 +526,7 @@ class ConvertToTextController extends GetxController {
     TextEditingController speakerNameController = TextEditingController();
     Set<String> uniqueSpeakers = messages.map((msg) => msg['name']!).toSet();
     String selectedSpeaker =
-        uniqueSpeakers.isNotEmpty ? uniqueSpeakers.first : "";
+    uniqueSpeakers.isNotEmpty ? uniqueSpeakers.first : "";
 
     Get.dialog(
       AlertDialog(
@@ -436,7 +585,7 @@ class ConvertToTextController extends GetxController {
                 if (existingTranscription != null &&
                     existingTranscription.toString().isNotEmpty) {
                   List<dynamic> data =
-                      json.decode(existingTranscription.toString());
+                  json.decode(existingTranscription.toString());
                   for (var entry in data) {
                     if (entry['Speaker_Name'] == selectedSpeaker) {
                       entry['Speaker_Name'] = newSpeakerName;
@@ -459,115 +608,6 @@ class ConvertToTextController extends GetxController {
       ),
     );
   }
-
-  /*void syncScrollingWithAudio(AudioPlayerController audioController) {
-    // Sync highlighting and scrolling with audio position
-    audioController.currentPosition.listen((position) async {
-      final currentTimestamp = position.toDouble(); // Audio position in seconds
-      final totalDuration = audioController.totalDuration.value;
-
-      // Dynamic offset calculation
-      double dynamicOffset;
-      const halfHourInSeconds = 1800.0; // 30 minutes in seconds
-      if (currentTimestamp <= halfHourInSeconds) {
-        // First half hour: increase by 0.3s every 10s
-        dynamicOffset = 10.0 + (currentTimestamp / 10).floor() * 0.1;
-      } else {
-        // Second half hour: base from 30min + increase by 0.05s every 10s
-        final offsetAtHalfHour = 10.0 + (1800.0 / 10).floor() * 0.2; // Offset at 1800s = 64.0s
-        final additionalTime = currentTimestamp - halfHourInSeconds;
-        dynamicOffset = offsetAtHalfHour + (additionalTime / 10).floor() * 0.05;
-      }
-
-      final adjustedTimestamp = (currentTimestamp + dynamicOffset).clamp(0.0, totalDuration.toDouble());
-
-      print('Audio position: $currentTimestamp, Offset: $dynamicOffset, Adjusted: $adjustedTimestamp, Total: $totalDuration');
-
-      // Find the message index for highlighting based on currentTimestamp (no offset for highlight)
-      int newHighlightIndex = -1;
-      for (int i = 0; i < messages.length; i++) {
-        final times = messages[i]['time']!.split(' - ');
-        final startTime = parseTimeToSeconds(times[0]);
-        final endTime = parseTimeToSeconds(times[1]);
-        if (currentTimestamp >= startTime && currentTimestamp <= (endTime + 0.5)) {
-          newHighlightIndex = i;
-          break;
-        }
-      }
-
-      // Fallback near the end of the audio
-      if (newHighlightIndex == -1 && currentTimestamp >= totalDuration - 1.0) {
-        newHighlightIndex = messages.length - 1;
-        print('Near end detected, forcing highlight to last: $newHighlightIndex');
-      }
-
-      // Update highlighted index if changed
-      if (currentHighlightedIndex.value != newHighlightIndex) {
-        currentHighlightedIndex.value = newHighlightIndex;
-        messages.refresh();
-        print('Highlighted index updated to: $newHighlightIndex at timestamp: $currentTimestamp');
-      }
-
-      // Ensure scroll controller is attached
-      if (!scrollController.hasClients) {
-        print('ScrollController not attached yet');
-        return;
-      }
-
-      // Calculate scroll position based on adjustedTimestamp
-      final maxScrollExtent = scrollController.position.maxScrollExtent;
-      final viewportHeight = scrollController.position.viewportDimension;
-      final currentScrollPosition = scrollController.offset;
-
-      final proportion = adjustedTimestamp / totalDuration;
-      double scrollOffset = proportion * maxScrollExtent - (viewportHeight / 2);
-      scrollOffset = scrollOffset.clamp(0.0, maxScrollExtent);
-
-      const animationDurationMs = 300; // Smooth scrolling
-
-      print('Scroll details - Proportion: $proportion, Offset: $scrollOffset, '
-          'Viewport: $viewportHeight, Max: $maxScrollExtent, Current: $currentScrollPosition');
-
-      if ((scrollOffset - currentScrollPosition).abs() > 5.0) {
-        await scrollController.animateTo(
-          scrollOffset,
-          duration: const Duration(milliseconds: animationDurationMs),
-          curve: Curves.easeOut,
-        );
-        print('Scrolled to: $scrollOffset with duration: $animationDurationMs ms');
-      } else {
-        print('No scroll needed, already near: $scrollOffset');
-      }
-    }, onError: (error) {
-      print('Error in position listener: $error');
-    });
-
-    // Optional: Scroll immediately when highlighted index changes
-    ever(currentHighlightedIndex, (index) {
-      if (index == -1 || !scrollController.hasClients) {
-        print('No valid index ($index) or scroll controller not attached');
-        return;
-      }
-
-      const itemHeightEstimate = 100.0; // Adjust based on CustomUserText height
-      final maxScrollExtent = scrollController.position.maxScrollExtent;
-      final viewportHeight = scrollController.position.viewportDimension;
-
-      double scrollOffset = index * itemHeightEstimate - (viewportHeight / 2);
-      scrollOffset = scrollOffset.clamp(0.0, maxScrollExtent);
-
-      print('Highlighted scroll - Index: $index, Offset: $scrollOffset, '
-          'Viewport: $viewportHeight, Max: $maxScrollExtent');
-
-      scrollController.animateTo(
-        scrollOffset,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      ).then((_) {
-        print('Scrolled to offset: $scrollOffset for highlighted index: $index');
-      });
-    });
-  }*/
 
   void syncScrollingWithAudio(AudioPlayerController audioController) {
     audioController.currentPosition.listen((position) async {
@@ -656,7 +696,7 @@ class ConvertToTextController extends GetxController {
 
       // Adjust timestamp with dynamic offset
       final adjustedTimestamp =
-          (currentTimestamp + dynamicOffset).clamp(0.0, totalDuration);
+      (currentTimestamp + dynamicOffset).clamp(0.0, totalDuration);
 
       // Calculate the proportional scroll position
       final proportion = adjustedTimestamp / totalDuration;

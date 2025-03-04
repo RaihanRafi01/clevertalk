@@ -1,9 +1,9 @@
+import 'package:clevertalk/common/widgets/auth/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import '../../../../common/appColors.dart';
 import '../../../../common/customFont.dart';
-import '../../../../common/widgets/auth/custom_button.dart';
 import '../../../../common/widgets/audio_text/customUserText.dart';
 import '../../../../common/widgets/customAppBar.dart';
 import '../../../../common/widgets/svgIcon.dart';
@@ -240,10 +240,18 @@ class ConvertToTextView extends StatelessWidget {
                     ],
                   ),
                   SizedBox(height: 6),
-                  Row(
+                  Obx(() => Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
+                      // Updated share functionality
                       if (!textController.isEditing.value) ...[
+                        GestureDetector(
+                          onTap: () async {
+                            await textController.generateAndSharePdf(); // Call the new method
+                          },
+                          child: SvgPicture.asset('assets/images/summary/share_icon.svg'),
+                        ),
+                        const SizedBox(width: 16),
                         GestureDetector(
                           onTap: () => textController.editSpeakerName(context, filePath),
                           child: SvgPicture.asset('assets/images/summary/speaker_edit_icon.svg'),
@@ -273,7 +281,7 @@ class ConvertToTextView extends StatelessWidget {
                         ),
                       ),
                     ],
-                  ),
+                  )),
                   Obx(() => AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300), // Increased duration for visibility
                     transitionBuilder: (Widget child, Animation<double> animation) {
@@ -348,18 +356,6 @@ class ConvertToTextView extends StatelessWidget {
                 ],
               ),
             ),
-
-            // Fixed editing and translation controls
-            /*Positioned(
-              top: 250, // Positioned below the audio player
-              left: 10,
-              right: 10,
-              child: Column(
-                children: [
-
-                ],
-              ),
-            ),*/
 
             // Fixed bottom buttons
             Positioned(
@@ -456,6 +452,4 @@ class ConvertToTextView extends StatelessWidget {
       }),
     ));
   }
-
-
 }
