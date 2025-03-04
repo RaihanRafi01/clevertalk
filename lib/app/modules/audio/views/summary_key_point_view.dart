@@ -101,8 +101,8 @@ class SummaryKeyPointView extends StatelessWidget {
                                   ? 'English'
                                   : controller.currentLanguage.value,
                               onPressed: () {},
-                              height: 26,
-                              width: 70,
+                              height: 40,
+                              width: 80,
                               fontSize: 12,
                             ),
                             Padding(
@@ -142,9 +142,9 @@ class SummaryKeyPointView extends StatelessWidget {
                             const Spacer(),
                             CustomButton(
                               text: 'Translate',
-                              onPressed: () => controller.translateText(filePath,fileName),
-                              height: 26,
-                              width: 70,
+                              onPressed: () => controller.translateText(filePath, fileName),
+                              height: 40,
+                              width: 80,
                               fontSize: 12,
                             ),
                           ],
@@ -199,7 +199,9 @@ class SummaryKeyPointView extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-                Text('Key Points:', style: h4.copyWith(fontSize: 17, fontWeight: FontWeight.bold)),
+                Obx(() => Text(
+                    controller.keyPointsLabel.value,
+                    style: h4.copyWith(fontSize: 17, fontWeight: FontWeight.bold))),
                 const SizedBox(height: 10),
                 Obx(() => controller.isEditing.value
                     ? _buildEditableList(
@@ -209,7 +211,9 @@ class SummaryKeyPointView extends StatelessWidget {
                     : _buildReadOnlyList(controller.mainPoints)),
                 const SizedBox(height: 20),
                 if (controller.conclusions.isNotEmpty) ...[
-                  Text('Conclusions:', style: h4.copyWith(fontSize: 17, fontWeight: FontWeight.bold)),
+                  Obx(() => Text(
+                      controller.conclusionsLabel.value,
+                      style: h4.copyWith(fontSize: 17, fontWeight: FontWeight.bold))),
                   const SizedBox(height: 10),
                   Obx(() => controller.isEditing.value
                       ? _buildEditableList(

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:ffi';
 import 'package:clevertalk/app/modules/audio/controllers/audio_controller.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:intl/intl.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
+
   //final AudioPlayerController audioPlayerController = Get.put(AudioPlayerController());
   factory DatabaseHelper() => _instance;
 
@@ -38,15 +40,13 @@ class DatabaseHelper {
     return false;
   }
 
-
   Future<Database> _initDatabase() async {
     String path = join(await getDatabasesPath(), 'audio_files.db');
     return await openDatabase(
       path,
       version: 1, // Keep version as 1 since you're starting from scratch
       onCreate: (db, version) async {
-        await db.execute(
-            '''
+        await db.execute('''
         CREATE TABLE audio_files (
           id INTEGER PRIMARY KEY,
           file_name TEXT,
@@ -58,23 +58,28 @@ class DatabaseHelper {
           key_point TEXT,
           transcription TEXT,
           language_summary TEXT,
-          language_transcription TEXT
+          language_transcription TEXT,
+          translated_labels TEXT
         )
-        '''
-        );
+        ''');
       },
     );
   }
 
-
-  Future<void> insertAudioFile(bool snackBar,
-      BuildContext context, String fileName, String filePath, String duration, bool isLocal , String localParsedDate) async {
+  Future<void> insertAudioFile(
+      bool snackBar,
+      BuildContext context,
+      String fileName,
+      String filePath,
+      String duration,
+      bool isLocal,
+      String localParsedDate) async {
     final db = await database;
     final date = DateTime.now().toIso8601String();
     //final parsedDate = parseFileNameToDate(fileName); // Parse date from file name
 
-    final parsedDate = isLocal ? localParsedDate : parseFileNameToDate(fileName);
-
+    final parsedDate =
+        isLocal ? localParsedDate : parseFileNameToDate(fileName);
 
     await db.insert('audio_files', {
       'file_name': fileName,
@@ -84,11 +89,15 @@ class DatabaseHelper {
       'parsed_date': parsedDate,
       'language_summary': "English",
       'language_transcription': "English",
+      'translated_labels': json.encode({
+        'keyPointsLabel': 'Key Points:',
+        'conclusionsLabel': 'Conclusions:',
+      }),
     });
     /*ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Audio file "$fileName" inserted successfully!')),
     );*/
-    if(snackBar) {
+    if (snackBar) {
       Get.snackbar('Success', 'Audio file "$fileName" saved successfully!');
     }
     //audioPlayerController.fetchAudioFiles();
@@ -121,7 +130,8 @@ class DatabaseHelper {
     Get.snackbar('Deleted!', 'Audio file deleted successfully!');
   }
 
-  Future<void> renameAudioFile(BuildContext context, int id, String newFileName) async {
+  Future<void> renameAudioFile(
+      BuildContext context, int id, String newFileName) async {
     final db = await database;
     await db.update(
       'audio_files',

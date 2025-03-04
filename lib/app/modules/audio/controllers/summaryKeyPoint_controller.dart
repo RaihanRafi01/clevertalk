@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -36,6 +38,9 @@ class SummaryKeyPointController extends GetxController {
   RxString currentLanguage = 'English'.obs;
   String parsedDate = "Unknown Date";
 
+  RxString keyPointsLabel = 'Key Points:'.obs;
+  RxString conclusionsLabel = 'Conclusions:'.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -49,7 +54,7 @@ class SummaryKeyPointController extends GetxController {
       final db = await DatabaseHelper().database;
       final result = await db.query(
         'audio_files',
-        columns: ['key_point', 'parsed_date', 'language_summary'],
+        columns: ['key_point', 'parsed_date', 'language_summary', 'translated_labels'],
         where: 'file_name = ?',
         whereArgs: [fileName],
       );
@@ -57,8 +62,17 @@ class SummaryKeyPointController extends GetxController {
       if (result.isNotEmpty) {
         parsedDate = result.first['parsed_date']?.toString() ?? "Unknown Date";
         String? keyPointText = result.first['key_point']?.toString();
-        currentLanguage.value =
-            result.first['language_summary']?.toString() ?? 'English';
+        currentLanguage.value = result.first['language_summary']?.toString() ?? 'English';
+
+        String? translatedLabelsJson = result.first['translated_labels']?.toString();
+        if (translatedLabelsJson != null && translatedLabelsJson.isNotEmpty) {
+          final labels = json.decode(translatedLabelsJson);
+          keyPointsLabel.value = labels['keyPointsLabel'] ?? 'Key Points:';
+          conclusionsLabel.value = labels['conclusionsLabel'] ?? 'Conclusions:';
+        } else {
+          keyPointsLabel.value = 'Key Points:';
+          conclusionsLabel.value = 'Conclusions:';
+        }
 
         if (keyPointText != null && keyPointText.isNotEmpty) {
           final data = json.decode(keyPointText
@@ -70,15 +84,17 @@ class SummaryKeyPointController extends GetxController {
           titleController.text = data["Title"] ?? "No Title";
           dateController.text = parsedDate;
           mainPoints.value = (data["Main Points"] as List?)
-                  ?.map((e) => (e as Map<String, dynamic>)
-                      .map((k, v) => MapEntry(k.trim(), v.toString().trim())))
-                  .toList() ??
+              ?.map((e) => (e as Map<String, dynamic>)
+              .map((k, v) => MapEntry(k.trim(), v.toString().trim())))
+              .toList() ??
               [];
           conclusions.value = (data["Conclusions"] as List?)
-                  ?.map((e) => (e as Map<String, dynamic>)
-                      .map((k, v) => MapEntry(k.trim(), v.toString().trim())))
-                  .toList() ??
+              ?.map((e) => (e as Map<String, dynamic>)
+              .map((k, v) => MapEntry(k.trim(), v.toString().trim())))
+              .toList() ??
               [];
+          print("Loaded Main Points: $mainPoints");
+          print("Loaded Conclusions: $conclusions"); // Debug print
         }
       }
 
@@ -96,24 +112,31 @@ class SummaryKeyPointController extends GetxController {
     print('REGENERATE ::::: fileName ::::::::: $fileName');
     final db = await DatabaseHelper().database;
     try {
-      Get.snackbar('Regenerating Summary...', 'This may take some time, but don\'t worry! We\'ll notify you as soon as it\'s ready. Feel free to using the app while you wait.');
+      Get.snackbar(duration: Duration(seconds: 4),'Regenerating Summary...', 'This may take some time, but don\'t worry! We\'ll notify you as soon as it\'s ready. Feel free to using the app while you wait.');
       final response = await _apiService.fetchKeyPoints(filePath, fileName);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final keyPointText = json.decode(response.body)['Data']['content'];
         await db.update(
           'audio_files',
-          {'key_point': keyPointText, 'language_summary': 'English'}, // Reset to English on regen
+          {
+            'key_point': keyPointText,
+            'language_summary': 'English',
+            'translated_labels': json.encode({
+              'keyPointsLabel': 'Key Points:',
+              'conclusionsLabel': 'Conclusions:',
+            }),
+          },
           where: 'file_name = ?',
           whereArgs: [fileName],
         );
         await _loadData();
         NotificationService.showNotification(
-          title: "Summary Ready!",
-          body: "Click to view Summary",
-          payload: "Summary",
-          fileName: fileName,
-          filePath: filePath
+            title: "Summary Ready!",
+            body: "Click to view Summary",
+            payload: "Summary",
+            fileName: fileName,
+            filePath: filePath
         );
       } else {
         Get.snackbar('Error', 'Summary Failed: ${response.body}');
@@ -142,16 +165,16 @@ class SummaryKeyPointController extends GetxController {
     final db = await DatabaseHelper().database;
     mainPoints.value = List.generate(
         mainPoints.length,
-        (i) => {
-              mainPointTitleControllers[i].text:
-                  mainPointValueControllers[i].text
-            });
+            (i) => {
+          mainPointTitleControllers[i].text:
+          mainPointValueControllers[i].text
+        });
     conclusions.value = List.generate(
         conclusions.length,
-        (i) => {
-              conclusionTitleControllers[i].text:
-                  conclusionValueControllers[i].text
-            });
+            (i) => {
+          conclusionTitleControllers[i].text:
+          conclusionValueControllers[i].text
+        });
 
     final updatedData = {
       "Title": titleController.text,
@@ -164,13 +187,17 @@ class SummaryKeyPointController extends GetxController {
       {
         'key_point': json.encode(updatedData),
         'parsed_date': dateController.text,
-        'language_summary': currentLanguage.value, // Save current language
+        'language_summary': currentLanguage.value,
+        'translated_labels': json.encode({
+          'keyPointsLabel': keyPointsLabel.value,
+          'conclusionsLabel': conclusionsLabel.value,
+        }),
       },
       where: 'file_name = ?',
       whereArgs: [fileName],
     );
 
-    if(snackBar){
+    if (snackBar) {
       Get.snackbar("Success", "Transcription saved!");
     }
     isEditing.value = false;
@@ -200,19 +227,145 @@ class SummaryKeyPointController extends GetxController {
 
   Future<void> generateAndSharePdf() async {
     final pdf = pw.Document();
+
+    // Load fonts from assets
+    final notoSansFont = pw.Font.ttf(await rootBundle.load("assets/fonts/NotoSans-Regular.ttf"));
+    final notoSansSCFont = pw.Font.ttf(await rootBundle.load("assets/fonts/NotoSansSC-Regular.ttf"));
+    final notoSansDevanagariFont = pw.Font.ttf(await rootBundle.load("assets/fonts/NotoSansDevanagari-Regular.ttf"));
+
     pdf.addPage(pw.Page(
       build: (pw.Context context) => pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.Text(titleController.text, style: pw.TextStyle(fontSize: 20)),
+          pw.Text(
+            titleController.text,
+            style: pw.TextStyle(
+              fontSize: 20,
+              fontWeight: pw.FontWeight.bold,
+              font: notoSansFont,
+              fontFallback: [notoSansSCFont, notoSansDevanagariFont],
+            ),
+          ),
           pw.SizedBox(height: 20),
-          pw.Text("Key Points:", style: pw.TextStyle(fontSize: 18)),
-          for (var point in mainPoints)
-            pw.Text("${point.keys.first}: ${point.values.first}\n"),
+          // Key Points Section
+          pw.Text(
+            keyPointsLabel.value,
+            style: pw.TextStyle(
+              fontSize: 18,
+              fontWeight: pw.FontWeight.bold,
+              font: notoSansFont,
+              fontFallback: [notoSansSCFont, notoSansDevanagariFont],
+            ),
+          ),
           pw.SizedBox(height: 10),
-          pw.Text("Conclusions:", style: pw.TextStyle(fontSize: 18)),
-          for (var conclusion in conclusions)
-            pw.Text("${conclusion.keys.first}: ${conclusion.values.first}\n"),
+          pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: mainPoints.map((point) {
+              return pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Row(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        '\u2022 ',
+                        style: pw.TextStyle(
+                          fontSize: 16,
+                          fontWeight: pw.FontWeight.bold,
+                          font: notoSansFont,
+                          fontFallback: [notoSansSCFont, notoSansDevanagariFont],
+                        ),
+                      ),
+                      pw.Expanded(
+                        child: pw.Text(
+                          point.keys.first,
+                          style: pw.TextStyle(
+                            fontSize: 16,
+                            fontWeight: pw.FontWeight.bold,
+                            font: notoSansFont,
+                            fontFallback: [notoSansSCFont, notoSansDevanagariFont],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.only(left: 20, top: 4),
+                    child: pw.Text(
+                      point.values.first,
+                      style: pw.TextStyle(
+                        fontSize: 15,
+                        font: notoSansFont,
+                        fontFallback: [notoSansSCFont, notoSansDevanagariFont],
+                      ),
+                    ),
+                  ),
+                  pw.SizedBox(height: 12),
+                ],
+              );
+            }).toList(),
+          ),
+          // Conclusions Section (if not empty)
+          if (conclusions.isNotEmpty) ...[
+            pw.SizedBox(height: 20),
+            pw.Text(
+              conclusionsLabel.value,
+              style: pw.TextStyle(
+                fontSize: 18,
+                fontWeight: pw.FontWeight.bold,
+                font: notoSansFont,
+                fontFallback: [notoSansSCFont, notoSansDevanagariFont],
+              ),
+            ),
+            pw.SizedBox(height: 10),
+            pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: conclusions.map((conclusion) {
+                return pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Row(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Text(
+                          '\u2022 ',
+                          style: pw.TextStyle(
+                            fontSize: 16,
+                            fontWeight: pw.FontWeight.bold,
+                            font: notoSansFont,
+                            fontFallback: [notoSansSCFont, notoSansDevanagariFont],
+                          ),
+                        ),
+                        pw.Expanded(
+                          child: pw.Text(
+                            conclusion.keys.first,
+                            style: pw.TextStyle(
+                              fontSize: 16,
+                              fontWeight: pw.FontWeight.bold,
+                              font: notoSansFont,
+                              fontFallback: [notoSansSCFont, notoSansDevanagariFont],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.only(left: 20, top: 4),
+                      child: pw.Text(
+                        conclusion.values.first,
+                        style: pw.TextStyle(
+                          fontSize: 15,
+                          font: notoSansFont,
+                          fontFallback: [notoSansSCFont, notoSansDevanagariFont],
+                        ),
+                      ),
+                    ),
+                    pw.SizedBox(height: 12),
+                  ],
+                );
+              }).toList(),
+            ),
+          ],
         ],
       ),
     ));
@@ -223,16 +376,35 @@ class SummaryKeyPointController extends GetxController {
   }
 
   Future<void> translateText(String filePath, String fileName) async {
-    Get.snackbar('Translation in progress...', 'This may take some time, but don\'t worry! We\'ll notify you as soon as it\'s ready. Feel free to using the app while you wait.');
+    Get.snackbar(
+      duration: Duration(seconds: 4),
+      'Translation in progress...',
+      'This may take some time, but don\'t worry! We\'ll notify you as soon as it\'s ready. Feel free to use the app while you wait.',
+    );
     try {
+      // Prepare separate lists for keys and values
+      List<String> mainPointKeys = mainPoints.map((point) => point.keys.first.trim()).toList();
+      List<String> mainPointValues = mainPoints.map((point) => point.values.first.trim()).toList();
+      List<String> conclusionKeys = conclusions.map((point) => point.keys.first.trim()).toList();
+      List<String> conclusionValues = conclusions.map((point) => point.values.first.trim()).toList();
+
       final textToTranslate = json.encode({
-        "Title": titleController.text,
-        "Main Points": mainPoints,
-        "Conclusions": conclusions,
+        "Title": titleController.text.trim(),
+        "MainPoints": {
+          "Keys": mainPointKeys,
+          "Values": mainPointValues,
+        },
+        "Conclusions": {
+          "Keys": conclusionKeys,
+          "Values": conclusionValues,
+        },
+        "Labels": {
+          "Key Points:": keyPointsLabel.value.trim(),
+          "Conclusions:": conclusionsLabel.value.trim(),
+        },
       });
 
-      const apiKey =
-          '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';
+      const apiKey = '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'; // Replace with your actual OpenAI API key
       const apiUrl = 'https://api.openai.com/v1/chat/completions';
 
       final response = await http.post(
@@ -244,11 +416,19 @@ class SummaryKeyPointController extends GetxController {
         body: json.encode({
           'model': 'gpt-4o-mini',
           'messages': [
-            {'role': 'system', 'content': 'You are a precise JSON translator. Return only valid JSON without any additional text or markdown.'},
+            {
+              'role': 'system',
+              'content': '''
+              You are a precise JSON translator. Translate the provided JSON content from ${currentLanguage.value} to ${selectedLanguage.value}. 
+              For "MainPoints" and "Conclusions", translate the "Keys" and "Values" lists separately. 
+              Ensure all translated text has no leading or trailing spaces. 
+              Return a JSON object with the same structure, containing translated "Title", "MainPoints" (with "Keys" and "Values"), "Conclusions" (with "Keys" and "Values"), and "Labels". 
+              Return only valid JSON without additional text or markdown.
+            '''
+            },
             {
               'role': 'user',
-              'content':
-                  'Translate the following JSON content from ${currentLanguage.value} to ${selectedLanguage.value} and return only the translated JSON:\n\n$textToTranslate',
+              'content': textToTranslate,
             },
           ],
           'max_tokens': 8000,
@@ -256,37 +436,44 @@ class SummaryKeyPointController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        final translatedText = json
-            .decode(utf8.decode(response.bodyBytes))['choices'][0]['message']
-                ['content']
-            .replaceAll('```json', '')
-            .replaceAll('```', '')
-            .trim();
+        final translatedText = json.decode(utf8.decode(response.bodyBytes))['choices'][0]['message']['content'].trim();
         final translatedData = json.decode(translatedText);
 
-        titleController.text = translatedData["Title"] ?? "No Title";
-        mainPoints.value = (translatedData["Main Points"] as List?)
-                ?.map((e) => (e as Map<String, dynamic>)
-                    .map((k, v) => MapEntry(k.trim(), v.toString().trim())))
-                .toList() ??
-            [];
-        conclusions.value = (translatedData["Conclusions"] as List?)
-                ?.map((e) => (e as Map<String, dynamic>)
-                    .map((k, v) => MapEntry(k.trim(), v.toString().trim())))
-                .toList() ??
-            [];
+        // Update title
+        titleController.text = translatedData["Title"]?.trim() ?? "No Title";
 
+        // Parse Main Points
+        final translatedMainPointKeys = (translatedData["MainPoints"]["Keys"] as List<dynamic>).map((k) => k.toString().trim()).toList();
+        final translatedMainPointValues = (translatedData["MainPoints"]["Values"] as List<dynamic>).map((v) => v.toString().trim()).toList();
+        mainPoints.value = List.generate(
+          translatedMainPointKeys.length,
+              (i) => {translatedMainPointKeys[i]: translatedMainPointValues[i]},
+        );
+
+        // Parse Conclusions
+        final translatedConclusionKeys = (translatedData["Conclusions"]["Keys"] as List<dynamic>).map((k) => k.toString().trim()).toList();
+        final translatedConclusionValues = (translatedData["Conclusions"]["Values"] as List<dynamic>).map((v) => v.toString().trim()).toList();
+        conclusions.value = List.generate(
+          translatedConclusionKeys.length,
+              (i) => {translatedConclusionKeys[i]: translatedConclusionValues[i]},
+        );
+
+        // Update labels
+        final labels = translatedData["Labels"] as Map<String, dynamic>;
+        keyPointsLabel.value = labels["Key Points:"]?.trim() ?? keyPointsLabel.value;
+        conclusionsLabel.value = labels["Conclusions:"]?.trim() ?? conclusionsLabel.value;
+
+        // Reinitialize controllers with translated data
         _initializeControllers();
-        currentLanguage.value =
-            selectedLanguage.value; // Update language before saving
-        await saveKeyPoints(false); // Save with new language
+        currentLanguage.value = selectedLanguage.value;
+        await saveKeyPoints(false);
+
         NotificationService.showNotification(
           title: "Summary Translation Ready!",
           body: "Click to view Summary",
           payload: "Summary",
-          keyPoints: filePath,
           fileName: fileName,
-          filePath: filePath
+          filePath: filePath,
         );
       } else {
         Get.snackbar('Error', 'Translation failed: ${response.body}\nPlease try again later.');

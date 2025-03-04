@@ -51,43 +51,60 @@ class NotificationSubscriptionView
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        //Text(entry.key, style: h4.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
-                        //const SizedBox(height: 10),
                         ...entry.value.map((notification) {
-                          // Find the index of the notification in the list
+                          // Use a truly unique key based on the notification object
+                          final uniqueKey = UniqueKey().toString();
                           final index = controller.notifications.indexOf(notification);
-                          return GestureDetector(
-                            onTap: () {
-                              // Mark the notification as read
-                              controller.markAsRead(index);
 
-                              print(
-                                  ':::::::::::::::: check keypoint: ${notification.keyPoints}');
-                              print(
-                                  ':::::::::::::::: check: ${notification.fileName}');
-                              if (notification.type == 'Conversion') {
-                                Get.to(() => ConvertToTextView(
-                                  filePath: notification.keyPoints ??
-                                      "No file path",
-                                  fileName: notification.fileName ??
-                                      "Unknown File",
-                                ));
-                              } else if (notification.type == 'Summary') {
-                                Get.to(() => SummaryKeyPointView(
-                                  fileName: notification.fileName ??
-                                      "Unknown File",
-                                  filePath: notification.filePath ??
-                                      'Unknown FilePath',
-                                ));
-                              }
+                          return Dismissible(
+                            key: Key(uniqueKey), // Use a unique key for each Dismissible
+                            direction: DismissDirection.endToStart, // Swipe right to left
+                            confirmDismiss: (direction) async {
+                              // Show delete confirmation dialog
+                              return await _showDeleteConfirmationDialog(context, index);
                             },
-                            child: NotificationCard(
-                              message: '${notification.message} of ${notification.fileName}',
-                              time: notification.time,
-                              isRead: notification.isRead, // Pass isRead status
+                            onDismissed: (direction) {
+                              // Remove the notification from the list after dismissal
+                              controller.deleteNotification(index);
+                            },
+                            background: Container(
+                              color: Colors.transparent,
+                              alignment: Alignment.centerRight,
+                              padding: const EdgeInsets.symmetric(horizontal: 20),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Text('Swipe to Delete'),
+                                  SizedBox(width: 10),
+                                  const Icon(Icons.delete, color: Colors.red),
+                                ],
+                              ),
+                            ),
+                            child: GestureDetector(
+                              onTap: () {
+                                controller.markAsRead(index);
+                                print(':::::::::::::::: check keypoint: ${notification.keyPoints}');
+                                print(':::::::::::::::: check: ${notification.fileName}');
+                                if (notification.type == 'Conversion') {
+                                  Get.to(() => ConvertToTextView(
+                                    filePath: notification.keyPoints ?? "No file path",
+                                    fileName: notification.fileName ?? "Unknown File",
+                                  ));
+                                } else if (notification.type == 'Summary') {
+                                  Get.to(() => SummaryKeyPointView(
+                                    fileName: notification.fileName ?? "Unknown File",
+                                    filePath: notification.filePath ?? 'Unknown FilePath',
+                                  ));
+                                }
+                              },
+                              child: NotificationCard(
+                                message: '${notification.message} of ${notification.fileName}',
+                                time: notification.time,
+                                isRead: notification.isRead,
+                              ),
                             ),
                           );
-                        }),
+                        }).toList(),
                         const SizedBox(height: 10),
                       ],
                     );
@@ -107,12 +124,36 @@ class NotificationSubscriptionView
       ),
     );
   }
+
+  // Show delete confirmation dialog
+  Future<bool?> _showDeleteConfirmationDialog(BuildContext context, int index) {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Notification'),
+        content: const Text('Are you sure you want to delete this notification?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false), // Cancel
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(true); // Confirm
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
+// NotificationCard remains unchanged
 class NotificationCard extends StatelessWidget {
   final String message;
   final String time;
-  final bool isRead; // Add isRead parameter
+  final bool isRead;
 
   const NotificationCard({
     Key? key,
@@ -125,7 +166,7 @@ class NotificationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       color: AppColors.appColor2,
-      margin: const EdgeInsets.only(bottom: 10),
+      margin: const EdgeInsets.only(bottom: 10), // Fix this if 'custom' isn't a valid named parameter
       elevation: 4,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
@@ -139,7 +180,7 @@ class NotificationCard extends StatelessWidget {
               message,
               style: h4.copyWith(
                 fontSize: 16,
-                color: isRead ? Colors.grey : Colors.white, // Grey if read
+                color: isRead ? Colors.grey : Colors.white,
               ),
             ),
             const SizedBox(height: 5),

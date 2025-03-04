@@ -161,7 +161,7 @@ class ConvertToTextController extends GetxController {
         .toList();
   }
 
-  Future<void> saveTranscription(String filePath,bool snackBar) async {
+  Future<void> saveTranscription(String filePath, bool snackBar) async {
     final dbHelper = DatabaseHelper();
     final db = await dbHelper.database;
 
@@ -192,7 +192,7 @@ class ConvertToTextController extends GetxController {
       where: 'file_path = ?',
       whereArgs: [filePath],
     );
-    if(snackBar){
+    if (snackBar) {
       Get.snackbar("Success", "Transcription saved!");
     }
     isEditing.value = false;
@@ -200,6 +200,7 @@ class ConvertToTextController extends GetxController {
 
   Future<void> translateText(String filePath, String fileName) async {
     Get.snackbar(
+        duration: Duration(seconds: 4),
         'Translation in progress...',
         'This may take some time, but don\'t worry! We\'ll notify you as soon as it\'s ready. Feel free to use the app while you wait.');
     try {
@@ -214,7 +215,7 @@ class ConvertToTextController extends GetxController {
       }).toList());
 
       const apiKey =
-          'sk-CT3BlbkFJCfJvQqqTCYGdK4Feq9HDwbc1_CaIMXannJRYs'; // Replace with your OpenAI API key
+          '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'; // Replace with your OpenAI API key
       const apiUrl = 'https://api.openai.com/v1/chat/completions';
 
       final response = await http.post(
@@ -229,12 +230,12 @@ class ConvertToTextController extends GetxController {
             {
               'role': 'system',
               'content':
-              'You are a precise JSON translator. Return only valid JSON without any additional text or markdown. If the input is too large, process it and return a valid JSON response, even if partial.'
+                  'You are a precise JSON translator. Return only valid JSON without any additional text or markdown. If the input is too large, process it and return a valid JSON response, even if partial.'
             },
             {
               'role': 'user',
               'content':
-              'Translate the following JSON content from ${currentLanguage.value} to ${selectedLanguage.value} and return only the translated JSON:\n\n$textToTranslate',
+                  'Translate the following JSON content from ${currentLanguage.value} to ${selectedLanguage.value} and return only the translated JSON:\n\n$textToTranslate',
             },
           ],
           'max_tokens': 16000, // Increased to handle larger responses
@@ -579,7 +580,8 @@ class ConvertToTextController extends GetxController {
         final times = messages[i]['time']!.split(' - ');
         final startTime = parseTimeToSeconds(times[0]);
         final endTime = parseTimeToSeconds(times[1]);
-        if (currentTimestamp >= startTime && currentTimestamp <= (endTime + 0.5)) {
+        if (currentTimestamp >= startTime &&
+            currentTimestamp <= (endTime + 0.5)) {
           newHighlightIndex = i;
           break;
         }
@@ -588,14 +590,16 @@ class ConvertToTextController extends GetxController {
       // Fallback near the end of the audio
       if (newHighlightIndex == -1 && currentTimestamp >= totalDuration - 1.0) {
         newHighlightIndex = messages.length - 1;
-        print('Near end detected, forcing highlight to last: $newHighlightIndex');
+        print(
+            'Near end detected, forcing highlight to last: $newHighlightIndex');
       }
 
       // Update highlighted index if changed
       if (currentHighlightedIndex.value != newHighlightIndex) {
         currentHighlightedIndex.value = newHighlightIndex;
         messages.refresh();
-        print('Highlighted index updated to: $newHighlightIndex at timestamp: $currentTimestamp');
+        print(
+            'Highlighted index updated to: $newHighlightIndex at timestamp: $currentTimestamp');
       }
 
       // Ensure scroll controller is attached and has content to scroll
@@ -626,28 +630,33 @@ class ConvertToTextController extends GetxController {
         dynamicOffset = 10.0 + (currentTimestamp / 10).floor() * 0.05;
       } else if (currentTimestamp <= 2 * partDuration) {
         // Part 2: 12-24 minutes
-        final offsetAtPart1 = 10.0 + (partDuration / 10).floor() * 0.05; // 13.6 at 720s
+        final offsetAtPart1 =
+            10.0 + (partDuration / 10).floor() * 0.05; // 13.6 at 720s
         final additionalTime = currentTimestamp - partDuration;
         dynamicOffset = offsetAtPart1 + (additionalTime / 10).floor() * 0.05;
       } else if (currentTimestamp <= 3 * partDuration) {
         // Part 3: 24-36 minutes (includes 30min mark)
-        final offsetAtPart2 = 10.0 + (2 * partDuration / 10).floor() * 0.05; // 17.2 at 1440s
+        final offsetAtPart2 =
+            10.0 + (2 * partDuration / 10).floor() * 0.05; // 17.2 at 1440s
         final additionalTime = currentTimestamp - 2 * partDuration;
         dynamicOffset = offsetAtPart2 + (additionalTime / 10).floor() * 0.05;
       } else if (currentTimestamp <= 4 * partDuration) {
         // Part 4: 36-48 minutes
-        final offsetAtPart3 = 10.0 + (3 * partDuration / 10).floor() * 0.05; // 20.8 at 2160s
+        final offsetAtPart3 =
+            10.0 + (3 * partDuration / 10).floor() * 0.05; // 20.8 at 2160s
         final additionalTime = currentTimestamp - 3 * partDuration;
         dynamicOffset = offsetAtPart3 + (additionalTime / 10).floor() * 0.05;
       } else {
         // Part 5: 48-60 minutes
-        final offsetAtPart4 = 10.0 + (4 * partDuration / 10).floor() * 0.03; // 24.4 at 2880s
+        final offsetAtPart4 =
+            10.0 + (4 * partDuration / 10).floor() * 0.03; // 24.4 at 2880s
         final additionalTime = currentTimestamp - 4 * partDuration;
         dynamicOffset = offsetAtPart4 + (additionalTime / 10).floor() * 0.05;
       }
 
       // Adjust timestamp with dynamic offset
-      final adjustedTimestamp = (currentTimestamp + dynamicOffset).clamp(0.0, totalDuration);
+      final adjustedTimestamp =
+          (currentTimestamp + dynamicOffset).clamp(0.0, totalDuration);
 
       // Calculate the proportional scroll position
       final proportion = adjustedTimestamp / totalDuration;
@@ -657,13 +666,17 @@ class ConvertToTextController extends GetxController {
       double targetScrollOffset;
       if (newHighlightIndex != -1) {
         final estimatedItemHeight = maxScrollExtent / messages.length;
-        double highlightScrollOffset = newHighlightIndex * estimatedItemHeight - (viewportHeight / 2);
+        double highlightScrollOffset =
+            newHighlightIndex * estimatedItemHeight - (viewportHeight / 2);
 
         // At or beyond 30 minutes (middle of Part 3), prioritize highlight
-        if (currentTimestamp >= 3 * partDuration / 2) { // 1080s (18min)
-          targetScrollOffset = 0.7 * highlightScrollOffset + 0.3 * proportionalScrollOffset;
+        if (currentTimestamp >= 3 * partDuration / 2) {
+          // 1080s (18min)
+          targetScrollOffset =
+              0.7 * highlightScrollOffset + 0.3 * proportionalScrollOffset;
         } else {
-          targetScrollOffset = (highlightScrollOffset + proportionalScrollOffset) / 2;
+          targetScrollOffset =
+              (highlightScrollOffset + proportionalScrollOffset) / 2;
         }
       } else {
         targetScrollOffset = proportionalScrollOffset;
@@ -703,7 +716,6 @@ class ConvertToTextController extends GetxController {
       print('Error in position listener: $error');
     });
   }
-
 
   double parseTimeToSeconds(String time) {
     final parts = time.split(':');

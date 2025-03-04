@@ -15,12 +15,11 @@ class NotificationSubscriptionController extends GetxController {
     notifications.value = [];
   }
 
-  // Function to add a new notification dynamically
   void addNotification(String jsonPayload) {
     try {
       final Map<String, dynamic> data = jsonDecode(jsonPayload);
       String? type = data['type'];
-      String? message = data['message']; // Assuming message is passed
+      String? message = data['message'];
       String? time = data['time'] ?? "Just now";
       String? fileName = data['fileName'];
       String? filePath = data['filePath'];
@@ -35,7 +34,7 @@ class NotificationSubscriptionController extends GetxController {
           fileName: fileName,
           filePath: filePath,
           keyPoints: keyPoints,
-          isRead: false, // New notifications are unread by default
+          isRead: false,
         ),
       );
     } catch (e) {
@@ -43,12 +42,10 @@ class NotificationSubscriptionController extends GetxController {
     }
   }
 
-  // Get unread notification count
   int getUnreadCount() {
     return notifications.where((notification) => !notification.isRead).length;
   }
 
-  // Group notifications by date
   Map<String, List<NotificationModel>> groupNotificationsByDate() {
     Map<String, List<NotificationModel>> groupedNotifications = {};
     for (var notification in notifications) {
@@ -59,18 +56,24 @@ class NotificationSubscriptionController extends GetxController {
     return groupedNotifications;
   }
 
-  // Mark all as read
   void markAllAsRead() {
     for (var notification in notifications) {
-      notification.isRead = true; // Mark each notification as read
+      notification.isRead = true;
     }
-    notifications.refresh(); // Trigger UI update
+    notifications.refresh();
   }
 
-  // Optional: Mark a single notification as read
   void markAsRead(int index) {
     if (index >= 0 && index < notifications.length) {
       notifications[index].isRead = true;
+      notifications.refresh();
+    }
+  }
+
+  // New method to delete a notification
+  void deleteNotification(int index) {
+    if (index >= 0 && index < notifications.length) {
+      notifications.removeAt(index);
       notifications.refresh(); // Trigger UI update
     }
   }
@@ -83,7 +86,7 @@ class NotificationModel {
   final String? fileName;
   final String? filePath;
   final String? keyPoints;
-  bool isRead; // Added isRead property
+  bool isRead;
 
   NotificationModel({
     required this.type,
@@ -92,6 +95,6 @@ class NotificationModel {
     this.fileName,
     this.filePath,
     this.keyPoints,
-    this.isRead = false, // Default to unread
+    this.isRead = false,
   });
 }
