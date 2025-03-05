@@ -1,10 +1,11 @@
-import 'package:clevertalk/common/widgets/auth/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../../../../common/appColors.dart';
 import '../../../../common/customFont.dart';
 import '../../../../common/widgets/audio_text/customUserText.dart';
+import '../../../../common/widgets/auth/custom_button.dart';
 import '../../../../common/widgets/customAppBar.dart';
 import '../../../../common/widgets/svgIcon.dart';
 import '../../audio/controllers/audio_controller.dart';
@@ -16,13 +17,64 @@ class ConvertToTextView extends StatelessWidget {
 
   const ConvertToTextView({super.key, required this.fileName, required this.filePath});
 
+  Widget _buildEditableList(ConvertToTextController controller, int index) {
+    final msg = controller.messages[index];
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            controller: controller.nameControllers[index],
+            style: h4.copyWith(fontSize: 15, fontWeight: FontWeight.bold),
+            decoration: const InputDecoration(
+              labelText: "Speaker Name",
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: controller.descControllers[index],
+            style: h4.copyWith(fontSize: 15),
+            maxLines: 2,
+            decoration: const InputDecoration(
+              labelText: "Transcription",
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 5),
+          Text(msg['time']!, style: h4.copyWith(fontSize: 12)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReadOnlyList(ConvertToTextController controller, int index) {
+    final msg = controller.messages[index];
+    final isHighlighted = controller.currentHighlightedIndex.value == index;
+    return CustomUserText(
+      name: msg['name']!,
+      time: msg['time']!,
+      UserColor: msg['name'] == 'l' ? AppColors.green : AppColors.textUserColor,
+      description: msg['description']!,
+      isHighlighted: isHighlighted,
+    );
+  }
+
+  String formatTimestamp(int seconds) {
+    final duration = Duration(seconds: seconds);
+    final hours = duration.inHours.toString().padLeft(2, '0');
+    final minutes = (duration.inMinutes % 60).toString().padLeft(2, '0');
+    final secs = (duration.inSeconds % 60).toString().padLeft(2, '0');
+    return hours != "00" ? '$hours:$minutes:$secs' : '$minutes:$secs';
+  }
+
   @override
   Widget build(BuildContext context) {
     final audioController = Get.put(AudioPlayerController(), permanent: true);
     final textController = Get.put(ConvertToTextController());
     textController.fetchMessages(filePath);
 
-    // Start transcription fetching and audio playback
     audioController.fetchAudioFiles().then((_) {
       final index = audioController.audioFiles.indexWhere((file) => file['file_name'] == fileName);
       if (index != -1) {
@@ -37,7 +89,7 @@ class ConvertToTextView extends StatelessWidget {
     return PopScope(
       onPopInvokedWithResult: (canPop, result) async {
         if (canPop) {
-          await audioController.stopAudio(); // Stop audio when navigating away
+          await audioController.stopAudio();
         }
       },
       child: Scaffold(
@@ -48,7 +100,6 @@ class ConvertToTextView extends StatelessWidget {
         ),
         body: Stack(
           children: [
-            // Scrollable content
             Obx(() {
               if (textController.isLoading.value) {
                 return const Center(child: CircularProgressIndicator());
@@ -57,22 +108,19 @@ class ConvertToTextView extends StatelessWidget {
               return Positioned.fill(
                 top: textController.isTranslate.value ? 350 : 290,
                 bottom: 100,
-                child: SingleChildScrollView(
-                  controller: textController.scrollController,
+                child: ScrollablePositionedList.builder(
+                  itemScrollController: textController.itemScrollController,
+                  itemCount: textController.messages.length,
                   padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Obx(() => textController.isEditing.value
-                          ? _buildEditableList(textController)
-                          : _buildReadOnlyList(textController)),
-                    ],
-                  ),
+                  itemBuilder: (context, index) {
+                    return Obx(() => textController.isEditing.value
+                        ? _buildEditableList(textController, index)
+                        : _buildReadOnlyList(textController, index));
+                  },
                 ),
               );
             }),
 
-            // Fixed header (audio player)
             Positioned(
               top: 10,
               left: 10,
@@ -94,8 +142,7 @@ class ConvertToTextView extends StatelessWidget {
                             child: Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 10),
                               child: Text(
-                                audioController.audioFiles.isNotEmpty &&
-                                    audioController.currentIndex.value >= 0
+                                audioController.audioFiles.isNotEmpty && audioController.currentIndex.value >= 0
                                     ? audioController.audioFiles[audioController.currentIndex.value]['file_name']
                                     : 'No File Selected',
                                 style: h1.copyWith(fontSize: 20, color: AppColors.textHeader),
@@ -107,33 +154,19 @@ class ConvertToTextView extends StatelessWidget {
                             value: audioController.currentPosition.value,
                             min: 0,
                             max: audioController.totalDuration.value,
-                            onChanged: (value) async {
+                            onChanged: (value) {
+                              textController.updateHighlightAndScroll(value);
+                            },
+                            onChangeEnd: (value) async {
                               await audioController.seekAudio(Duration(seconds: value.toInt()));
-                              final textController = Get.find<ConvertToTextController>();
-                              if (textController.scrollController.hasClients) {
-                                final totalDuration = audioController.totalDuration.value;
-                                // Add 10-second offset
-                                final adjustedValue = (value + 30).clamp(0.0, totalDuration.toDouble());
-                                final proportion = adjustedValue / totalDuration;
-                                final maxScrollExtent = textController.scrollController.position.maxScrollExtent;
-                                final viewportHeight = textController.scrollController.position.viewportDimension;
-                                final scrollOffset = (proportion * maxScrollExtent - (viewportHeight / 2))
-                                    .clamp(0.0, maxScrollExtent);
-
-                                textController.scrollController.jumpTo(scrollOffset);
-                                // Highlight still based on actual value
-                                final highlightProportion = value / totalDuration;
-                                final newIndex = (highlightProportion * (textController.messages.length - 1))
-                                    .round()
-                                    .clamp(0, textController.messages.length - 1);
-                                textController.currentHighlightedIndex.value = newIndex;
-                                textController.messages.refresh();
-                                print('Seeked to $value, Adjusted to $adjustedValue, jumped to $scrollOffset, index: $newIndex');
-                              }
                             },
                             activeColor: AppColors.appColor,
                             inactiveColor: Colors.grey,
                           ),
+                          Obx(() => Text(
+                            formatTimestamp(audioController.currentPosition.value.toInt()),
+                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black),
+                          )),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
@@ -160,25 +193,15 @@ class ConvertToTextView extends StatelessWidget {
                                 onTap: () async {
                                   try {
                                     if (audioController.isPlaying.value) {
-                                      print('Pausing audio... Current position: ${audioController.currentPosition.value}');
                                       await audioController.pauseAudio();
-                                      print('Audio paused. Position: ${audioController.currentPosition.value}');
                                     } else {
-                                      print('Attempting to play/resume audio. isPlaying: ${audioController.isPlaying.value}, '
-                                          'Current position: ${audioController.currentPosition.value}, '
-                                          'FilePath: $filePath');
                                       if (audioController.currentPosition.value > 0) {
-                                        print('Resuming audio from position: ${audioController.currentPosition.value}');
                                         await audioController.resumeAudio(filePath: filePath);
-                                        print('Resume completed. isPlaying: ${audioController.isPlaying.value}');
                                       } else {
-                                        print('Starting fresh playback with filePath: $filePath');
                                         await audioController.playAudio(filePath: filePath);
-                                        print('Fresh playback started. isPlaying: ${audioController.isPlaying.value}');
                                       }
                                     }
                                   } catch (e) {
-                                    print('Error toggling play/pause/resume: $e');
                                     Get.snackbar('Error', 'Failed to toggle audio: $e');
                                   }
                                 },
@@ -190,27 +213,6 @@ class ConvertToTextView extends StatelessWidget {
                                   final newPosition = (audioController.currentAudioPosition.inSeconds + 10)
                                       .clamp(0, audioController.totalDuration.value.toInt());
                                   await audioController.seekAudio(Duration(seconds: newPosition));
-                                  final textController = Get.find<ConvertToTextController>();
-                                  if (textController.scrollController.hasClients) {
-                                    final totalDuration = audioController.totalDuration.value;
-                                    // Add 10-second offset
-                                    final adjustedPosition = (newPosition + 10).clamp(0.0, totalDuration.toDouble());
-                                    final proportion = adjustedPosition / totalDuration;
-                                    final maxScrollExtent = textController.scrollController.position.maxScrollExtent;
-                                    final viewportHeight = textController.scrollController.position.viewportDimension;
-                                    final scrollOffset = (proportion * maxScrollExtent - (viewportHeight / 2))
-                                        .clamp(0.0, maxScrollExtent);
-
-                                    textController.scrollController.jumpTo(scrollOffset);
-                                    // Highlight still based on actual position
-                                    final highlightProportion = newPosition / totalDuration;
-                                    final newIndex = (highlightProportion * (textController.messages.length - 1))
-                                        .round()
-                                        .clamp(0, textController.messages.length - 1);
-                                    textController.currentHighlightedIndex.value = newIndex;
-                                    textController.messages.refresh();
-                                    print('Seeked forward to $newPosition, Adjusted to $adjustedPosition, jumped to $scrollOffset, index: $newIndex');
-                                  }
                                 },
                               ),
                               SvgIcon(
@@ -239,15 +241,14 @@ class ConvertToTextView extends StatelessWidget {
                       const Spacer(),
                     ],
                   ),
-                  SizedBox(height: 6),
+                  const SizedBox(height: 6),
                   Obx(() => Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      // Updated share functionality
                       if (!textController.isEditing.value) ...[
                         GestureDetector(
                           onTap: () async {
-                            await textController.generateAndSharePdf(); // Call the new method
+                            await textController.generateAndSharePdf();
                           },
                           child: SvgPicture.asset('assets/images/summary/share_icon.svg'),
                         ),
@@ -260,7 +261,6 @@ class ConvertToTextView extends StatelessWidget {
                         GestureDetector(
                           onTap: () {
                             textController.isTranslate.toggle();
-                            print('isTranslate toggled to: ${textController.isTranslate.value}'); // Debug
                           },
                           child: SvgPicture.asset('assets/images/summary/translate_icon.svg'),
                         ),
@@ -283,7 +283,7 @@ class ConvertToTextView extends StatelessWidget {
                     ],
                   )),
                   Obx(() => AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300), // Increased duration for visibility
+                    duration: const Duration(milliseconds: 300),
                     transitionBuilder: (Widget child, Animation<double> animation) {
                       final offsetAnimation = Tween<Offset>(
                         begin: const Offset(0.0, -0.5),
@@ -357,7 +357,6 @@ class ConvertToTextView extends StatelessWidget {
               ),
             ),
 
-            // Fixed bottom buttons
             Positioned(
               bottom: 20,
               left: 10,
@@ -378,7 +377,6 @@ class ConvertToTextView extends StatelessWidget {
               ),
             ),
 
-            // Loading overlay
             Positioned(
               left: 10,
               right: 10,
@@ -397,59 +395,5 @@ class ConvertToTextView extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Widget _buildEditableList(ConvertToTextController controller) {
-    return Column(
-      children: List.generate(controller.messages.length, (index) {
-        final msg = controller.messages[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                controller: controller.nameControllers[index],
-                style: h4.copyWith(fontSize: 15, fontWeight: FontWeight.bold),
-                decoration: const InputDecoration(
-                  labelText: "Speaker Name",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: controller.descControllers[index],
-                style: h4.copyWith(fontSize: 15),
-                maxLines: 2,
-                decoration: const InputDecoration(
-                  labelText: "Transcription",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 5),
-              Text(msg['time']!, style: h4.copyWith(fontSize: 12)),
-            ],
-          ),
-        );
-      }),
-    );
-  }
-
-  Widget _buildReadOnlyList(ConvertToTextController controller) {
-    return Obx(() => Column(
-      children: List.generate(controller.messages.length, (index) {
-        final msg = controller.messages[index];
-        final isHighlighted = controller.currentHighlightedIndex.value == index;
-        // Debug: Log rebuilding
-        print(':::::::::::::::::::::::Rebuilding index $index, isHighlighted: $isHighlighted');
-        return CustomUserText(
-          name: msg['name']!,
-          time: msg['time']!,
-          UserColor: msg['name'] == 'l' ? AppColors.green : AppColors.textUserColor,
-          description: msg['description']!,
-          isHighlighted: isHighlighted,
-        );
-      }),
-    ));
   }
 }
