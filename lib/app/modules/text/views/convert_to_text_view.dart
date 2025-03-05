@@ -106,7 +106,7 @@ class ConvertToTextView extends StatelessWidget {
               }
 
               return Positioned.fill(
-                top: textController.isTranslate.value ? 350 : 290,
+                top: textController.isTranslate.value ? 350 : 300,
                 bottom: 100,
                 child: ScrollablePositionedList.builder(
                   itemScrollController: textController.itemScrollController,
@@ -164,10 +164,6 @@ class ConvertToTextView extends StatelessWidget {
                             activeColor: AppColors.appColor,
                             inactiveColor: Colors.grey,
                           ),
-                          Obx(() => Text(
-                            formatTimestamp(audioController.currentPosition.value.toInt()),
-                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black),
-                          )),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
@@ -242,7 +238,7 @@ class ConvertToTextView extends StatelessWidget {
                       const Spacer(),
                     ],
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 10),
                   Obx(() => Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
