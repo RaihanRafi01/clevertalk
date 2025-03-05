@@ -155,6 +155,7 @@ class ConvertToTextView extends StatelessWidget {
                             min: 0,
                             max: audioController.totalDuration.value,
                             onChanged: (value) {
+                              audioController.currentPosition.value = value;
                               textController.updateHighlightAndScroll(value);
                             },
                             onChangeEnd: (value) async {

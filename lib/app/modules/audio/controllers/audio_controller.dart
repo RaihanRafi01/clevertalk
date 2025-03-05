@@ -22,6 +22,7 @@ class AudioPlayerController extends GetxController {
   RxInt currentIndex = (-1).obs; // Default to -1 (no file selected)
   RxBool isLoading = false.obs; // Observable for loading state
   String? _currentFilePath;
+  RxBool isSeeking = false.obs;
 
   @override
   void onInit() {
@@ -59,8 +60,10 @@ class AudioPlayerController extends GetxController {
   Duration get currentAudioPosition => _audioPlayer.position;
 
   Future<void> seekAudio(Duration position) async {
+    isSeeking.value = true; // Set seeking flag
     print('Seeking to: ${position.inSeconds}');
     await _audioPlayer.seek(position);
+    isSeeking.value = false; // Reset flag after seek
   }
 
   Future<void> pauseAudio() async {

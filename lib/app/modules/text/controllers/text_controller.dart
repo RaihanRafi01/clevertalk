@@ -470,43 +470,65 @@ class ConvertToTextController extends GetxController {
   }
 
   void syncScrollingWithAudio(AudioPlayerController audioController) {
-    audioController.currentPosition.listen((position) {
-      updateHighlightAndScroll(position.toDouble());
-    }, onError: (error) {
-      print('Error in position listener: $error');
+    ever(audioController.currentPosition, (position) {
+      if (!isEditing.value) {  // Prevents unnecessary updates while editing
+        updateHighlightAndScroll(position.toDouble());
+      }
     });
   }
 
+
   void updateHighlightAndScroll(double time) {
     int newHighlightIndex = -1;
+
     for (int i = 0; i < messages.length; i++) {
       final times = messages[i]['time']!.split(' - ');
       final startTime = parseTimeToSeconds(times[0]);
       final endTime = parseTimeToSeconds(times[1]);
+
       if (time >= startTime && time < endTime) {
         newHighlightIndex = i;
         break;
       }
     }
-    if (newHighlightIndex == -1) {
-      if (time < parseTimeToSeconds(messages[0]['time']!.split(' - ')[0])) {
-        newHighlightIndex = 0;
-      } else if (time >= parseTimeToSeconds(messages.last['time']!.split(' - ')[1])) {
-        newHighlightIndex = messages.length - 1;
-      }
-    }
+
     if (newHighlightIndex != -1 && currentHighlightedIndex.value != newHighlightIndex) {
       currentHighlightedIndex.value = newHighlightIndex;
       messages.refresh();
+
       if (itemScrollController.isAttached) {
-        itemScrollController.scrollTo(
-          index: newHighlightIndex,
-          alignment: 0.5,
-          duration: const Duration(milliseconds: 100),
-        );
+        // If the user is seeking, instantly jump to the new position
+        itemScrollController.jumpTo(index: newHighlightIndex);
       }
     }
+
+    // Enable smooth scrolling only when audio is playing normally
+    if (newHighlightIndex > 0 && !Get.find<AudioPlayerController>().isSeeking.value) {
+      _smoothAutoScroll();
+    }
   }
+
+
+
+  void _smoothAutoScroll() {
+    if (!itemScrollController.isAttached) return;
+
+    int nextIndex = currentHighlightedIndex.value + 1;
+
+    // ✅ Ensure we do not scroll unnecessarily when at the first message
+    if (nextIndex > 0 && nextIndex < messages.length) {
+      itemScrollController.scrollTo(
+        index: nextIndex,
+        alignment: 0.7, // Moves downward slightly each time
+        duration: const Duration(milliseconds: 7000),
+        curve: Curves.linear,
+      );
+    }
+  }
+
+
+
+
 
   double parseTimeToSeconds(String time) {
     final parts = time.split(':');
