@@ -233,23 +233,78 @@ class SummaryKeyPointController extends GetxController {
     final notoSansSCFont = pw.Font.ttf(await rootBundle.load("assets/fonts/NotoSansSC-Regular.ttf"));
     final notoSansDevanagariFont = pw.Font.ttf(await rootBundle.load("assets/fonts/NotoSansDevanagari-Regular.ttf"));
 
-    pdf.addPage(pw.Page(
-      build: (pw.Context context) => pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: [
-          pw.Text(
-            titleController.text,
-            style: pw.TextStyle(
-              fontSize: 20,
-              fontWeight: pw.FontWeight.bold,
-              font: notoSansFont,
-              fontFallback: [notoSansSCFont, notoSansDevanagariFont],
-            ),
+    pdf.addPage(pw.MultiPage(
+      build: (pw.Context context) => [
+        // Title
+        pw.Text(
+          titleController.text,
+          style: pw.TextStyle(
+            fontSize: 20,
+            fontWeight: pw.FontWeight.bold,
+            font: notoSansFont,
+            fontFallback: [notoSansSCFont, notoSansDevanagariFont],
           ),
+        ),
+        pw.SizedBox(height: 20),
+        // Key Points Section Label
+        pw.Text(
+          keyPointsLabel.value,
+          style: pw.TextStyle(
+            fontSize: 18,
+            fontWeight: pw.FontWeight.bold,
+            font: notoSansFont,
+            fontFallback: [notoSansSCFont, notoSansDevanagariFont],
+          ),
+        ),
+        pw.SizedBox(height: 10),
+        // Main Points
+        ...mainPoints.map((point) => pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Row(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text(
+                  '\u2022 ',
+                  style: pw.TextStyle(
+                    fontSize: 16,
+                    fontWeight: pw.FontWeight.bold,
+                    font: notoSansFont,
+                    fontFallback: [notoSansSCFont, notoSansDevanagariFont],
+                  ),
+                ),
+                pw.Expanded(
+                  child: pw.Text(
+                    point.keys.first,
+                    style: pw.TextStyle(
+                      fontSize: 16,
+                      fontWeight: pw.FontWeight.bold,
+                      font: notoSansFont,
+                      fontFallback: [notoSansSCFont, notoSansDevanagariFont],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            pw.Padding(
+              padding: const pw.EdgeInsets.only(left: 20, top: 4),
+              child: pw.Text(
+                point.values.first,
+                style: pw.TextStyle(
+                  fontSize: 15,
+                  font: notoSansFont,
+                  fontFallback: [notoSansSCFont, notoSansDevanagariFont],
+                ),
+              ),
+            ),
+            pw.SizedBox(height: 12),
+          ],
+        )).toList(),
+        // Conclusions Section (if not empty)
+        if (conclusions.isNotEmpty) ...[
           pw.SizedBox(height: 20),
-          // Key Points Section
           pw.Text(
-            keyPointsLabel.value,
+            conclusionsLabel.value,
             style: pw.TextStyle(
               fontSize: 18,
               fontWeight: pw.FontWeight.bold,
@@ -258,116 +313,50 @@ class SummaryKeyPointController extends GetxController {
             ),
           ),
           pw.SizedBox(height: 10),
-          pw.Column(
+          ...conclusions.map((conclusion) => pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: mainPoints.map((point) {
-              return pw.Column(
+            children: [
+              pw.Row(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
-                  pw.Row(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
-                    children: [
-                      pw.Text(
-                        '\u2022 ',
-                        style: pw.TextStyle(
-                          fontSize: 16,
-                          fontWeight: pw.FontWeight.bold,
-                          font: notoSansFont,
-                          fontFallback: [notoSansSCFont, notoSansDevanagariFont],
-                        ),
-                      ),
-                      pw.Expanded(
-                        child: pw.Text(
-                          point.keys.first,
-                          style: pw.TextStyle(
-                            fontSize: 16,
-                            fontWeight: pw.FontWeight.bold,
-                            font: notoSansFont,
-                            fontFallback: [notoSansSCFont, notoSansDevanagariFont],
-                          ),
-                        ),
-                      ),
-                    ],
+                  pw.Text(
+                    '\u2022 ',
+                    style: pw.TextStyle(
+                      fontSize: 16,
+                      fontWeight: pw.FontWeight.bold,
+                      font: notoSansFont,
+                      fontFallback: [notoSansSCFont, notoSansDevanagariFont],
+                    ),
                   ),
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.only(left: 20, top: 4),
+                  pw.Expanded(
                     child: pw.Text(
-                      point.values.first,
+                      conclusion.keys.first,
                       style: pw.TextStyle(
-                        fontSize: 15,
+                        fontSize: 16,
+                        fontWeight: pw.FontWeight.bold,
                         font: notoSansFont,
                         fontFallback: [notoSansSCFont, notoSansDevanagariFont],
                       ),
                     ),
                   ),
-                  pw.SizedBox(height: 12),
                 ],
-              );
-            }).toList(),
-          ),
-          // Conclusions Section (if not empty)
-          if (conclusions.isNotEmpty) ...[
-            pw.SizedBox(height: 20),
-            pw.Text(
-              conclusionsLabel.value,
-              style: pw.TextStyle(
-                fontSize: 18,
-                fontWeight: pw.FontWeight.bold,
-                font: notoSansFont,
-                fontFallback: [notoSansSCFont, notoSansDevanagariFont],
               ),
-            ),
-            pw.SizedBox(height: 10),
-            pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: conclusions.map((conclusion) {
-                return pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
-                  children: [
-                    pw.Row(
-                      crossAxisAlignment: pw.CrossAxisAlignment.start,
-                      children: [
-                        pw.Text(
-                          '\u2022 ',
-                          style: pw.TextStyle(
-                            fontSize: 16,
-                            fontWeight: pw.FontWeight.bold,
-                            font: notoSansFont,
-                            fontFallback: [notoSansSCFont, notoSansDevanagariFont],
-                          ),
-                        ),
-                        pw.Expanded(
-                          child: pw.Text(
-                            conclusion.keys.first,
-                            style: pw.TextStyle(
-                              fontSize: 16,
-                              fontWeight: pw.FontWeight.bold,
-                              font: notoSansFont,
-                              fontFallback: [notoSansSCFont, notoSansDevanagariFont],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.only(left: 20, top: 4),
-                      child: pw.Text(
-                        conclusion.values.first,
-                        style: pw.TextStyle(
-                          fontSize: 15,
-                          font: notoSansFont,
-                          fontFallback: [notoSansSCFont, notoSansDevanagariFont],
-                        ),
-                      ),
-                    ),
-                    pw.SizedBox(height: 12),
-                  ],
-                );
-              }).toList(),
-            ),
-          ],
+              pw.Padding(
+                padding: const pw.EdgeInsets.only(left: 20, top: 4),
+                child: pw.Text(
+                  conclusion.values.first,
+                  style: pw.TextStyle(
+                    fontSize: 15,
+                    font: notoSansFont,
+                    fontFallback: [notoSansSCFont, notoSansDevanagariFont],
+                  ),
+                ),
+              ),
+              pw.SizedBox(height: 12),
+            ],
+          )).toList(),
         ],
-      ),
+      ],
     ));
 
     final file = File("${(await getTemporaryDirectory()).path}/summary.pdf");
@@ -382,7 +371,7 @@ class SummaryKeyPointController extends GetxController {
       'This may take some time, but don\'t worry! We\'ll notify you as soon as it\'s ready. Feel free to use the app while you wait.',
     );
     try {
-      // Prepare separate lists for keys and values
+      // Prepare separate lists for keys and values, tightly trimmed
       List<String> mainPointKeys = mainPoints.map((point) => point.keys.first.trim()).toList();
       List<String> mainPointValues = mainPoints.map((point) => point.values.first.trim()).toList();
       List<String> conclusionKeys = conclusions.map((point) => point.keys.first.trim()).toList();
@@ -419,11 +408,11 @@ class SummaryKeyPointController extends GetxController {
             {
               'role': 'system',
               'content': '''
-              You are a precise JSON translator. Translate the provided JSON content from ${currentLanguage.value} to ${selectedLanguage.value}. 
-              For "MainPoints" and "Conclusions", translate the "Keys" and "Values" lists separately. 
-              Ensure all translated text has no leading or trailing spaces. 
-              Return a JSON object with the same structure, containing translated "Title", "MainPoints" (with "Keys" and "Values"), "Conclusions" (with "Keys" and "Values"), and "Labels". 
-              Return only valid JSON without additional text or markdown.
+            You are a precise JSON translator. Translate the provided JSON content from ${currentLanguage.value} to ${selectedLanguage.value}. 
+            For "MainPoints" and "Conclusions", translate the "Keys" and "Values" lists separately. 
+            Ensure all translated text has no leading or trailing spaces and is tightly formatted. 
+            Return a JSON object with the same structure, containing translated "Title", "MainPoints" (with "Keys" and "Values"), "Conclusions" (with "Keys" and "Values"), and "Labels". 
+            Return only valid JSON without additional text or markdown.
             '''
             },
             {
@@ -442,7 +431,7 @@ class SummaryKeyPointController extends GetxController {
         // Update title
         titleController.text = translatedData["Title"]?.trim() ?? "No Title";
 
-        // Parse Main Points
+        // Parse Main Points with tight trimming
         final translatedMainPointKeys = (translatedData["MainPoints"]["Keys"] as List<dynamic>).map((k) => k.toString().trim()).toList();
         final translatedMainPointValues = (translatedData["MainPoints"]["Values"] as List<dynamic>).map((v) => v.toString().trim()).toList();
         mainPoints.value = List.generate(
@@ -450,7 +439,7 @@ class SummaryKeyPointController extends GetxController {
               (i) => {translatedMainPointKeys[i]: translatedMainPointValues[i]},
         );
 
-        // Parse Conclusions
+        // Parse Conclusions with tight trimming
         final translatedConclusionKeys = (translatedData["Conclusions"]["Keys"] as List<dynamic>).map((k) => k.toString().trim()).toList();
         final translatedConclusionValues = (translatedData["Conclusions"]["Values"] as List<dynamic>).map((v) => v.toString().trim()).toList();
         conclusions.value = List.generate(
@@ -458,7 +447,7 @@ class SummaryKeyPointController extends GetxController {
               (i) => {translatedConclusionKeys[i]: translatedConclusionValues[i]},
         );
 
-        // Update labels
+        // Update labels with tight trimming
         final labels = translatedData["Labels"] as Map<String, dynamic>;
         keyPointsLabel.value = labels["Key Points:"]?.trim() ?? keyPointsLabel.value;
         conclusionsLabel.value = labels["Conclusions:"]?.trim() ?? conclusionsLabel.value;

@@ -196,7 +196,7 @@ class ConvertToTextController extends GetxController {
     );
 
     try {
-      const apiKey = 'your-openai-api-key-here'; // Replace with your actual API key
+      const apiKey = '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'; // Replace with your actual API key
       const apiUrl = 'https://api.openai.com/v1/chat/completions';
       const chunkSize = 20;
 
