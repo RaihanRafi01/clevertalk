@@ -102,13 +102,13 @@ Future<void> connectUsbDevice(BuildContext context) async {
         } else {
           retryCount++;
           if (retryCount < maxRetries) {
-            await Future.delayed(Duration(seconds: 10));
+            await Future.delayed(Duration(seconds: 15));
           }
         }
       } catch (e) {
         retryCount++;
         if (retryCount < maxRetries) {
-          await Future.delayed(Duration(seconds: 10));
+          await Future.delayed(Duration(seconds: 15));
         }
       }
     }
@@ -144,7 +144,7 @@ Future<void> connectUsbDevice(BuildContext context) async {
         } catch (e) {
           retryCountStep3++;
           if (retryCountStep3 < maxRetriesStep3) {
-            await Future.delayed(Duration(seconds: 10));
+            await Future.delayed(Duration(seconds: 15));
           } else {
             dialogController.updateDialog(
               title: "Error",
