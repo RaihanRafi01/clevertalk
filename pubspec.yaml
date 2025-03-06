@@ -59,6 +59,7 @@ dependencies:
   flutter_local_notifications: ^18.0.1
   scroll_to_index: ^3.0.1
   scrollable_positioned_list: ^0.3.8
+  background_fetch: ^1.3.7
 dev_dependencies:
   flutter_test:
     sdk: flutter

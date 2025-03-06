@@ -103,9 +103,11 @@ class RecordView extends GetView<RecordController> {
                     }
                   },
                 ),
-                SvgIcon(
+                Obx(() => SvgIcon(
                   height: 100,
-                  svgPath: 'assets/images/audio/mic_icon.svg',
+                  svgPath: controller.isRecording.value && !controller.isPaused.value
+                      ? 'assets/images/audio/pause_icon.svg'
+                      : 'assets/images/audio/mic_icon.svg',
                   onTap: () {
                     if (controller.isRecording.value) {
                       if (controller.isPaused.value) {
@@ -120,7 +122,7 @@ class RecordView extends GetView<RecordController> {
                       controller.startRecording();
                     }
                   },
-                ),
+                )),
                 SvgIcon(
                   height: 35,
                   svgPath: 'assets/images/audio/save_icon.svg',

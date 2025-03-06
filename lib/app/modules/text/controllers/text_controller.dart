@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:flutter/services.dart';
@@ -23,6 +24,7 @@ class ConvertToTextController extends GetxController {
   var isTranslate = false.obs;
   var selectedLanguage = 'English'.obs;
   var currentLanguage = 'English'.obs;
+  String parsedDate = "Unknown Date";
   var title = ''.obs;
   final ItemScrollController itemScrollController = ItemScrollController();
   List<TextEditingController> nameControllers = [];
@@ -50,6 +52,7 @@ class ConvertToTextController extends GetxController {
       if (result.isNotEmpty) {
         final existingTranscription = result.first['transcription'];
         title.value = result.first['file_name'].toString();
+        parsedDate = result.first['parsed_date']?.toString() ?? "Unknown Date";
         currentLanguage.value = result.first['language_transcription']?.toString() ?? 'English';
 
         if (existingTranscription != null && existingTranscription.toString().isNotEmpty) {
@@ -278,6 +281,23 @@ class ConvertToTextController extends GetxController {
     final notoSansSCFont = pw.Font.ttf(await rootBundle.load("assets/fonts/NotoSansSC-Regular.ttf"));
     final notoSansDevanagariFont = pw.Font.ttf(await rootBundle.load("assets/fonts/NotoSansDevanagari-Regular.ttf"));
 
+    String date;
+    String time;
+    final dateTimeString = parsedDate;
+    if (dateTimeString == "Unknown Date") {
+      date = "Unknown Date";
+      time = "Unknown Time";
+    } else {
+      try {
+        final dateTime = DateTime.parse(dateTimeString);
+        date = DateFormat('d MMMM y').format(dateTime);
+        time = DateFormat('h:mm a').format(dateTime);
+      } catch (e) {
+        date = "Invalid Date";
+        time = "Invalid Time";
+      }
+    }
+
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
@@ -299,11 +319,36 @@ class ConvertToTextController extends GetxController {
                   pw.Text(
                     'Transcription of ${title.value}',
                     style: pw.TextStyle(
-                      fontSize: 20,
+                      fontSize: 24,
                       fontWeight: pw.FontWeight.bold,
                       font: notoSansFont,
                       fontFallback: [notoSansSCFont, notoSansDevanagariFont],
                     ),
+                  ),
+                  pw.SizedBox(height: 20),
+                  pw.Row(
+                    mainAxisAlignment: pw.MainAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        'Date: $date',
+                        style: pw.TextStyle(
+                          fontSize: 16,
+                          fontWeight: pw.FontWeight.bold,
+                          font: notoSansFont,
+                          fontFallback: [notoSansSCFont, notoSansDevanagariFont],
+                        ),
+                      ),
+                      pw.SizedBox(width: 20),
+                      pw.Text(
+                        'Time: $time',
+                        style: pw.TextStyle(
+                          fontSize: 16,
+                          fontWeight: pw.FontWeight.bold,
+                          font: notoSansFont,
+                          fontFallback: [notoSansSCFont, notoSansDevanagariFont],
+                        ),
+                      ),
+                    ],
                   ),
                   pw.SizedBox(height: 20),
                 ],
@@ -330,19 +375,34 @@ class ConvertToTextController extends GetxController {
                       ),
                     ),
                     pw.Flexible(
-                      child: pw.Text(
-                        '${msg['name']}: ${msg['description'] ?? 'No description'}',
-                        style: pw.TextStyle(
-                          fontSize: 15,
-                          font: notoSansFont,
-                          fontFallback: [notoSansSCFont, notoSansDevanagariFont],
+                      child: pw.RichText(
+                        text: pw.TextSpan(
+                          children: [
+                            pw.TextSpan(
+                              text: '${msg['name']}: ',
+                              style: pw.TextStyle(
+                                fontSize: 18,
+                                font: notoSansFont,
+                                fontWeight: pw.FontWeight.bold, // Bold the name
+                                fontFallback: [notoSansSCFont, notoSansDevanagariFont],
+                              ),
+                            ),
+                            pw.TextSpan(
+                              text: msg['description'] ?? 'No description',
+                              style: pw.TextStyle(
+                                fontSize: 15,
+                                font: notoSansFont,
+                                fontFallback: [notoSansSCFont, notoSansDevanagariFont],
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
                   ],
                 ),
                 pw.Padding(
-                  padding: const pw.EdgeInsets.only(left: 20, top: 4),
+                  padding: const pw.EdgeInsets.only(left: 20, top: 5),
                   child: pw.Text(
                     msg['time'] ?? 'No time',
                     style: pw.TextStyle(
@@ -352,6 +412,7 @@ class ConvertToTextController extends GetxController {
                     ),
                   ),
                 ),
+                pw.SizedBox(height: 20),
               ],
             );
 
