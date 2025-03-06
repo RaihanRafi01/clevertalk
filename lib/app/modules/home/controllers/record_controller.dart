@@ -1,6 +1,5 @@
 import 'dart:async';
-import 'dart:io';
-import 'package:flutter/material.dart';
+import 'package:flutter_background/flutter_background.dart';
 import 'package:get/get.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:intl/intl.dart';
@@ -31,6 +30,15 @@ class RecordController extends GetxController {
     requestPermissions();
     _recorder = FlutterSoundRecorder();
     _initializeRecorder();
+    initBackground();
+  }
+
+  Future<void> initBackground() async {
+    bool hasPermissions = await FlutterBackground.hasPermissions;
+    if (!hasPermissions) {
+      await FlutterBackground.initialize();
+    }
+    await FlutterBackground.enableBackgroundExecution();
   }
 
   Future<void> requestPermissions() async {
@@ -66,7 +74,7 @@ class RecordController extends GetxController {
       }
 
       _filePath =
-          '${directory.path}/recording_${DateTime.now().millisecondsSinceEpoch}.wav';
+      '${directory.path}/recording_${DateTime.now().millisecondsSinceEpoch}.wav';
       await _recorder?.startRecorder(
         toFile: _filePath,
         codec: Codec.pcm16WAV,
@@ -155,7 +163,7 @@ class RecordController extends GetxController {
     // Insert audio details into the database
     if (_filePath != null) {
       String formattedDate =
-          DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+      DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
 
       await DatabaseHelper().insertAudioFile(true,Get.context!, '$filename.WAV',
           _filePath!, duration, true, formattedDate);
