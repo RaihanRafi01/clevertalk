@@ -125,12 +125,14 @@ Future<void> connectUsbDevice(BuildContext context) async {
       return;
     }
 
+    await Future.delayed(Duration(seconds: 10));
+
     try {
       String combinedPath = '$usbPath$selectedPath';
       final directory = Directory(combinedPath);
 
       int retryCountStep3 = 0;
-      const maxRetriesStep3 = 3;
+      const maxRetriesStep3 = 5;
       List<FileSystemEntity> files = [];
 
       while (retryCountStep3 < maxRetriesStep3) {

@@ -520,7 +520,7 @@ class ConvertToTextController extends GetxController {
       itemScrollController.scrollTo(
         index: nextIndex,
         alignment: 0.7, // Moves downward slightly each time
-        duration: const Duration(milliseconds: 7000),
+        duration: const Duration(milliseconds: 10000),
         curve: Curves.linear,
       );
     }

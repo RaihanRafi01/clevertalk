@@ -233,13 +233,30 @@ class SummaryKeyPointController extends GetxController {
     final notoSansSCFont = pw.Font.ttf(await rootBundle.load("assets/fonts/NotoSansSC-Regular.ttf"));
     final notoSansDevanagariFont = pw.Font.ttf(await rootBundle.load("assets/fonts/NotoSansDevanagari-Regular.ttf"));
 
+    String date;
+    String time;
+    final dateTimeString = dateController.text;
+    if (dateTimeString == "Unknown Date") {
+      date = "Unknown Date";
+      time = "Unknown Time";
+    } else {
+      try {
+        final dateTime = DateTime.parse(dateTimeString);
+        date = DateFormat('d MMMM y').format(dateTime);
+        time = DateFormat('h:mm a').format(dateTime);
+      } catch (e) {
+        date = "Invalid Date";
+        time = "Invalid Time";
+      }
+    }
+
     pdf.addPage(pw.MultiPage(
       build: (pw.Context context) => [
         // Title
         pw.Text(
           titleController.text,
           style: pw.TextStyle(
-            fontSize: 20,
+            fontSize: 24,
             fontWeight: pw.FontWeight.bold,
             font: notoSansFont,
             fontFallback: [notoSansSCFont, notoSansDevanagariFont],
@@ -247,6 +264,31 @@ class SummaryKeyPointController extends GetxController {
         ),
         pw.SizedBox(height: 20),
         // Key Points Section Label
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.start,
+          children: [
+            pw.Text(
+              'Date: $date',
+              style: pw.TextStyle(
+                fontSize: 16,
+                fontWeight: pw.FontWeight.bold,
+                font: notoSansFont,
+                fontFallback: [notoSansSCFont, notoSansDevanagariFont],
+              ),
+            ),
+            pw.SizedBox(width: 20),
+            pw.Text(
+              'Time: $time',
+              style: pw.TextStyle(
+                fontSize: 16,
+                fontWeight: pw.FontWeight.bold,
+                font: notoSansFont,
+                fontFallback: [notoSansSCFont, notoSansDevanagariFont],
+              ),
+            ),
+          ],
+        ),
+        pw.SizedBox(height: 20),
         pw.Text(
           keyPointsLabel.value,
           style: pw.TextStyle(
