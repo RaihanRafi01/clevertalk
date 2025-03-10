@@ -1,6 +1,5 @@
 package com.jvai.clevertalk
 
-import android.content.Intent
 import android.content.Context
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
@@ -9,16 +8,15 @@ import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
-import android.content.ContentResolver
-import android.net.Uri
-import android.os.Bundle
-import android.provider.DocumentsContract
+import android.os.Build
+import android.os.Environment
 import android.os.storage.StorageVolume
-
-
+import java.io.File
+import android.util.Log
 
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "usb_path_reader/usb"
+    private val TAG = "MainActivity"
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -39,12 +37,6 @@ class MainActivity : FlutterActivity() {
                     } else {
                         result.error("UNAVAILABLE", "USB Path not available.", null)
                     }
-                }
-                "getFolderPath" -> {
-                    val uriStr = call.argument<String>("uri")
-                    val uri = Uri.parse(uriStr)
-                    val resolvedPath = getRealPathFromURI(uri)
-                    result.success(resolvedPath)
                 }
                 else -> {
                     result.notImplemented()
@@ -74,82 +66,42 @@ class MainActivity : FlutterActivity() {
                 "deviceUUID" to deviceUUID
             )
         }
-
         return null
     }
 
-    // Function to get USB storage path
     private fun getUsbPath(): String? {
         val storageManager = getSystemService(Context.STORAGE_SERVICE) as StorageManager
         val storageVolumes = storageManager.storageVolumes
 
-        // Iterate in reverse to prioritize recently connected devices
-        for (volume in storageVolumes.reversed()) {
+        for (volume in storageVolumes) {
             if (volume.isRemovable) {
-                // Heuristic 1: Check volume description for "USB"
-                val description = volume.getDescription(this).lowercase()
-                if ("usb" in description) {
-                    return volume.directory?.absolutePath ?: "/storage/${volume.uuid}"
+                val path = volume.directory?.absolutePath
+                Log.d(TAG, "Checking removable volume: $path")
+                if (path != null) {
+                    if (path.contains("usb", ignoreCase = true) || path.contains("otg", ignoreCase = true)) {
+                        Log.d(TAG, "USB path found: $path")
+                        return path
+                    }
+                    val file = File(path)
+                    if (file.exists() && file.canRead()) {
+                        Log.d(TAG, "Accessible removable path found: $path")
+                        return path
+                    }
                 }
-
-                // Heuristic 2: Check if path contains USB identifiers
-                val path = volume.directory?.absolutePath?.lowercase() ?: ""
-                if (path.contains("usb") || path.contains("otg")) {
-                    return path
-                }
-
-                // Heuristic 3: Use reflection to check raw system path
-                val systemPath = try {
-                    val getPathMethod = StorageVolume::class.java.getMethod("getPath")
-                    getPathMethod.invoke(volume) as String
-                } catch (e: Exception) {
-                    null
-                }
-
-                if (systemPath?.lowercase()?.contains("usb") == true) {
-                    return volume.directory?.absolutePath ?: systemPath
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    try {
+                        val getPathMethod = StorageVolume::class.java.getMethod("getPath")
+                        val rawPath = getPathMethod.invoke(volume) as String
+                        Log.d(TAG, "Raw path via reflection: $rawPath")
+                        if (rawPath.contains("usb", ignoreCase = true) || rawPath.contains("otg", ignoreCase = true)) {
+                            return rawPath
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Reflection failed: $e")
+                    }
                 }
             }
         }
         return null
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_CODE_OPEN_DOCUMENT_TREE && resultCode == RESULT_OK) {
-            val treeUri = data?.data
-            if (treeUri != null) {
-                // Take persistent permissions
-                contentResolver.takePersistableUriPermission(
-                    treeUri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                )
-
-                // Resolve the URI to a real path
-                val resolvedPath = getRealPathFromURI(treeUri)
-
-                // Send the resolved path to Flutter
-                MethodChannel(flutterEngine!!.dartExecutor.binaryMessenger, CHANNEL)
-                    .invokeMethod("onFolderSelected", resolvedPath)
-            }
-        }
-    }
-
-    private fun getRealPathFromURI(uri: Uri): String {
-        return if (DocumentsContract.isTreeUri(uri)) {
-            val docId = DocumentsContract.getTreeDocumentId(uri)
-            val parts = docId.split(":").toTypedArray()
-            if (parts.size >= 2) {
-                "/storage/${parts[0]}/${parts[1]}"
-            } else {
-                docId
-            }
-        } else {
-            uri.path ?: ""
-        }
-    }
-
-    companion object {
-        private const val REQUEST_CODE_OPEN_DOCUMENT_TREE = 1
     }
 }

@@ -12,7 +12,6 @@ import '../../../../common/appColors.dart';
 import '../../../data/database_helper.dart';
 import '../../audio/controllers/audio_controller.dart';
 
-// Dialog State Controller using GetX
 class DialogStateController extends GetxController {
   var title = ''.obs;
   var message = ''.obs;
@@ -42,6 +41,172 @@ class DialogStateController extends GetxController {
     if (showContinue != null) this.showContinue.value = showContinue;
     if (showTryAgain != null) this.showTryAgain.value = showTryAgain;
   }
+}
+
+// Declare helper functions before use
+Future<PermissionStatus> _requestStoragePermission() async {
+  PermissionStatus status;
+
+  // For Android 10 (API 29), request READ_EXTERNAL_STORAGE
+  if (Platform.isAndroid && Platform.version.startsWith('29')) {
+    status = await Permission.storage.status;
+    if (!status.isGranted) {
+      status = await Permission.storage.request();
+      if (status.isPermanentlyDenied) {
+        Get.snackbar('Debug', 'Storage permission permanently denied, opening settings',
+            snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));
+        await openAppSettings();
+        // Recheck status after opening settings
+        status = await Permission.storage.status;
+      }
+    }
+  } else {
+    // For Android 11+ (API 30+), request MANAGE_EXTERNAL_STORAGE
+    status = await Permission.manageExternalStorage.status;
+    if (!status.isGranted) {
+      status = await Permission.manageExternalStorage.request();
+      if (status.isPermanentlyDenied) {
+        Get.snackbar('Debug', 'Manage External Storage permission permanently denied, opening settings',
+            snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));
+        await openAppSettings();
+        // Recheck status after opening settings
+        status = await Permission.manageExternalStorage.status;
+      }
+    }
+  }
+
+  return status;
+}
+
+Future<void> _processFiles(BuildContext context, String usbPath, DialogStateController dialogController, DatabaseHelper dbHelper) async {
+  String combinedPath = '$usbPath/RECORD'; // Fixed selectedPath to be part of the path
+  var directory = Directory(combinedPath);
+
+  Get.snackbar('Debug', 'Attempting to access directory: $combinedPath',
+      snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));
+
+  // Try multiple variations of the path
+  final possiblePaths = [
+    combinedPath,
+    '/storage$combinedPath',
+    '/mnt/media_rw$combinedPath',
+  ];
+  bool directoryFound = false;
+
+  await Future.delayed(Duration(seconds: 15));
+
+  for (final path in possiblePaths) {
+    final dir = Directory(path);
+    if (dir.existsSync()) {
+      final stat = dir.statSync();
+      if (stat.type == FileSystemEntityType.directory) {
+        combinedPath = path;
+        directory = dir;
+        directoryFound = true;
+        Get.snackbar('Debug', 'Found valid directory: $combinedPath',
+            snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2));
+        break;
+      }
+    }
+  }
+
+  if (!directoryFound) {
+    Get.snackbar('Debug', 'No valid directory found in: $possiblePaths',
+        snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));
+    throw Exception('No valid directory found in: $possiblePaths');
+  }
+
+  int retryCountStep3 = 0;
+  const maxRetriesStep3 = 5;
+  List<FileSystemEntity> files = [];
+
+  while (retryCountStep3 < maxRetriesStep3) {
+    try {
+      files = directory.listSync(recursive: true, followLinks: false);
+      Get.snackbar('Debug', 'Successfully listed files in $combinedPath',
+          snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2));
+      break;
+    } catch (e) {
+      retryCountStep3++;
+      if (retryCountStep3 < maxRetriesStep3) {
+        Get.snackbar('Debug', 'Attempt $retryCountStep3 failed: $e, retrying...',
+            snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2));
+        await Future.delayed(Duration(seconds: 15));
+      } else {
+        Get.snackbar('Debug', 'All attempts failed: $e',
+            snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));
+        dialogController.updateDialog(
+          title: "Error",
+          message: "Failed to access directory after $maxRetriesStep3 attempts.\nError: $e",
+          icon: Icons.error,
+          iconColor: Colors.red.shade700,
+          isLoading: false,
+          showTryAgain: true,
+        );
+        return;
+      }
+    }
+  }
+
+  final audioFilesList = files.where((file) {
+    final extension = file.path.split('.').last.toLowerCase();
+    return ['mp3', 'wav', 'aac'].contains(extension);
+  }).toList();
+
+  final savedFiles = await dbHelper.fetchAudioFiles();
+  final savedFileNames = savedFiles.map((file) => file['file_name'] as String).toSet();
+
+  List<FileSystemEntity> newFiles = audioFilesList.where((file) {
+    final fileName = file.path.split('/').last;
+    return !savedFileNames.contains(fileName);
+  }).toList();
+
+  dialogController.updateDialog(
+    title: "Transferring",
+    message: "Please wait for file transfer from CleverTalk recorder\n\nFiles remaining: ${newFiles.length}",
+    progress: 0.0,
+    isLoading: true,
+  );
+
+  for (var i = 0; i < newFiles.length; i++) {
+    final file = newFiles[i];
+    final originalFilePath = file.path;
+    final localFilePath = await _copyFileToLocal(originalFilePath);
+    final duration = await _getAudioDuration(localFilePath);
+
+    await dbHelper.insertAudioFile(
+      false,
+      context,
+      localFilePath.split('/').last,
+      localFilePath,
+      duration,
+      false,
+      '',
+    );
+
+    final progress = (i + 1) / newFiles.length;
+    dialogController.updateDialog(
+      title: "Transferring",
+      message: "Please wait for file transfer from CleverTalk recorder\n\nFiles remaining: ${newFiles.length - (i + 1)}",
+      progress: progress,
+      isLoading: true,
+    );
+  }
+
+  dialogController.updateDialog(
+    title: "Completed",
+    message: "All files have been downloaded!\n${newFiles.length} files transferred successfully",
+    icon: Icons.check_circle,
+    iconColor: AppColors.appColor,
+    isLoading: false,
+    showContinue: true,
+  );
+
+  Get.snackbar('Debug', 'Transfer completed: ${newFiles.length} files',
+      snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));
+
+  final AudioPlayerController audioController = Get.put(AudioPlayerController());
+  audioController.fetchAudioFiles();
 }
 
 Future<void> connectUsbDevice(BuildContext context) async {
@@ -75,8 +240,18 @@ Future<void> connectUsbDevice(BuildContext context) async {
 
     while (retryCount < maxRetries) {
       try {
-        if (Platform.isAndroid && await Permission.manageExternalStorage.isDenied) {
-          await Permission.manageExternalStorage.request();
+        // Request storage permissions
+        final permissionStatus = await _requestStoragePermission();
+        if (permissionStatus != PermissionStatus.granted) {
+          dialogController.updateDialog(
+            title: "Permission Required",
+            message: "This app needs access to external storage to read files from the CleverTalk recorder. Please grant the permission.",
+            icon: Icons.error,
+            iconColor: Colors.red.shade700,
+            isLoading: false,
+            showTryAgain: true,
+          );
+          return;
         }
 
         final Map<dynamic, dynamic>? usbDeviceDetails =
@@ -84,12 +259,17 @@ Future<void> connectUsbDevice(BuildContext context) async {
 
         if (usbDeviceDetails != null) {
           usbPath = await platform.invokeMethod<String>('getUsbPath');
+          if (usbPath == null || (usbPath?.isEmpty ?? true)) { // Null-safe check for isEmpty
+            throw Exception('USB path not detected');
+          }
           usbDeviceName = usbDeviceDetails['deviceName'];
           usbVendorId = usbDeviceDetails['vendorId'];
           usbProductId = usbDeviceDetails['productId'];
           usbDeviceUUID = usbDeviceDetails['deviceUUID'];
           isUsbConnected = true;
 
+          Get.snackbar('Debug', 'USB connected at path: $usbPath',
+              snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));
           dialogController.updateDialog(
             title: "Success",
             message: "Successfully connected to the recorder\nPlease wait for file transfer from CleverTalk recorder",
@@ -101,12 +281,14 @@ Future<void> connectUsbDevice(BuildContext context) async {
           break;
         } else {
           retryCount++;
-          if (retryCount < maxRetries) {
-            await Future.delayed(Duration(seconds: 15));
-          }
+          Get.snackbar('Debug', 'Attempt $retryCount failed: No USB device detected, retrying...',
+              snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2));
+          await Future.delayed(Duration(seconds: 15));
         }
       } catch (e) {
         retryCount++;
+        Get.snackbar('Debug', 'Attempt $retryCount failed: $e, retrying...',
+            snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2));
         if (retryCount < maxRetries) {
           await Future.delayed(Duration(seconds: 15));
         }
@@ -125,109 +307,7 @@ Future<void> connectUsbDevice(BuildContext context) async {
       return;
     }
 
-    await Future.delayed(Duration(seconds: 10));
-
-    try {
-      String combinedPath = '$usbPath$selectedPath';
-      final directory = Directory(combinedPath);
-
-      int retryCountStep3 = 0;
-      const maxRetriesStep3 = 5;
-      List<FileSystemEntity> files = [];
-
-      while (retryCountStep3 < maxRetriesStep3) {
-        try {
-          if (!directory.existsSync()) {
-            throw Exception('Directory does not exist!');
-          }
-
-          files = directory.listSync(recursive: true, followLinks: false);
-          break;
-        } catch (e) {
-          retryCountStep3++;
-          if (retryCountStep3 < maxRetriesStep3) {
-            await Future.delayed(Duration(seconds: 15));
-          } else {
-            dialogController.updateDialog(
-              title: "Error",
-              message: "Failed to access directory after $maxRetriesStep3 attempts.",
-              icon: Icons.error,
-              iconColor: Colors.red.shade700,
-              isLoading: false,
-              showTryAgain: true,
-            );
-            return;
-          }
-        }
-      }
-
-    final audioFilesList = files.where((file) {
-      final extension = file.path.split('.').last.toLowerCase();
-      return ['mp3', 'wav', 'aac'].contains(extension);
-    }).toList();
-
-    final savedFiles = await dbHelper.fetchAudioFiles();
-    final savedFileNames = savedFiles.map((file) => file['file_name'] as String).toSet();
-
-    List<FileSystemEntity> newFiles = audioFilesList.where((file) {
-      final fileName = file.path.split('/').last;
-      return !savedFileNames.contains(fileName);
-    }).toList();
-
-      dialogController.updateDialog(
-        title: "Transferring",
-        message: "Please wait for file transfer from CleverTalk recorder\n\nFiles remaining: ${newFiles.length}",
-        progress: 0.0,
-        isLoading: true,
-      );
-
-    for (var i = 0; i < newFiles.length; i++) {
-      final file = newFiles[i];
-      final originalFilePath = file.path;
-      final localFilePath = await _copyFileToLocal(originalFilePath);
-      final duration = await _getAudioDuration(localFilePath);
-
-      await dbHelper.insertAudioFile(
-        false,
-        context,
-        localFilePath.split('/').last,
-        localFilePath,
-        duration,
-        false,
-        '',
-      );
-
-        final progress = (i + 1) / newFiles.length;
-        dialogController.updateDialog(
-          title: "Transferring",
-          message: "Please wait for file transfer from CleverTalk recorder\n\nFiles remaining: ${newFiles.length - (i + 1)}",
-          progress: progress,
-          isLoading: true,
-        );
-      }
-
-      dialogController.updateDialog(
-        title: "Completed",
-        message: "All files have been downloaded!\n${newFiles.length} files transferred successfully",
-        icon: Icons.check_circle,
-        iconColor: AppColors.appColor,
-        isLoading: false,
-        showContinue: true,
-      );
-
-      final AudioPlayerController audioController = Get.put(AudioPlayerController());
-      audioController.fetchAudioFiles();
-
-    } catch (e) {
-      dialogController.updateDialog(
-        title: "Error",
-        message: "An error occurred: $e",
-        icon: Icons.error,
-        iconColor: Colors.red.shade700,
-        isLoading: false,
-        showTryAgain: true,
-      );
-    }
+    await _processFiles(context, usbPath!, dialogController, dbHelper);
   }
 
   // Initial call to start the connection process
@@ -283,7 +363,7 @@ DialogStateController _showPersistentDialog(BuildContext context) {
 
   Get.dialog(
     WillPopScope(
-      onWillPop: () async => false, // Prevents dialog dismissal on back button press
+      onWillPop: () async => false,
       child: Obx(() => Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         elevation: 8,
@@ -374,9 +454,9 @@ DialogStateController _showPersistentDialog(BuildContext context) {
                   width: 160,
                   text: 'Try Again',
                   onPressed: () async {
-                    controller.updateDialog(showTryAgain: false); // Reset try again state
+                    controller.updateDialog(showTryAgain: false);
                     Get.back();
-                    await connectUsbDevice(context); // Restart the process within the same dialog
+                    await connectUsbDevice(context);
                   },
                 ),
               ],
@@ -385,7 +465,7 @@ DialogStateController _showPersistentDialog(BuildContext context) {
         ),
       )),
     ),
-    barrierDismissible: false, // Prevents closing by tapping outside
+    barrierDismissible: false,
   );
 
   return controller;

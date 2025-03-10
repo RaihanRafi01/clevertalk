@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <application
         android:usesCleartextTraffic="true"
         android:requestLegacyExternalStorage="true"
@@ -15,9 +16,10 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <service
-            android:name="com.pravera.flutter_foreground_service.service.ForegroundService"
+            android:name="com.transistorsoft.flutter.backgroundfetch.BackgroundFetchService"
             android:enabled="true"
-            android:exported="false" />
+            android:exported="true"
+            android:permission="android.permission.BIND_JOB_SERVICE"/>
 
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"

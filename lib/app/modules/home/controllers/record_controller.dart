@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:audio_session/audio_session.dart';
 import 'package:flutter_background/flutter_background.dart';
 import 'package:get/get.dart';
 import 'package:flutter_sound/flutter_sound.dart';
@@ -33,16 +34,36 @@ class RecordController extends GetxController {
     initBackground();
   }
 
+  bool _backgroundInitialized = false;
+
   Future<void> initBackground() async {
-    bool hasPermissions = await FlutterBackground.hasPermissions;
-    if (!hasPermissions) {
-      await FlutterBackground.initialize();
+    try {
+      if (!_backgroundInitialized) {
+        final androidConfig = FlutterBackgroundAndroidConfig(
+          notificationTitle: "Recording Audio",
+          notificationText: "Audio is being recorded in the background",
+          notificationImportance: AndroidNotificationImportance.high,
+          notificationIcon: AndroidResource(name: 'ic_launcher', defType: 'mipmap'),
+        );
+
+        // Initialize and enable in sequence
+        await FlutterBackground.initialize(androidConfig: androidConfig);
+        _backgroundInitialized = true;
+      }
+
+      if (!await FlutterBackground.isBackgroundExecutionEnabled) {
+        await FlutterBackground.enableBackgroundExecution();
+      }
+    } catch (e) {
+      print("Background initialization error: $e");
+      rethrow;
     }
-    await FlutterBackground.enableBackgroundExecution();
   }
 
   Future<void> requestPermissions() async {
     var status = await Permission.microphone.request();
+    await Permission.storage.request();
+    await Permission.notification.request();
     if (status.isGranted) {
       print("Microphone permission granted");
     } else {
@@ -66,47 +87,73 @@ class RecordController extends GetxController {
     }
   }
 
-  void startRecording() async {
+  Future<void> startRecording() async {
     try {
-      final directory = await getApplicationDocumentsDirectory();
-      if (!await directory.exists()) {
-        await directory.create(recursive: true);
-      }
+      // Initialize background first
+      await initBackground();
 
-      _filePath =
-      '${directory.path}/recording_${DateTime.now().millisecondsSinceEpoch}.wav';
+      // Configure audio session for background
+      final session = await AudioSession.instance;
+      await session.configure(AudioSessionConfiguration(
+        avAudioSessionCategory: AVAudioSessionCategory.playAndRecord,
+        avAudioSessionMode: AVAudioSessionMode.defaultMode,
+        avAudioSessionCategoryOptions: AVAudioSessionCategoryOptions.allowBluetooth |
+        AVAudioSessionCategoryOptions.defaultToSpeaker |
+        AVAudioSessionCategoryOptions.mixWithOthers,
+      ));
+      await session.setActive(true);
+
+      // Start recording with proper format
+      final directory = await getApplicationDocumentsDirectory();
+      _filePath = '${directory.path}/recording_${DateTime.now().millisecondsSinceEpoch}.wav';
+
       await _recorder?.startRecorder(
         toFile: _filePath,
         codec: Codec.pcm16WAV,
+        numChannels: 1,
+        sampleRate: 16000,
+        bitRate: 128000,
       );
 
+      // Keep existing timer logic
       isRecording.value = true;
       recordingTime.value = 0;
       recordingMilliseconds.value = 0;
       waveformOffset.value = 0.0;
 
-      // Start the timer
       _timer = Timer.periodic(Duration(milliseconds: 50), (timer) {
-        // Only update if it's recording and not paused
         if (isRecording.value && !isPaused.value) {
           recordingMilliseconds.value += 50;
           if (recordingMilliseconds.value >= 1000) {
             recordingMilliseconds.value = 0;
             recordingTime.value++;
           }
-
           waveformOffset.value -= 2;
-          if (waveformOffset.value <= -Get.width) {
-            waveformOffset.value = 0.0;
-          }
+          if (waveformOffset.value <= -Get.width) waveformOffset.value = 0;
         }
       });
 
-      print("Recording started.");
     } catch (e) {
       print("Error starting recording: $e");
+      Get.snackbar("Error", "Failed to start recording: ${e.toString()}");
     }
   }
+
+  Future<void> stopRecording() async {
+    try {
+      await _recorder?.stopRecorder();
+      await FlutterBackground.disableBackgroundExecution();
+      final session = await AudioSession.instance;
+      await session.setActive(false);
+
+      // Your existing cleanup logic
+      isRecording.value = false;
+      _timer?.cancel();
+    } catch (e) {
+      print("Error stopping recording: $e");
+    }
+  }
+
 
   Future<void> pauseRecording() async {
     try {
@@ -189,38 +236,11 @@ class RecordController extends GetxController {
     }*/
   }
 
-  Future<void> stopRecording() async {
-    try {
-      await _recorder?.stopRecorder();
-      isRecording.value = false;
-      _timer?.cancel();
-      recordingTime.value = 0;
-      recordingMilliseconds.value = 0;
-      waveformOffset.value = 0.0;
-
-      /*// Get the duration of the recording
-      final duration = formatTime(recordingTime.value, recordingMilliseconds.value);
-
-      // Insert audio details into the database
-      if (_filePath != null) {
-        await DatabaseHelper().insertAudioFile(
-          Get.context!,
-          'recording_${DateTime.now().millisecondsSinceEpoch}.WAV',
-          _filePath!,
-          duration,
-        );
-      }
-
-      print("Recording stopped and saved to the database.");*/
-    } catch (e) {
-      print("Error stopping recording: $e");
-    }
-  }
-
   @override
   void onClose() {
     _timer?.cancel();
     _recorder?.closeRecorder();
+    FlutterBackground.disableBackgroundExecution();
     super.onClose();
   }
 
