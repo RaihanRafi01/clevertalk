@@ -35,7 +35,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.AUTHENTICATION,
-      page: () => AuthenticationView(),
+      page: () => AuthenticationView(),  //AuthenticationView
       binding: AuthenticationBinding(),
     ),
     GetPage(

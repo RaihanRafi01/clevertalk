@@ -1,62 +1,117 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:audio_session/audio_session.dart';
-import 'package:flutter_background/flutter_background.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:get/get.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../../data/database_helper.dart';
+import '../../../data/services/recordingTask_service.dart';
 import '../../audio/controllers/audio_controller.dart';
 import '../../text/controllers/text_controller.dart';
 
-class RecordController extends GetxController {
+class RecordController extends GetxController with WidgetsBindingObserver {
   var recordingTime = 0.obs;
   var recordingMilliseconds = 0.obs;
   var isRecording = false.obs;
-  var isPaused = false.obs; // Track if the recording is paused
-  var waveformOffset = 0.0.obs; // Track the position of the waveform
+  var isPaused = false.obs;
+  var waveformOffset = 0.0.obs;
   Timer? _timer;
   FlutterSoundRecorder? _recorder;
   String? _filePath;
 
-  int _pauseTime = 0; // Track time when recording is paused
-  int _pauseMilliseconds = 0; // Track milliseconds when recording is paused
+  int _pauseTime = 0;
+  int _pauseMilliseconds = 0;
   final AudioPlayerController audioPlayerController = Get.put(AudioPlayerController());
   final TextViewController textViewController = Get.put(TextViewController());
 
   @override
   void onInit() {
     super.onInit();
+    WidgetsBinding.instance.addObserver(this);
     requestPermissions();
+    //requestForegroundMicrophonePermission();
+    //disableBatteryOptimizations();
     _recorder = FlutterSoundRecorder();
     _initializeRecorder();
-    initBackground();
+    /*Future.delayed(Duration(milliseconds: 100), ()  {
+      _initForegroundTask();
+    });*/
   }
 
-  bool _backgroundInitialized = false;
+  @override
+  void onClose() {
+    _timer?.cancel();
+    _recorder?.closeRecorder();
+    FlutterForegroundTask.stopService();
+    WidgetsBinding.instance.removeObserver(this);
+    super.onClose();
+  }
 
-  Future<void> initBackground() async {
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused && isRecording.value && !isPaused.value) {
+      print("App minimized, foreground service keeps recording");
+    } else if (state == AppLifecycleState.resumed) {
+      print("App resumed, attempting to resume recording if paused");
+      if (isRecording.value && isPaused.value) {
+        resumeRecording();
+      }
+    }
+  }
+
+  Future<void> requestForegroundMicrophonePermission() async {
+    if (Platform.isAndroid && int.parse(Platform.operatingSystemVersion.split(' ')[0]) >= 14) {
+      const MethodChannel _channel = MethodChannel('request_foreground_microphone');
+
+      try {
+        final bool granted = await _channel.invokeMethod('requestPermission');
+        if (!granted) {
+          print("Foreground microphone permission denied");
+        }
+      } on PlatformException catch (e) {
+        print("Error requesting foreground microphone permission: $e");
+      }
+    }
+  }
+
+
+
+  Future<void> _initForegroundTask() async {
     try {
-      if (!_backgroundInitialized) {
-        final androidConfig = FlutterBackgroundAndroidConfig(
-          notificationTitle: "Recording Audio",
-          notificationText: "Audio is being recorded in the background",
-          notificationImportance: AndroidNotificationImportance.high,
-          notificationIcon: AndroidResource(name: 'ic_launcher', defType: 'mipmap'),
-        );
+      FlutterForegroundTask.init(
+        androidNotificationOptions: AndroidNotificationOptions(
+          channelId: 'recording_channel',
+          channelName: 'Recording Service',
+          channelDescription: 'This app is recording audio in the background',
+          channelImportance: NotificationChannelImportance.DEFAULT,
+          priority: NotificationPriority.DEFAULT,
+        ),
+        iosNotificationOptions: const IOSNotificationOptions(
+          showNotification: true,
+          playSound: false,
+        ),
+        foregroundTaskOptions: ForegroundTaskOptions(
+          eventAction: ForegroundTaskEventAction.repeat(5000),
+          autoRunOnBoot: false,
+          allowWakeLock: true,
+          allowWifiLock: true,
+        ),
+      );
 
-        // Initialize and enable in sequence
-        await FlutterBackground.initialize(androidConfig: androidConfig);
-        _backgroundInitialized = true;
-      }
-
-      if (!await FlutterBackground.isBackgroundExecutionEnabled) {
-        await FlutterBackground.enableBackgroundExecution();
-      }
+      FlutterForegroundTask.setTaskHandler(RecordingTaskHandler());
+      print("Foreground task initialized successfully");
     } catch (e) {
-      print("Background initialization error: $e");
-      rethrow;
+      print("Error initializing foreground task: $e");
+      if (Get.overlayContext != null) {
+        Get.snackbar("Error", "Failed to initialize foreground task: $e");
+      } else {
+        print("Overlay context unavailable, cannot show snackbar");
+      }
     }
   }
 
@@ -81,7 +136,7 @@ class RecordController extends GetxController {
   Future<void> _initializeRecorder() async {
     try {
       await _recorder?.openRecorder();
-      print("Recorder initialized successfully.");
+      print("Recorder initialized successfully");
     } catch (e) {
       print("Error initializing recorder: $e");
     }
@@ -89,21 +144,39 @@ class RecordController extends GetxController {
 
   Future<void> startRecording() async {
     try {
-      // Initialize background first
-      await initBackground();
+      // Ensure the service starts properly
+      ServiceRequestResult serviceStarted = await FlutterForegroundTask.startService(
+        notificationTitle: "Recording Audio",
+        notificationText: "Your app is recording audio in the background",
+      );
+      print(":::::::::::::::::::::::::Service start result: $serviceStarted");
 
-      // Configure audio session for background
+      // Acquire proper audio focus
       final session = await AudioSession.instance;
       await session.configure(AudioSessionConfiguration(
         avAudioSessionCategory: AVAudioSessionCategory.playAndRecord,
-        avAudioSessionMode: AVAudioSessionMode.defaultMode,
+        avAudioSessionMode: AVAudioSessionMode.voiceChat,  // <- Change to `voiceChat`
         avAudioSessionCategoryOptions: AVAudioSessionCategoryOptions.allowBluetooth |
         AVAudioSessionCategoryOptions.defaultToSpeaker |
         AVAudioSessionCategoryOptions.mixWithOthers,
+        androidAudioFocusGainType: AndroidAudioFocusGainType.gainTransientExclusive,
+        androidWillPauseWhenDucked: false,
       ));
+
       await session.setActive(true);
 
-      // Start recording with proper format
+      session.interruptionEventStream.listen((event) async {
+        if (event.begin && isRecording.value && !isPaused.value) {
+          print("Microphone interrupted by another app!");
+          await pauseRecording();
+          Get.snackbar("Recording Paused", "Another app is using the microphone.");
+        } else if (!event.begin && isRecording.value && isPaused.value) {
+          print("Microphone access restored, resuming recording...");
+          await resumeRecording();
+          Get.snackbar("Recording Resumed", "Microphone access restored.");
+        }
+      });
+
       final directory = await getApplicationDocumentsDirectory();
       _filePath = '${directory.path}/recording_${DateTime.now().millisecondsSinceEpoch}.wav';
 
@@ -115,7 +188,6 @@ class RecordController extends GetxController {
         bitRate: 128000,
       );
 
-      // Keep existing timer logic
       isRecording.value = true;
       recordingTime.value = 0;
       recordingMilliseconds.value = 0;
@@ -133,51 +205,48 @@ class RecordController extends GetxController {
         }
       });
 
+      print("Recording started successfully");
     } catch (e) {
       print("Error starting recording: $e");
       Get.snackbar("Error", "Failed to start recording: ${e.toString()}");
     }
   }
 
+
   Future<void> stopRecording() async {
     try {
-      await _recorder?.stopRecorder();
-      await FlutterBackground.disableBackgroundExecution();
-      final session = await AudioSession.instance;
-      await session.setActive(false);
-
-      // Your existing cleanup logic
       isRecording.value = false;
       _timer?.cancel();
+      await _recorder?.stopRecorder();
+      await FlutterForegroundTask.stopService();
+      final session = await AudioSession.instance;
+      await session.setActive(false);
+      // Your existing cleanup logic
     } catch (e) {
       print("Error stopping recording: $e");
     }
   }
-
 
   Future<void> pauseRecording() async {
     try {
       await _recorder?.pauseRecorder();
       isPaused.value = true;
 
-      // Save the current state of time and milliseconds when paused
       _pauseTime = recordingTime.value;
       _pauseMilliseconds = recordingMilliseconds.value;
 
-      // Pause the timer
       _timer?.cancel();
-      print("Recording paused.");
+      print("Recording paused at ${DateTime.now()}");
     } catch (e) {
       print("Error pausing recording: $e");
     }
   }
 
-  void resumeRecording() async {
+  Future<void> resumeRecording() async {
     try {
       await _recorder?.resumeRecorder();
       isPaused.value = false;
 
-      // Restart the timer from the paused state
       _timer = Timer.periodic(Duration(milliseconds: 50), (timer) {
         if (isRecording.value && !isPaused.value) {
           recordingMilliseconds.value += 50;
@@ -185,7 +254,6 @@ class RecordController extends GetxController {
             recordingMilliseconds.value = 0;
             recordingTime.value++;
           }
-
           waveformOffset.value -= 2;
           if (waveformOffset.value <= -Get.width) {
             waveformOffset.value = 0.0;
@@ -193,56 +261,48 @@ class RecordController extends GetxController {
         }
       });
 
-      // Resume from the paused time
       recordingTime.value = _pauseTime;
       recordingMilliseconds.value = _pauseMilliseconds;
 
-      print("Recording resumed.");
+      print("Recording resumed at ${DateTime.now()}");
     } catch (e) {
       print("Error resuming recording: $e");
+      Get.snackbar("Error", "Failed to resume recording: ${e.toString()}");
     }
   }
-
   Future<void> saveRecording(String filename) async {
     print(':::::::::::::::::::::::::TIME:::::::::::::::::${recordingTime.value} :: ${recordingMilliseconds.value}');
     final duration = formatTime(recordingTime.value, recordingMilliseconds.value);
 
     // Insert audio details into the database
     if (_filePath != null) {
-      String formattedDate =
-      DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+      String formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
 
-      await DatabaseHelper().insertAudioFile(true,Get.context!, '$filename.WAV',
-          _filePath!, duration, true, formattedDate);
+      await DatabaseHelper().insertAudioFile(
+        true,
+        Get.context!,
+        '$filename.WAV',
+        _filePath!,
+        duration,
+        true,
+        formattedDate,
+      );
+
       await stopRecording();
+
+      // Reset recording variables
+      recordingTime.value = 0;
+      recordingMilliseconds.value = 0;
+      waveformOffset.value = 0.0;
+      isPaused.value = false;
+      _pauseTime = 0;
+      _pauseMilliseconds = 0;
+
       audioPlayerController.fetchAudioFiles();
       textViewController.fetchTextFiles();
     }
-
-    /*final directory = await getApplicationDocumentsDirectory();
-      if (!directory.existsSync()) {
-        directory.createSync(recursive: true);
-      }
-      final localPath = '${directory.path}/${_filePath?.split('/').last}';
-
-      File(_filePath!).copySync(localPath);*/
-    /*//print("Recording stopped and saved to the database.");
-
-      // Copy the file to the local path
-      //
-      print("Recording saved at: $localPath");
-    } else {
-      print("No recording to save.");
-    }*/
   }
 
-  @override
-  void onClose() {
-    _timer?.cancel();
-    _recorder?.closeRecorder();
-    FlutterBackground.disableBackgroundExecution();
-    super.onClose();
-  }
 
   String formatTime(int seconds, int milliseconds) {
     final minutes = (seconds ~/ 60).toString().padLeft(2, '0');
