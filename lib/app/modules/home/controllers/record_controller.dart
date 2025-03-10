@@ -38,9 +38,9 @@ class RecordController extends GetxController with WidgetsBindingObserver {
     //disableBatteryOptimizations();
     _recorder = FlutterSoundRecorder();
     _initializeRecorder();
-    /*Future.delayed(Duration(milliseconds: 100), ()  {
+    Future.delayed(Duration(milliseconds: 100), ()  {
       _initForegroundTask();
-    });*/
+    });
   }
 
   @override
@@ -64,7 +64,13 @@ class RecordController extends GetxController with WidgetsBindingObserver {
     }
   }
 
-  Future<void> requestForegroundMicrophonePermission() async {
+  Future<void> disableBatteryOptimizations() async {
+    if (await Permission.ignoreBatteryOptimizations.isDenied) {
+      await Permission.ignoreBatteryOptimizations.request();
+    }
+  }
+
+  /*Future<void> requestForegroundMicrophonePermission() async {
     if (Platform.isAndroid && int.parse(Platform.operatingSystemVersion.split(' ')[0]) >= 14) {
       const MethodChannel _channel = MethodChannel('request_foreground_microphone');
 
@@ -77,7 +83,7 @@ class RecordController extends GetxController with WidgetsBindingObserver {
         print("Error requesting foreground microphone permission: $e");
       }
     }
-  }
+  }*/
 
 
 
