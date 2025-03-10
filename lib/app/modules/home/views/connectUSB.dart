@@ -53,8 +53,8 @@ Future<PermissionStatus> _requestStoragePermission() async {
     if (!status.isGranted) {
       status = await Permission.storage.request();
       if (status.isPermanentlyDenied) {
-        Get.snackbar('Debug', 'Storage permission permanently denied, opening settings',
-            snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));
+        /*Get.snackbar('Debug', 'Storage permission permanently denied, opening settings',
+            snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));*/
         await openAppSettings();
         // Recheck status after opening settings
         status = await Permission.storage.status;
@@ -66,8 +66,8 @@ Future<PermissionStatus> _requestStoragePermission() async {
     if (!status.isGranted) {
       status = await Permission.manageExternalStorage.request();
       if (status.isPermanentlyDenied) {
-        Get.snackbar('Debug', 'Manage External Storage permission permanently denied, opening settings',
-            snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));
+       /* Get.snackbar('Debug', 'Manage External Storage permission permanently denied, opening settings',
+            snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));*/
         await openAppSettings();
         // Recheck status after opening settings
         status = await Permission.manageExternalStorage.status;
@@ -82,8 +82,8 @@ Future<void> _processFiles(BuildContext context, String usbPath, DialogStateCont
   String combinedPath = '$usbPath/RECORD'; // Fixed selectedPath to be part of the path
   var directory = Directory(combinedPath);
 
-  Get.snackbar('Debug', 'Attempting to access directory: $combinedPath',
-      snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));
+  /*Get.snackbar('Debug', 'Attempting to access directory: $combinedPath',
+      snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));*/
 
   // Try multiple variations of the path
   final possiblePaths = [
@@ -103,16 +103,16 @@ Future<void> _processFiles(BuildContext context, String usbPath, DialogStateCont
         combinedPath = path;
         directory = dir;
         directoryFound = true;
-        Get.snackbar('Debug', 'Found valid directory: $combinedPath',
-            snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2));
+        /*Get.snackbar('Debug', 'Found valid directory: $combinedPath',
+            snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2));*/
         break;
       }
     }
   }
 
   if (!directoryFound) {
-    Get.snackbar('Debug', 'No valid directory found in: $possiblePaths',
-        snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));
+   /* Get.snackbar('Debug', 'No valid directory found in: $possiblePaths',
+        snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));*/
     throw Exception('No valid directory found in: $possiblePaths');
   }
 
@@ -123,21 +123,21 @@ Future<void> _processFiles(BuildContext context, String usbPath, DialogStateCont
   while (retryCountStep3 < maxRetriesStep3) {
     try {
       files = directory.listSync(recursive: true, followLinks: false);
-      Get.snackbar('Debug', 'Successfully listed files in $combinedPath',
-          snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2));
+      /*Get.snackbar('Debug', 'Successfully listed files in $combinedPath',
+          snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2));*/
       break;
     } catch (e) {
       retryCountStep3++;
       if (retryCountStep3 < maxRetriesStep3) {
-        Get.snackbar('Debug', 'Attempt $retryCountStep3 failed: $e, retrying...',
-            snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2));
+        /*Get.snackbar('Debug', 'Attempt $retryCountStep3 failed: $e, retrying...',
+            snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2));*/
         await Future.delayed(Duration(seconds: 15));
       } else {
-        Get.snackbar('Debug', 'All attempts failed: $e',
-            snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));
+        /*Get.snackbar('Debug', 'All attempts failed: $e',
+            snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));*/
         dialogController.updateDialog(
           title: "Error",
-          message: "Failed to access directory after $maxRetriesStep3 attempts.\nError: $e",
+          message: "Failed to access directory after $maxRetriesStep3 attempts.",
           icon: Icons.error,
           iconColor: Colors.red.shade700,
           isLoading: false,
@@ -202,8 +202,8 @@ Future<void> _processFiles(BuildContext context, String usbPath, DialogStateCont
     showContinue: true,
   );
 
-  Get.snackbar('Debug', 'Transfer completed: ${newFiles.length} files',
-      snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));
+  /*Get.snackbar('Debug', 'Transfer completed: ${newFiles.length} files',
+      snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));*/
 
   final AudioPlayerController audioController = Get.put(AudioPlayerController());
   audioController.fetchAudioFiles();
@@ -268,8 +268,8 @@ Future<void> connectUsbDevice(BuildContext context) async {
           usbDeviceUUID = usbDeviceDetails['deviceUUID'];
           isUsbConnected = true;
 
-          Get.snackbar('Debug', 'USB connected at path: $usbPath',
-              snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));
+          /*Get.snackbar('Debug', 'USB connected at path: $usbPath',
+              snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));*/
           dialogController.updateDialog(
             title: "Success",
             message: "Successfully connected to the recorder\nPlease wait for file transfer from CleverTalk recorder",
@@ -281,8 +281,8 @@ Future<void> connectUsbDevice(BuildContext context) async {
           break;
         } else {
           retryCount++;
-          Get.snackbar('Debug', 'Attempt $retryCount failed: No USB device detected, retrying...',
-              snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2));
+         /* Get.snackbar('Debug', 'Attempt $retryCount failed: No USB device detected, retrying...',
+              snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2));*/
           await Future.delayed(Duration(seconds: 15));
         }
       } catch (e) {
