@@ -61,6 +61,7 @@ dependencies:
   scrollable_positioned_list: ^0.3.8
   flutter_foreground_task: ^8.17.0
   audio_session: ^0.1.25
+  dropdown_search: ^6.0.2
 dev_dependencies:
   flutter_test:
     sdk: flutter
