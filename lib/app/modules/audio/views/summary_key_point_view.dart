@@ -49,17 +49,17 @@ class SummaryKeyPointView extends StatelessWidget {
                         onTap: () async {
                           await controller.summaryRegenerate(filePath, fileName);
                         },
-                        child: SvgPicture.asset('assets/images/summary/reload_icon.svg'),
+                        child: SvgPicture.asset('assets/images/summary/reload_icon.svg',color: AppColors.gray1,),
                       ),
                       const SizedBox(width: 16),
                       GestureDetector(
                         onTap: () => controller.isTranslate.toggle(),
-                        child: SvgPicture.asset('assets/images/summary/translate_icon.svg'),
+                        child: SvgPicture.asset('assets/images/summary/translate_icon.svg',color: AppColors.gray1),
                       ),
                       const SizedBox(width: 16),
                       GestureDetector(
                         onTap: () => controller.generateAndSharePdf(),
-                        child: SvgPicture.asset('assets/images/summary/share_icon.svg'),
+                        child: SvgPicture.asset('assets/images/summary/share_icon.svg',color: AppColors.gray1),
                       ),
                     ],
                     const SizedBox(width: 16),
@@ -74,7 +74,7 @@ class SummaryKeyPointView extends StatelessWidget {
                       child: SvgPicture.asset(
                         controller.isEditing.value
                             ? 'assets/images/summary/save_icon.svg'
-                            : 'assets/images/summary/edit_icon.svg',
+                            : 'assets/images/summary/edit_icon.svg',color: AppColors.gray1
                       ),
                     ),
                   ],
@@ -199,7 +199,7 @@ class SummaryKeyPointView extends StatelessWidget {
                 const SizedBox(height: 16),
                 Obx(() => Text(
                     controller.keyPointsLabel.value,
-                    style: h4.copyWith(fontSize: 17, fontWeight: FontWeight.bold))),
+                    style: h4.copyWith(fontSize: 15, fontWeight: FontWeight.bold))),
                 const SizedBox(height: 10),
                 Obx(() => controller.isEditing.value
                     ? _buildEditableList(
@@ -211,7 +211,7 @@ class SummaryKeyPointView extends StatelessWidget {
                 if (controller.conclusions.isNotEmpty) ...[
                   Obx(() => Text(
                       controller.conclusionsLabel.value,
-                      style: h4.copyWith(fontSize: 17, fontWeight: FontWeight.bold))),
+                      style: h4.copyWith(fontSize: 15, fontWeight: FontWeight.bold))),
                   const SizedBox(height: 10),
                   Obx(() => controller.isEditing.value
                       ? _buildEditableList(
@@ -274,10 +274,10 @@ class SummaryKeyPointView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text("• ${point.keys.first}",
-                  style: h4.copyWith(fontSize: 16, fontWeight: FontWeight.bold)),
+                  style: h4.copyWith(fontSize: 14, fontWeight: FontWeight.bold)),
               Padding(
                 padding: const EdgeInsets.only(left: 20, top: 4),
-                child: Text(point.values.first, style: h4.copyWith(fontSize: 15)),
+                child: Text(point.values.first, style: h4.copyWith(fontSize: 13)),
               ),
             ],
           ),

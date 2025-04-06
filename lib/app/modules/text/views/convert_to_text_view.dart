@@ -331,7 +331,7 @@ class ConvertToTextView extends StatelessWidget {
                                 audioController.audioFiles.isNotEmpty && audioController.currentIndex.value >= 0
                                     ? audioController.audioFiles[audioController.currentIndex.value]['file_name']
                                     : 'No File Selected',
-                                style: h1.copyWith(fontSize: 20, color: AppColors.gray2),
+                                style: h1.copyWith(fontSize: 18, color: AppColors.gray2),
                               ),
                             ),
                           ),
