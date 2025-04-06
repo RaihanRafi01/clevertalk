@@ -36,70 +36,75 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
-      title: Text(
-        title,
-        style: h1.copyWith(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
       actions: [
-        if (isSearch)
-        // First SVG Icon Button
-          IconButton(
-            onPressed: onFirstIconPressed,
-            icon: SvgPicture.asset(
-              firstIcon,
-              height: 24,
-              width: 24,
-            ),
-          ),
-        // Second SVG Icon Button with Badge
-        Stack(
+        Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            IconButton(
-              onPressed: () async {
-                print('notification pressed!');
-                Get.to(() => NotificationSubscriptionView());
-              },
-              icon: SvgPicture.asset(
-                secondIcon,
-                height: 24,
-                width: 24,
+            if (isSearch)
+            // First Icon with GestureDetector
+              GestureDetector(
+                onTap: onFirstIconPressed,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12), // Adjust padding
+                  child: SvgPicture.asset(
+                    firstIcon,
+                    height: 17,
+                    width: 17,
+                  ),
+                ),
               ),
-            ),
-            // Badge with unread count
-            Obx(() {
-              final unreadCount = controller.getUnreadCount();
-              if (unreadCount == 0) return const SizedBox.shrink(); // Hide badge if no unread notifications
-              return Positioned(
-                right: 8,
-                top: 8,
-                child: Container(
-                  padding: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    color: Colors.black, // Customize badge color
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  constraints: const BoxConstraints(
-                    minWidth: 16,
-                    minHeight: 16,
-                  ),
-                  child: Center(
-                    child: Text(
-                      unreadCount > 9 ? '9+' : '$unreadCount', // Show "9+" if count > 9
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
+            // Second Icon with Badge
+            Stack(
+              children: [
+                GestureDetector(
+                  onTap: () async {
+                    print('notification pressed!');
+                    Get.to(() => NotificationSubscriptionView());
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8), // Adjust padding
+                    child: SvgPicture.asset(
+                      secondIcon,
+                      height: 17,
+                      width: 17,
                     ),
                   ),
                 ),
-              );
-            }),
+                // Badge with unread count
+                Obx(() {
+                  final unreadCount = controller.getUnreadCount();
+                  if (unreadCount == 0) return const SizedBox.shrink();
+                  return Positioned(
+                    right: 8,
+                    top: 8,
+                    child: Container(
+                      padding: const EdgeInsets.all(1),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
+                      child: Center(
+                        child: Text(
+                          unreadCount > 9 ? '9+' : '$unreadCount',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ],
+            ),
           ],
         ),
+        const SizedBox(width: 8), // Optional: Add some padding to the right of the last icon
       ],
     );
   }

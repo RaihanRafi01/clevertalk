@@ -4,9 +4,12 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import '../../../../common/appColors.dart';
 import '../../../../common/widgets/customAppBar.dart';
+import '../../../../common/widgets/customNavigationBar.dart';
 import '../../../../common/widgets/home/customPopUp.dart';
 import '../../../../common/widgets/svgIcon.dart';
+import '../../dashboard/controllers/dashboard_controller.dart';
 import '../controllers/record_controller.dart';
+import 'package:clevertalk/app/modules/dashboard/views/dashboard_view.dart';
 
 class RecordView extends GetView<RecordController> {
   const RecordView({super.key});
@@ -28,31 +31,47 @@ class RecordView extends GetView<RecordController> {
               print("Second icon pressed");
             },
           ),
+          bottomNavigationBar: CustomNavigationBar(
+            onItemTapped: (index) {
+              // Pause recording before navigating
+              if (controller.isRecording.value && !controller.isPaused.value) {
+                controller.pauseRecording();
+              }
+              // Update the DashboardController's currentIndex before navigating
+              final dashboardController = Get.find<DashboardController>();
+              dashboardController.updateIndex(index); // Set the desired index
+              // Navigate to DashboardView
+              Get.off(() => const DashboardView());
+            },
+          ),
           body: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                SizedBox(height: 80),
+                const SizedBox(height: 80),
                 SvgPicture.asset('assets/images/auth/logo.svg'),
-                SizedBox(height: 30),
+                const SizedBox(height: 30),
 
                 // Timer
                 Obx(() => Container(
                   width: 150,
-                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 20, vertical: 5),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.black, width: 2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Center(
                     child: Text(
-                      controller.formatTime(controller.recordingTime.value, controller.recordingMilliseconds.value),
+                      controller.formatTime(
+                          controller.recordingTime.value,
+                          controller.recordingMilliseconds.value),
                       style: h3.copyWith(fontSize: 17),
                     ),
                   ),
                 )),
 
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
 
                 // Waveform with animated gray lines
                 Obx(() => SizedBox(
@@ -70,9 +89,11 @@ class RecordView extends GetView<RecordController> {
                             children: List.generate(100, (index) {
                               return Container(
                                 width: (index % 2 == 0 ? 3 : 4).toDouble(),
-                                height: (index % 2 == 0 ? 100 : 60).toDouble(),
+                                height:
+                                (index % 2 == 0 ? 100 : 60).toDouble(),
                                 color: AppColors.blurtext,
-                                margin: EdgeInsets.symmetric(horizontal: 5),
+                                margin:
+                                const EdgeInsets.symmetric(horizontal: 5),
                               );
                             }),
                           ),
@@ -91,7 +112,7 @@ class RecordView extends GetView<RecordController> {
                   ),
                 )),
 
-                SizedBox(height: 100),
+                const SizedBox(height: 100),
 
                 // Control buttons
                 Row(
@@ -108,7 +129,8 @@ class RecordView extends GetView<RecordController> {
                     ),
                     Obx(() => SvgIcon(
                       height: 100,
-                      svgPath: controller.isRecording.value && !controller.isPaused.value
+                      svgPath: controller.isRecording.value &&
+                          !controller.isPaused.value
                           ? 'assets/images/audio/pause_icon.svg'
                           : 'assets/images/audio/mic_icon.svg',
                       onTap: () {
@@ -131,7 +153,7 @@ class RecordView extends GetView<RecordController> {
                       svgPath: 'assets/images/audio/save_icon.svg',
                       onTap: () async {
                         TextEditingController txtController = TextEditingController();
-                        await controller.pauseRecording(); // Wait for the recording to pause before proceeding
+                        await controller.pauseRecording(); // Wait for the recording to pause
                         showDialog(
                           context: context,
                           barrierDismissible: false,
@@ -142,24 +164,30 @@ class RecordView extends GetView<RecordController> {
                               onButtonPressed: () async {
                                 final filename = txtController.text.trim();
                                 if (filename.isEmpty) {
-                                  // Show a message to the user if no name is provided.
                                   print("Please provide a name for the recording.");
                                   Navigator.of(context).pop();
                                   return;
                                 }
 
-                                // Wait for the save to complete before closing the dialog
+                                // Save the recording
                                 await controller.saveRecording(filename);
-                                Navigator.of(context).pop(); // Close the dialog after saving
+                                Navigator.of(context).pop(); // Close the dialog
+
+                                // Update the DashboardController's currentIndex to "Recordings" (index 1)
+                                final dashboardController = Get.find<DashboardController>();
+                                dashboardController.updateIndex(1); // Set to "Recordings" tab
+
+                                // Navigate to DashboardView
+                                Get.off(() => const DashboardView());
                               },
                             );
                           },
                         );
                       },
-                    )
+                    ),
                   ],
                 ),
-                SizedBox(height: 30),
+                const SizedBox(height: 30),
               ],
             ),
           ),

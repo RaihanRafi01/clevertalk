@@ -62,12 +62,12 @@ class CustomListTile extends StatelessWidget {
           if(showPlayIcon) Icon(
             Icons.access_time,
             size: 10,
-            color: AppColors.green,
+            color: Colors.grey,
           ),
           if(showPlayIcon) const SizedBox(width: 2),
           if(showPlayIcon) Text(
             duration,
-            style: h4.copyWith(fontSize: 10, color: AppColors.green),
+            style: h4.copyWith(fontSize: 10, color: Colors.grey),
             overflow: TextOverflow.ellipsis,
           ),
         ],

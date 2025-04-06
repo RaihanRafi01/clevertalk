@@ -5,7 +5,9 @@ import '../../app/modules/dashboard/controllers/dashboard_controller.dart';
 import '../appColors.dart';
 
 class CustomNavigationBar extends StatelessWidget {
-  const CustomNavigationBar({super.key});
+  final Function(int)? onItemTapped; // Optional callback for custom tap behavior
+
+  const CustomNavigationBar({super.key, this.onItemTapped});
 
   @override
   Widget build(BuildContext context) {
@@ -17,10 +19,6 @@ class CustomNavigationBar extends StatelessWidget {
         'label': 'Home',
         'icon': 'assets/images/navbar/home_icon.svg',
       },
-      /*{
-        'label': 'Text',
-        'icon': 'assets/images/navbar/text_icon.svg',
-      },*/
       {
         'label': 'Recordings',
         'icon': 'assets/images/navbar/audio_icon.svg',
@@ -38,40 +36,53 @@ class CustomNavigationBar extends StatelessWidget {
     return Obx(
           () => Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0), // Add horizontal padding
-        child: Container(
-          decoration: BoxDecoration(
-            color: AppColors.appColor,
-            borderRadius: const BorderRadius.all(Radius.circular(50)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, -5),
-              ),
-            ],
+        child: Theme(
+          data: Theme.of(context).copyWith(
+            splashColor: Colors.transparent,
+            highlightColor: Colors.transparent,
+            hoverColor: Colors.transparent,
           ),
-          child: BottomNavigationBar(
-            currentIndex: controller.currentIndex.value,
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: Colors.transparent, // Transparent background
-            elevation: 0, // Removes shadow under navigation bar
-            showSelectedLabels: true,
-            showUnselectedLabels: false,
-            selectedItemColor: Colors.white,
-            unselectedItemColor: Colors.white.withOpacity(0.6),
-            onTap: controller.updateIndex,
-            items: navItems.map((item) {
-              return BottomNavigationBarItem(
-                icon: SvgPicture.asset(
-                  item['icon']!, // Use the single icon for all states
-                  color: controller.currentIndex.value == navItems.indexOf(item)
-                      ? Colors.white
-                      : Colors.white.withOpacity(0.6), // Highlight selected icon
-                  key: ValueKey('${item['label']}'), // Unique key for each icon
-                ),
-                label: item['label'],
-              );
-            }).toList(),
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Colors.transparent, // Transparent background
+              borderRadius: BorderRadius.all(Radius.circular(50)),
+            ),
+            child: BottomNavigationBar(
+              currentIndex: controller.currentIndex.value,
+              type: BottomNavigationBarType.fixed,
+              backgroundColor: Colors.transparent, // Transparent background
+              elevation: 0, // Removes shadow under navigation bar
+              showSelectedLabels: true,
+              showUnselectedLabels: false,
+              selectedItemColor: Colors.black,
+              unselectedItemColor: Colors.black.withOpacity(0.6),
+              selectedLabelStyle: const TextStyle(
+                color: Colors.transparent, // Make selected label invisible
+              ),
+              unselectedLabelStyle: const TextStyle(
+                color: Colors.transparent, // Make unselected label invisible
+              ),
+              onTap: (index) {
+                // Use the custom onItemTapped callback if provided, otherwise use default behavior
+                if (onItemTapped != null) {
+                  onItemTapped!(index);
+                } else {
+                  controller.updateIndex(index);
+                }
+              },
+              items: navItems.map((item) {
+                return BottomNavigationBarItem(
+                  icon: SvgPicture.asset(
+                    item['icon']!, // Use the single icon for all states
+                    color: controller.currentIndex.value == navItems.indexOf(item)
+                        ? Colors.black // Selected icon color: black
+                        : Colors.black.withOpacity(0.6), // Unselected icon color: semi-transparent black
+                    key: ValueKey('${item['label']}'), // Unique key for each icon
+                  ),
+                  label: item['label'],
+                );
+              }).toList(),
+            ),
           ),
         ),
       ),

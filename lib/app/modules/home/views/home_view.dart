@@ -40,8 +40,8 @@ class HomeView extends GetView<HomeController> {
                   children: [
                     Expanded(
                       child: CustomButton(
-                        height: 70,
-                        text: 'Connect Clevertalk Recorder',
+                        height: 50,
+                        text: 'Connect Clevertalk',
                         onPressed: () {
                           Get.to(BeforeConnectView());
                         },
@@ -51,7 +51,7 @@ class HomeView extends GetView<HomeController> {
                     SizedBox(width: 40),
                     Expanded(
                       child: CustomButton(
-                        height: 70,
+                        height: 50,
                         text: 'Explore Plans',
                         onPressed: () {
                           Get.to(SubscriptionView());
@@ -64,13 +64,29 @@ class HomeView extends GetView<HomeController> {
                 ),
                 SizedBox(height: 20),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 80),
-                  child: CustomButton(
-                    height: 40,
-                    text: '120 minutes remaining',
-                    onPressed: () {},
-                    borderRadius: 30,
-                    //backgroundColor: AppColors.appColor2,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: GestureDetector(
+                    onTap: () {}, // Add your onTap functionality here
+                    child: Container(
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.transparent, // Transparent background
+                        borderRadius: BorderRadius.circular(10), // Rounded corners
+                        border: Border.all(
+                          color: Colors.grey.withOpacity(0.5), // Light gray border
+                          width: 1, // Thin border
+                        ),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          '120 minutes remaining',
+                          style: TextStyle(
+                            color: Colors.black, // Black text
+                            fontSize: 16, // Adjust font size as needed
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
                 SizedBox(height: 20),
@@ -92,37 +108,40 @@ class HomeView extends GetView<HomeController> {
                   );
                 } else {
                   // Display list of audio files
-                  return ListView.separated(
-                    shrinkWrap: true,
-                    physics: ClampingScrollPhysics(),
-                    itemCount: audioPlayerController.audioFiles.length,
-                    separatorBuilder: (context, index) => const Divider(
-                      color: Colors.grey,
-                      thickness: 1,
-                      indent: 16,
-                      endIndent: 16,
-                    ),
-                    itemBuilder: (context, index) {
-                      final audioFile = audioPlayerController.audioFiles[index];
-                      final fileName = audioFile['file_name'] ?? 'Unknown Title';
-                      final filePath = audioFile['file_path'];
-                      final parsedDate = audioFile['parsed_date'] ?? 'Unknown Date';
-                      final id = audioFile['id'];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      physics: ClampingScrollPhysics(),
+                      itemCount: audioPlayerController.audioFiles.length,
+                      separatorBuilder: (context, index) => const Divider(
+                        color: Colors.grey,
+                        thickness: 1,
+                        indent: 16,
+                        endIndent: 16,
+                      ),
+                      itemBuilder: (context, index) {
+                        final audioFile = audioPlayerController.audioFiles[index];
+                        final fileName = audioFile['file_name'] ?? 'Unknown Title';
+                        final filePath = audioFile['file_path'];
+                        final parsedDate = audioFile['parsed_date'] ?? 'Unknown Date';
+                        final id = audioFile['id'];
 
-                      return GestureDetector(
-                        onTap: (){
-                          navigateBasedOnTranscription(context, fileName, filePath);
-                        },
-                        child: CustomListTile(
-                          filepath: filePath,
-                          title: fileName,
-                          subtitle: parsedDate,
-                          duration: audioFile['duration'] ?? '00:00:00',
-                          id: id,
-                          onUpdate: () => audioPlayerController.fetchAudioFiles(),
-                        ),
-                      );
-                    },
+                        return GestureDetector(
+                          onTap: (){
+                            navigateBasedOnTranscription(context, fileName, filePath);
+                          },
+                          child: CustomListTile(
+                            filepath: filePath,
+                            title: fileName,
+                            subtitle: parsedDate,
+                            duration: audioFile['duration'] ?? '00:00:00',
+                            id: id,
+                            onUpdate: () => audioPlayerController.fetchAudioFiles(),
+                          ),
+                        );
+                      },
+                    ),
                   );
                 }
               }),
@@ -136,10 +155,10 @@ class HomeView extends GetView<HomeController> {
                     SizedBox(height: 20),
                     Center(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 80),
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
                         child: CustomButton(
                           borderRadius: 30,
-                          text: 'Start Recording',
+                          text: 'START RECORDING',
                           onPressed: () => Get.to(() => RecordView()),
                         ),
                       ),
