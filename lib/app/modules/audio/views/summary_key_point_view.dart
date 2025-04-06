@@ -6,9 +6,12 @@ import 'package:intl/intl.dart';
 import '../../../../common/appColors.dart';
 import '../../../../common/customFont.dart';
 import '../../../../common/widgets/customAppBar.dart';
+import '../../../../common/widgets/customNavigationBar.dart'; // Add this import
 import '../../../data/services/notification_services.dart';
 import '../bindings/language_model.dart';
 import '../controllers/summaryKeyPoint_controller.dart';
+import '../../dashboard/controllers/dashboard_controller.dart'; // Add this import
+import '../../dashboard/views/dashboard_view.dart'; // Add this import
 
 class SummaryKeyPointView extends StatelessWidget {
   final String fileName;
@@ -24,208 +27,238 @@ class SummaryKeyPointView extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.put(SummaryKeyPointController(fileName: fileName));
 
-    return Scaffold(
-      appBar: CustomAppBar(
-        title: "CLEVERTALK",
-        onFirstIconPressed: () {},
-        onSecondIconPressed: () {},
-      ),
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
+    return PopScope(
+      onPopInvokedWithResult: (canPop, result) async {
+        if (canPop) {
+          // Update DashboardController to "Recordings" tab (index 1)
+          final dashboardController = Get.find<DashboardController>();
+          dashboardController.updateIndex(1); // Set to "Recordings" tab
+          Get.offAll(() => const DashboardView(), arguments: 1); // Navigate without back icon
         }
+      },
+      child: Scaffold(
+        appBar: CustomAppBar(
+          title: "CLEVERTALK",
+          onFirstIconPressed: () {},
+          onSecondIconPressed: () {},
+        ),
+        bottomNavigationBar: CustomNavigationBar(
+          onItemTapped: (index) {
+            // Update the DashboardController's currentIndex before navigating
+            final dashboardController = Get.find<DashboardController>();
+            dashboardController.updateIndex(index); // Set the desired index
+            // Navigate to DashboardView, clear stack, and pass the index
+            Get.offAll(() => const DashboardView(), arguments: index);
+          },
+        ),
+        body: Obx(() {
+          if (controller.isLoading.value) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    if (!controller.isEditing.value) ...[
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (!controller.isEditing.value) ...[
+                        GestureDetector(
+                          onTap: () async {
+                            await controller.summaryRegenerate(filePath, fileName);
+                          },
+                          child: SvgPicture.asset(
+                            'assets/images/summary/reload_icon.svg',
+                            color: AppColors.gray1,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        GestureDetector(
+                          onTap: () => controller.isTranslate.toggle(),
+                          child: SvgPicture.asset(
+                            'assets/images/summary/translate_icon.svg',
+                            color: AppColors.gray1,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        GestureDetector(
+                          onTap: () => controller.generateAndSharePdf(),
+                          child: SvgPicture.asset(
+                            'assets/images/summary/share_icon.svg',
+                            color: AppColors.gray1,
+                          ),
+                        ),
+                      ],
+                      const SizedBox(width: 16),
                       GestureDetector(
-                        onTap: () async {
-                          await controller.summaryRegenerate(filePath, fileName);
+                        onTap: () {
+                          if (controller.isEditing.value) {
+                            controller.saveKeyPoints(true);
+                          }
+                          controller.isTranslate.value = false;
+                          controller.isEditing.toggle();
                         },
-                        child: SvgPicture.asset('assets/images/summary/reload_icon.svg',color: AppColors.gray1,),
-                      ),
-                      const SizedBox(width: 16),
-                      GestureDetector(
-                        onTap: () => controller.isTranslate.toggle(),
-                        child: SvgPicture.asset('assets/images/summary/translate_icon.svg',color: AppColors.gray1),
-                      ),
-                      const SizedBox(width: 16),
-                      GestureDetector(
-                        onTap: () => controller.generateAndSharePdf(),
-                        child: SvgPicture.asset('assets/images/summary/share_icon.svg',color: AppColors.gray1),
+                        child: SvgPicture.asset(
+                          controller.isEditing.value
+                              ? 'assets/images/summary/save_icon.svg'
+                              : 'assets/images/summary/edit_icon.svg',
+                          color: AppColors.gray1,
+                        ),
                       ),
                     ],
-                    const SizedBox(width: 16),
-                    GestureDetector(
-                      onTap: () {
-                        if (controller.isEditing.value) {
-                          controller.saveKeyPoints(true);
-                        }
-                        controller.isTranslate.value = false;
-                        controller.isEditing.toggle();
-                      },
-                      child: SvgPicture.asset(
-                        controller.isEditing.value
-                            ? 'assets/images/summary/save_icon.svg'
-                            : 'assets/images/summary/edit_icon.svg',color: AppColors.gray1
-                      ),
-                    ),
-                  ],
-                ),
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 100),
-                  transitionBuilder: (Widget child, Animation<double> animation) {
-                    final offsetAnimation = Tween<Offset>(
-                      begin: const Offset(0.0, -0.5),
-                      end: const Offset(0.0, 0.0),
-                    ).animate(animation);
-                    return SlideTransition(position: offsetAnimation, child: child);
-                  },
-                  child: controller.isTranslate.value
-                      ? Container(
-                    key: const ValueKey('translateRow'),
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            CustomButton(
-                              text: controller.currentLanguage.value.isEmpty
-                                  ? 'English'
-                                  : controller.currentLanguage.value,
-                              onPressed: () {},
-                              height: 40,
-                              width: 80,
-                              fontSize: 12,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
-                              child: SvgPicture.asset('assets/images/summary/arrow_icon.svg'),
-                            ),
-                            // Replace your existing DropdownButton with this
-                            Obx(() => Container(
-                              height: 40,
-                              width: 120,
-                              decoration: BoxDecoration(
-                                color: AppColors.appColor,
-                                borderRadius: BorderRadius.circular(20),
-                              ), // <-- Added closing parenthesis for BoxDecoration
-                              child: InkWell(
-                                onTap: () => _showSearchBottomSheet(context, controller),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          controller.selectedLanguage.value,
-                                          style: h4.copyWith(fontSize: 12, color: Colors.white),
-                                          overflow: TextOverflow.ellipsis,
+                  ),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 100),
+                    transitionBuilder: (Widget child, Animation<double> animation) {
+                      final offsetAnimation = Tween<Offset>(
+                        begin: const Offset(0.0, -0.5),
+                        end: const Offset(0.0, 0.0),
+                      ).animate(animation);
+                      return SlideTransition(position: offsetAnimation, child: child);
+                    },
+                    child: controller.isTranslate.value
+                        ? Container(
+                      key: const ValueKey('translateRow'),
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              CustomButton(
+                                text: controller.currentLanguage.value.isEmpty
+                                    ? 'English'
+                                    : controller.currentLanguage.value,
+                                onPressed: () {},
+                                height: 40,
+                                width: 80,
+                                fontSize: 12,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                child: SvgPicture.asset('assets/images/summary/arrow_icon.svg'),
+                              ),
+                              Obx(() => Container(
+                                height: 40,
+                                width: 120,
+                                decoration: BoxDecoration(
+                                  color: AppColors.appColor,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: InkWell(
+                                  onTap: () => _showSearchBottomSheet(context, controller),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            controller.selectedLanguage.value,
+                                            style: h4.copyWith(
+                                                fontSize: 12, color: Colors.white),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
                                         ),
-                                      ),
-                                      const Icon(Icons.arrow_drop_down, color: Colors.white, size: 20),
-                                    ],
+                                        const Icon(Icons.arrow_drop_down,
+                                            color: Colors.white, size: 20),
+                                      ],
+                                    ),
                                   ),
                                 ),
+                              )),
+                              const Spacer(),
+                              CustomButton(
+                                text: 'Translate',
+                                onPressed: () => controller.translateText(filePath, fileName),
+                                height: 40,
+                                width: 80,
+                                fontSize: 12,
                               ),
-                            )),
-                            const Spacer(),
-                            CustomButton(
-                              text: 'Translate',
-                              onPressed: () => controller.translateText(filePath, fileName),
-                              height: 40,
-                              width: 80,
-                              fontSize: 12,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                      ],
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                      ),
+                    )
+                        : const SizedBox(height: 20, key: ValueKey('empty')),
+                  ),
+                  Obx(() => controller.isEditing.value
+                      ? TextField(
+                    controller: controller.titleController,
+                    style: h4.copyWith(fontSize: 18, fontWeight: FontWeight.bold),
+                    decoration: const InputDecoration(
+                      labelText: "Title",
+                      border: OutlineInputBorder(),
                     ),
                   )
-                      : const SizedBox(height: 20, key: ValueKey('empty')),
-                ),
-                Obx(() => controller.isEditing.value
-                    ? TextField(
-                  controller: controller.titleController,
-                  style: h4.copyWith(fontSize: 18, fontWeight: FontWeight.bold),
-                  decoration: const InputDecoration(
-                    labelText: "Title",
-                    border: OutlineInputBorder(),
-                  ),
-                )
-                    : Text(
-                  controller.titleController.text,
-                  style: h4.copyWith(fontSize: 18, fontWeight: FontWeight.bold),
-                )),
-                const SizedBox(height: 10),
-                Obx(() => controller.isEditing.value
-                    ? TextField(
-                  controller: controller.dateController,
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                  decoration: InputDecoration(
-                    labelText: "Date",
-                    border: const OutlineInputBorder(),
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.calendar_month_outlined),
-                      onPressed: controller.pickDateTime,
+                      : Text(
+                    controller.titleController.text,
+                    style: h4.copyWith(fontSize: 18, fontWeight: FontWeight.bold),
+                  )),
+                  const SizedBox(height: 10),
+                  Obx(() => controller.isEditing.value
+                      ? TextField(
+                    controller: controller.dateController,
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                    decoration: InputDecoration(
+                      labelText: "Date",
+                      border: const OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.calendar_month_outlined),
+                        onPressed: controller.pickDateTime,
+                      ),
                     ),
+                  )
+                      : Text(
+                    _formatDate(controller.dateController.text),
+                    style: h4.copyWith(fontSize: 15),
+                  )),
+                  const SizedBox(height: 5),
+                  Row(
+                    children: [
+                      SvgPicture.asset('assets/images/summary/lan_icon.svg'),
+                      const SizedBox(width: 10),
+                      Obx(() => Text(
+                          controller.currentLanguage.value.isEmpty
+                              ? 'English'
+                              : controller.currentLanguage.value,
+                          style: h4)),
+                    ],
                   ),
-                )
-                    : Text(
-                  _formatDate(controller.dateController.text),
-                  style: h4.copyWith(fontSize: 15),
-                )),
-                const SizedBox(height: 5),
-                Row(
-                  children: [
-                    SvgPicture.asset('assets/images/summary/lan_icon.svg'),
-                    const SizedBox(width: 10),
-                    Obx(() => Text(
-                        controller.currentLanguage.value.isEmpty
-                            ? 'English'
-                            : controller.currentLanguage.value,
-                        style: h4)),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Obx(() => Text(
-                    controller.keyPointsLabel.value,
-                    style: h4.copyWith(fontSize: 15, fontWeight: FontWeight.bold))),
-                const SizedBox(height: 10),
-                Obx(() => controller.isEditing.value
-                    ? _buildEditableList(
-                    controller.mainPoints,
-                    controller.mainPointTitleControllers,
-                    controller.mainPointValueControllers)
-                    : _buildReadOnlyList(controller.mainPoints)),
-                const SizedBox(height: 20),
-                if (controller.conclusions.isNotEmpty) ...[
+                  const SizedBox(height: 16),
                   Obx(() => Text(
-                      controller.conclusionsLabel.value,
+                      controller.keyPointsLabel.value,
                       style: h4.copyWith(fontSize: 15, fontWeight: FontWeight.bold))),
                   const SizedBox(height: 10),
                   Obx(() => controller.isEditing.value
                       ? _buildEditableList(
-                      controller.conclusions,
-                      controller.conclusionTitleControllers,
-                      controller.conclusionValueControllers)
-                      : _buildReadOnlyList(controller.conclusions)),
+                      controller.mainPoints,
+                      controller.mainPointTitleControllers,
+                      controller.mainPointValueControllers)
+                      : _buildReadOnlyList(controller.mainPoints)),
+                  const SizedBox(height: 20),
+                  if (controller.conclusions.isNotEmpty) ...[
+                    Obx(() => Text(
+                        controller.conclusionsLabel.value,
+                        style: h4.copyWith(fontSize: 15, fontWeight: FontWeight.bold))),
+                    const SizedBox(height: 10),
+                    Obx(() => controller.isEditing.value
+                        ? _buildEditableList(
+                        controller.conclusions,
+                        controller.conclusionTitleControllers,
+                        controller.conclusionValueControllers)
+                        : _buildReadOnlyList(controller.conclusions)),
+                  ],
+                  const SizedBox(height: 60), // Extra padding for navigation bar
                 ],
-                const SizedBox(height: 30),
-              ],
+              ),
             ),
-          ),
-        );
-      }),
+          );
+        }),
+      ),
     );
   }
 
@@ -294,12 +327,12 @@ class SummaryKeyPointView extends StatelessWidget {
   void _showSearchBottomSheet(BuildContext context, SummaryKeyPointController controller) {
     TextEditingController searchController = TextEditingController();
     List<Language> filteredLanguages = List.from(languages);
-    bool isCleared = false; // Flag to track if the clear button has been clicked
+    bool isCleared = false;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent, // Transparent background for a custom container
+      backgroundColor: Colors.transparent,
       builder: (context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
@@ -321,7 +354,6 @@ class SummaryKeyPointView extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  // Header with a title and close button
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -330,7 +362,7 @@ class SummaryKeyPointView extends StatelessWidget {
                         style: h4.copyWith(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.textHeader, // Use your app's color scheme
+                          color: AppColors.textHeader,
                         ),
                       ),
                       IconButton(
@@ -340,7 +372,6 @@ class SummaryKeyPointView extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 10),
-                  // Search field with enhanced design
                   TextField(
                     controller: searchController,
                     decoration: InputDecoration(
@@ -397,7 +428,6 @@ class SummaryKeyPointView extends StatelessWidget {
                     },
                   ),
                   const SizedBox(height: 16),
-                  // Enhanced language list
                   Expanded(
                     child: filteredLanguages.isEmpty
                         ? Center(
@@ -449,7 +479,7 @@ class SummaryKeyPointView extends StatelessWidget {
                             ),
                             trailing: const Icon(
                               Icons.check,
-                              color: Colors.transparent, // Placeholder for selection indication
+                              color: Colors.transparent,
                             ),
                             onTap: () {
                               controller.selectedLanguage.value = lang.name;

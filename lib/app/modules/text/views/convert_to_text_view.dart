@@ -7,11 +7,13 @@ import '../../../../common/customFont.dart';
 import '../../../../common/widgets/audio_text/customUserText.dart';
 import '../../../../common/widgets/auth/custom_button.dart';
 import '../../../../common/widgets/customAppBar.dart';
+import '../../../../common/widgets/customNavigationBar.dart'; // Add this import
 import '../../../../common/widgets/svgIcon.dart';
 import '../../audio/bindings/language_model.dart';
 import '../../audio/controllers/audio_controller.dart';
 import '../controllers/text_controller.dart';
-
+import '../../dashboard/controllers/dashboard_controller.dart'; // Add this import
+import '../../dashboard/views/dashboard_view.dart'; // Add this import
 
 class ConvertToTextView extends StatelessWidget {
   final String fileName;
@@ -71,16 +73,15 @@ class ConvertToTextView extends StatelessWidget {
     return hours != "00" ? '$hours:$minutes:$secs' : '$minutes:$secs';
   }
 
-  // Method to show the searchable language bottom sheet
   void _showSearchBottomSheet(BuildContext context, ConvertToTextController controller) {
     TextEditingController searchController = TextEditingController();
     List<Language> filteredLanguages = List.from(languages);
-    bool isCleared = false; // Flag to track if the clear button has been clicked
+    bool isCleared = false;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent, // Transparent background for a custom container
+      backgroundColor: Colors.transparent,
       builder: (context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
@@ -102,7 +103,6 @@ class ConvertToTextView extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  // Header with a title and close button
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -111,7 +111,7 @@ class ConvertToTextView extends StatelessWidget {
                         style: h4.copyWith(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.textHeader, // Use your app's color scheme
+                          color: AppColors.textHeader,
                         ),
                       ),
                       IconButton(
@@ -121,7 +121,6 @@ class ConvertToTextView extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 10),
-                  // Search field with enhanced design
                   TextField(
                     controller: searchController,
                     decoration: InputDecoration(
@@ -178,7 +177,6 @@ class ConvertToTextView extends StatelessWidget {
                     },
                   ),
                   const SizedBox(height: 16),
-                  // Enhanced language list
                   Expanded(
                     child: filteredLanguages.isEmpty
                         ? Center(
@@ -230,7 +228,7 @@ class ConvertToTextView extends StatelessWidget {
                             ),
                             trailing: const Icon(
                               Icons.check,
-                              color: Colors.transparent, // Placeholder for selection indication
+                              color: Colors.transparent,
                             ),
                             onTap: () {
                               controller.selectedLanguage.value = lang.name;
@@ -276,6 +274,10 @@ class ConvertToTextView extends StatelessWidget {
       onPopInvokedWithResult: (canPop, result) async {
         if (canPop) {
           await audioController.stopAudio();
+          // Update DashboardController to "Recordings" tab (index 1)
+          final dashboardController = Get.find<DashboardController>();
+          dashboardController.updateIndex(1); // Set to "Recordings" tab
+          Get.offAll(() => const DashboardView(), arguments: 1); // Navigate without back icon
         }
       },
       child: Scaffold(
@@ -283,6 +285,19 @@ class ConvertToTextView extends StatelessWidget {
           title: "CLEVERTALK",
           onFirstIconPressed: () => print("First icon pressed"),
           onSecondIconPressed: () => print("Second icon pressed"),
+        ),
+        bottomNavigationBar: CustomNavigationBar(
+          onItemTapped: (index) async {
+            // Pause audio before navigating if it's playing
+            if (audioController.isPlaying.value) {
+              await audioController.pauseAudio();
+            }
+            // Update the DashboardController's currentIndex before navigating
+            final dashboardController = Get.find<DashboardController>();
+            dashboardController.updateIndex(index); // Set the desired index
+            // Navigate to DashboardView, clear stack, and pass the index
+            Get.offAll(() => const DashboardView(), arguments: index);
+          },
         ),
         body: Stack(
           children: [
@@ -292,8 +307,8 @@ class ConvertToTextView extends StatelessWidget {
               }
 
               return Positioned.fill(
-                top: textController.isTranslate.value ? 350 : 300,
-                bottom: 100,
+                top: textController.isTranslate.value ? 310 : 260,
+                bottom: 60,
                 child: ScrollablePositionedList.builder(
                   itemScrollController: textController.itemScrollController,
                   itemCount: textController.messages.length,
@@ -306,9 +321,8 @@ class ConvertToTextView extends StatelessWidget {
                 ),
               );
             }),
-
             Positioned(
-              top: 10,
+              top: 0,
               left: 10,
               right: 10,
               child: Column(
@@ -328,8 +342,10 @@ class ConvertToTextView extends StatelessWidget {
                             child: Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 10),
                               child: Text(
-                                audioController.audioFiles.isNotEmpty && audioController.currentIndex.value >= 0
-                                    ? audioController.audioFiles[audioController.currentIndex.value]['file_name']
+                                audioController.audioFiles.isNotEmpty &&
+                                    audioController.currentIndex.value >= 0
+                                    ? audioController.audioFiles[audioController.currentIndex.value]
+                                ['file_name']
                                     : 'No File Selected',
                                 style: h1.copyWith(fontSize: 18, color: AppColors.gray2),
                               ),
@@ -409,14 +425,15 @@ class ConvertToTextView extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
                   Row(
                     children: [
                       const Spacer(),
                       Obx(
                             () => Text(
                           textController.messages.isNotEmpty
-                              ? audioController.audioFiles[audioController.currentIndex.value]['file_name']
+                              ? audioController.audioFiles[audioController.currentIndex.value]
+                          ['file_name']
                               : 'Please wait for a while...',
                           style: h1.copyWith(fontSize: 16, color: AppColors.gray2),
                         ),
@@ -433,19 +450,28 @@ class ConvertToTextView extends StatelessWidget {
                           onTap: () async {
                             await textController.generateAndSharePdf();
                           },
-                          child: SvgPicture.asset('assets/images/summary/share_icon.svg',color: AppColors.gray1,),
+                          child: SvgPicture.asset(
+                            'assets/images/summary/share_icon.svg',
+                            color: AppColors.gray1,
+                          ),
                         ),
                         const SizedBox(width: 16),
                         GestureDetector(
                           onTap: () => textController.editSpeakerName(context, filePath),
-                          child: SvgPicture.asset('assets/images/summary/speaker_edit_icon.svg',color: AppColors.gray1,),
+                          child: SvgPicture.asset(
+                            'assets/images/summary/speaker_edit_icon.svg',
+                            color: AppColors.gray1,
+                          ),
                         ),
                         const SizedBox(width: 16),
                         GestureDetector(
                           onTap: () {
                             textController.isTranslate.toggle();
                           },
-                          child: SvgPicture.asset('assets/images/summary/translate_icon.svg',color: AppColors.gray1,),
+                          child: SvgPicture.asset(
+                            'assets/images/summary/translate_icon.svg',
+                            color: AppColors.gray1,
+                          ),
                         ),
                         const SizedBox(width: 16),
                       ],
@@ -460,7 +486,8 @@ class ConvertToTextView extends StatelessWidget {
                         child: SvgPicture.asset(
                           textController.isEditing.value
                               ? 'assets/images/summary/save_icon.svg'
-                              : 'assets/images/summary/edit_icon.svg',color: AppColors.gray1,
+                              : 'assets/images/summary/edit_icon.svg',
+                          color: AppColors.gray1,
                         ),
                       ),
                     ],
@@ -492,7 +519,8 @@ class ConvertToTextView extends StatelessWidget {
                           ),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: SvgPicture.asset('assets/images/summary/arrow_icon.svg'),
+                            child:
+                            SvgPicture.asset('assets/images/summary/arrow_icon.svg'),
                           ),
                           Obx(() => Container(
                             height: 30,
@@ -512,11 +540,13 @@ class ConvertToTextView extends StatelessWidget {
                                         textController.selectedLanguage.value.isEmpty
                                             ? 'Select Language'
                                             : textController.selectedLanguage.value,
-                                        style: h4.copyWith(fontSize: 11, color: Colors.white),
+                                        style: h4.copyWith(
+                                            fontSize: 11, color: Colors.white),
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
-                                    const Icon(Icons.arrow_drop_down, color: Colors.white, size: 20),
+                                    const Icon(Icons.arrow_drop_down,
+                                        color: Colors.white, size: 20),
                                   ],
                                 ),
                               ),
@@ -525,7 +555,8 @@ class ConvertToTextView extends StatelessWidget {
                           const Spacer(),
                           CustomButton(
                             text: 'Translate',
-                            onPressed: () => textController.translateText(filePath, fileName),
+                            onPressed: () =>
+                                textController.translateText(filePath, fileName),
                             height: 30,
                             width: 80,
                             fontSize: 11,
@@ -538,7 +569,6 @@ class ConvertToTextView extends StatelessWidget {
                 ],
               ),
             ),
-
             Positioned(
               bottom: 20,
               left: 10,
@@ -554,11 +584,9 @@ class ConvertToTextView extends StatelessWidget {
                       audioController.fetchKeyPoints(filePath, fileName);
                     },
                   ),
-                  const SizedBox(height: 20),
                 ],
               ),
             ),
-
             Positioned(
               left: 10,
               right: 10,
