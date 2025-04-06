@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../appColors.dart';
+import '../../customFont.dart';
 
 class SettingsList extends StatelessWidget {
   final String svgPath;
@@ -26,7 +27,7 @@ class SettingsList extends StatelessWidget {
     return GestureDetector(
       onTap: onTap, // Call the provided callback when tapped
       child: Padding(
-        padding: const EdgeInsets.only(left: 16, right: 16, bottom: 20),
+        padding: const EdgeInsets.only(right: 16, bottom: 20),
         child: Column(
           children: [
             Row(
@@ -35,7 +36,7 @@ class SettingsList extends StatelessWidget {
                 SizedBox(width: 10),
                 Text(
                   text,
-                  style: TextStyle(fontSize: 18),
+                  style: h4.copyWith(fontSize: 14),
                 ),
                 Spacer(),
                 isTogol

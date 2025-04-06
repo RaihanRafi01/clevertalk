@@ -53,11 +53,11 @@ class SettingView extends GetView<SettingController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Settings', style: h1.copyWith(fontSize: 30)),
+              Text('Settings', style: h1.copyWith(fontSize: 35)),
               SizedBox(height: 30),
 
               // Account Section
-              Text('Account', style: h4.copyWith(fontSize: 18)),
+              Text('Account', style: h1.copyWith(fontSize: 19)),
               SizedBox(height: 10),
               SettingsList(
                   svgPath: 'assets/images/settings/subscription_icon.svg',
@@ -96,7 +96,7 @@ class SettingView extends GetView<SettingController> {
               ),
 
               // Help Section
-              Text('Help', style: h4.copyWith(fontSize: 18)),
+              Text('Help', style:h1.copyWith(fontSize: 19)),
               SizedBox(height: 10),
               SettingsList(
                   svgPath: 'assets/images/settings/email_icon.svg',
@@ -105,7 +105,7 @@ class SettingView extends GetView<SettingController> {
               ),
 
               // Notification Section with Toggle
-              Text('Notification', style: h4.copyWith(fontSize: 18)),
+              Text('Notification', style: h1.copyWith(fontSize: 19)),
               SizedBox(height: 10),
               Obx(() {
                 return SettingsList(
@@ -125,7 +125,7 @@ class SettingView extends GetView<SettingController> {
                 );
               }),
               // Language Section with Dropdown
-              Text('Language', style: h4.copyWith(fontSize: 18)),
+              Text('Language', style: h1.copyWith(fontSize: 19)),
               SizedBox(height: 10),
 
               // DropdownButton with full width and border

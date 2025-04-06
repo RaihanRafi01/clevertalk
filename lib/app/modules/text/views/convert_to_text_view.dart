@@ -57,7 +57,7 @@ class ConvertToTextView extends StatelessWidget {
     return CustomUserText(
       name: msg['name']!,
       time: msg['time']!,
-      UserColor: msg['name'] == 'l' ? AppColors.green : AppColors.textUserColor,
+      UserColor: Colors.black,
       description: msg['description']!,
       isHighlighted: isHighlighted,
     );
@@ -316,7 +316,7 @@ class ConvertToTextView extends StatelessWidget {
                   Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(5),
-                      border: Border.all(color: AppColors.appColor, width: 2),
+                      border: Border.all(color: AppColors.gray1),
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 20),
                     child: Obx(
@@ -331,7 +331,7 @@ class ConvertToTextView extends StatelessWidget {
                                 audioController.audioFiles.isNotEmpty && audioController.currentIndex.value >= 0
                                     ? audioController.audioFiles[audioController.currentIndex.value]['file_name']
                                     : 'No File Selected',
-                                style: h1.copyWith(fontSize: 20, color: AppColors.textHeader),
+                                style: h1.copyWith(fontSize: 20, color: AppColors.gray2),
                               ),
                             ),
                           ),
@@ -418,7 +418,7 @@ class ConvertToTextView extends StatelessWidget {
                           textController.messages.isNotEmpty
                               ? audioController.audioFiles[audioController.currentIndex.value]['file_name']
                               : 'Please wait for a while...',
-                          style: h1.copyWith(fontSize: 20, color: AppColors.textHeader),
+                          style: h1.copyWith(fontSize: 16, color: AppColors.gray2),
                         ),
                       ),
                       const Spacer(),
@@ -433,19 +433,19 @@ class ConvertToTextView extends StatelessWidget {
                           onTap: () async {
                             await textController.generateAndSharePdf();
                           },
-                          child: SvgPicture.asset('assets/images/summary/share_icon.svg'),
+                          child: SvgPicture.asset('assets/images/summary/share_icon.svg',color: AppColors.gray1,),
                         ),
                         const SizedBox(width: 16),
                         GestureDetector(
                           onTap: () => textController.editSpeakerName(context, filePath),
-                          child: SvgPicture.asset('assets/images/summary/speaker_edit_icon.svg'),
+                          child: SvgPicture.asset('assets/images/summary/speaker_edit_icon.svg',color: AppColors.gray1,),
                         ),
                         const SizedBox(width: 16),
                         GestureDetector(
                           onTap: () {
                             textController.isTranslate.toggle();
                           },
-                          child: SvgPicture.asset('assets/images/summary/translate_icon.svg'),
+                          child: SvgPicture.asset('assets/images/summary/translate_icon.svg',color: AppColors.gray1,),
                         ),
                         const SizedBox(width: 16),
                       ],
@@ -460,7 +460,7 @@ class ConvertToTextView extends StatelessWidget {
                         child: SvgPicture.asset(
                           textController.isEditing.value
                               ? 'assets/images/summary/save_icon.svg'
-                              : 'assets/images/summary/edit_icon.svg',
+                              : 'assets/images/summary/edit_icon.svg',color: AppColors.gray1,
                         ),
                       ),
                     ],
@@ -486,16 +486,16 @@ class ConvertToTextView extends StatelessWidget {
                                 ? 'English'
                                 : textController.currentLanguage.value,
                             onPressed: () {},
-                            height: 40,
+                            height: 30,
                             width: 80,
-                            fontSize: 12,
+                            fontSize: 11,
                           ),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: SvgPicture.asset('assets/images/summary/arrow_icon.svg'),
                           ),
                           Obx(() => Container(
-                            height: 40,
+                            height: 30,
                             width: 120,
                             decoration: BoxDecoration(
                               color: AppColors.appColor,
@@ -512,7 +512,7 @@ class ConvertToTextView extends StatelessWidget {
                                         textController.selectedLanguage.value.isEmpty
                                             ? 'Select Language'
                                             : textController.selectedLanguage.value,
-                                        style: h4.copyWith(fontSize: 12, color: Colors.white),
+                                        style: h4.copyWith(fontSize: 11, color: Colors.white),
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
@@ -526,9 +526,9 @@ class ConvertToTextView extends StatelessWidget {
                           CustomButton(
                             text: 'Translate',
                             onPressed: () => textController.translateText(filePath, fileName),
-                            height: 40,
+                            height: 30,
                             width: 80,
-                            fontSize: 12,
+                            fontSize: 11,
                           ),
                         ],
                       ),

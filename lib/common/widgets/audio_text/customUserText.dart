@@ -20,47 +20,49 @@ class CustomUserText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-      decoration: BoxDecoration(
-        color: isHighlighted ? Colors.yellow.withOpacity(0.3) : Colors.transparent,  // Highlight background if true
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: isHighlighted ? AppColors.appColor : Colors.transparent, width: 2), // Optional border for highlighted state
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: RichText(
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: '$name ',
-                    style: h4.copyWith(
-                      fontSize: 20,
-                      color: UserColor,
-                      fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal, // Bold for highlighted
+    return Padding(
+      padding: isHighlighted ? const EdgeInsets.symmetric(horizontal: 20,vertical: 5) : const EdgeInsets.symmetric(vertical: 5),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+        decoration: BoxDecoration(
+          color: isHighlighted ? Colors.yellow.withOpacity(0.2) : Colors.transparent,  // Highlight background if true
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: isHighlighted ? AppColors.appColor : Colors.transparent,), // Optional border for highlighted state
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: '$name ',
+                      style: h4.copyWith(
+                        fontSize: 18,
+                        color: UserColor,
+                        fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal, // Bold for highlighted
+                      ),
                     ),
-                  ),
-                  TextSpan(
-                    text: time,
-                    style: h4.copyWith(fontSize: 20, color: Colors.black),
-                  ),
-                ],
+                    TextSpan(
+                      text: time,
+                      style: h4.copyWith(fontSize: 18, color: Colors.black),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          SizedBox(height: 5),
-          Text(
-            description,
-            style: h4.copyWith(
-              fontSize: 20,
-              fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal,  // Bold for highlighted
+            SizedBox(height: 15),
+            Text(
+              description,
+              style: h4.copyWith(
+                fontSize: 16,
+                fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal,  // Bold for highlighted
+              ),
             ),
-          ),
-          SizedBox(height: 20),
-        ],
+          ],
+        ),
       ),
     );
   }

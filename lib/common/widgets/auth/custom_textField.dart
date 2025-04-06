@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl_phone_field/intl_phone_field.dart'; // Ensure you have this package in your `pubspec.yaml`
 import '../../../app/modules/home/controllers/home_controller.dart';
 import '../../appColors.dart';
+import '../../customFont.dart';
 
 class CustomTextField extends StatefulWidget {
   final String label;
@@ -25,15 +25,15 @@ class CustomTextField extends StatefulWidget {
     required this.hint,
     this.isPassword = false,
     this.readOnly = false,
-    this.phone = false, // Default value for `phone`
+    this.phone = false,
     this.controller,
     this.prefixIcon,
     this.suffixIcon,
     this.onChanged,
     this.keyboardType,
     this.onTap,
-    this.radius = 12,
-    this.textColor = AppColors.blurtext,
+    this.radius = 10,
+    this.textColor = AppColors.gray1,
   });
 
   @override
@@ -64,8 +64,15 @@ class _CustomTextFieldState extends State<CustomTextField> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(widget.label, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: widget.textColor)),
-        const SizedBox(height: 8),
+        Text(
+          widget.label,
+          style: h4.copyWith(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: widget.textColor,
+          ),
+        ),
+        const SizedBox(height: 4),
         TextField(
           cursorColor: AppColors.appColor,
           controller: widget.controller,
@@ -76,32 +83,38 @@ class _CustomTextFieldState extends State<CustomTextField> {
           onTap: widget.onTap,
           decoration: InputDecoration(
             hintText: widget.hint,
-            hintStyle: TextStyle(color: AppColors.appColor),
+            hintStyle: h4.copyWith(fontSize: 14),
             prefixIcon: widget.prefixIcon != null
-                ? Icon(widget.prefixIcon, color: AppColors.appColor)
+                ? Icon(widget.prefixIcon, color: Colors.grey.shade600)
                 : null,
             suffixIcon: widget.isPassword
                 ? IconButton(
               icon: Icon(
-                _obscureText ? Icons.visibility_off_rounded : Icons.visibility_rounded,
-                color: AppColors.appColor,
+                _obscureText
+                    ? Icons.visibility_off_rounded
+                    : Icons.visibility_rounded,
+                color: AppColors.gray1,
               ),
               onPressed: _togglePasswordVisibility,
             )
                 : (widget.suffixIcon != null
-                ? Icon(widget.suffixIcon, color: AppColors.appColor)
+                ? Icon(widget.suffixIcon, color: AppColors.gray1)
                 : null),
+            contentPadding: const EdgeInsets.symmetric(
+              vertical: 10, // Reduced vertical padding to decrease height
+              horizontal: 12, // Adjusted horizontal padding for consistency
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(widget.radius),
-              borderSide: const BorderSide(color: AppColors.appColor),
+              borderSide: const BorderSide(color: AppColors.gray1),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(widget.radius),
-              borderSide: const BorderSide(color: AppColors.appColor),
+              borderSide: const BorderSide(color: AppColors.gray1),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(widget.radius),
-              borderSide: const BorderSide(color: AppColors.appColor, width: 2),
+              borderSide: const BorderSide(color: AppColors.appColor, width: 1),
             ),
           ),
         ),

@@ -36,6 +36,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
+      scrolledUnderElevation: 0,
       actions: [
         Row(
           mainAxisSize: MainAxisSize.min,
@@ -45,7 +46,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               GestureDetector(
                 onTap: onFirstIconPressed,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12), // Adjust padding
+                  padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 8), // Adjust padding
                   child: SvgPicture.asset(
                     firstIcon,
                     height: 17,
@@ -62,7 +63,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                     Get.to(() => NotificationSubscriptionView());
                   },
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8), // Adjust padding
+                    padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 8), // Adjust padding
                     child: SvgPicture.asset(
                       secondIcon,
                       height: 17,
@@ -75,8 +76,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   final unreadCount = controller.getUnreadCount();
                   if (unreadCount == 0) return const SizedBox.shrink();
                   return Positioned(
-                    right: 8,
-                    top: 8,
+                    right: 0,
+                    top: 0,
                     child: Container(
                       padding: const EdgeInsets.all(1),
                       decoration: BoxDecoration(

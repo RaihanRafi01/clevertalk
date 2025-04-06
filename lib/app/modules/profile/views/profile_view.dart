@@ -132,7 +132,7 @@ class _EditProfileViewState extends State<ProfileView> {
                       )),
                       const SizedBox(height: 10),
                       CustomButton(
-                        backgroundColor: AppColors.appColor2,
+                        backgroundColor: AppColors.appColor,
                         isGem: true,
                         width: 210,
                         text: 'Standard Account',
@@ -153,7 +153,7 @@ class _EditProfileViewState extends State<ProfileView> {
               },
               hint: 'Enter Your Name',
             ),
-            SizedBox(height: 12),
+            SizedBox(height: 30),
             CustomTextField(
               readOnly: true,
               label: 'Email',
@@ -162,9 +162,10 @@ class _EditProfileViewState extends State<ProfileView> {
               keyboardType: TextInputType.emailAddress,
               hint: 'Enter Your Email',
             ),
-            SizedBox(height: 12),
+            SizedBox(height: 30),
             CustomTextField(
               phone: true,
+              prefixIcon: Icons.phone,
               label: 'Phone Number',
               controller: _phoneController,
               keyboardType: TextInputType.phone,
@@ -173,6 +174,7 @@ class _EditProfileViewState extends State<ProfileView> {
                 profileController.updatePhone(value);
               },
             ),
+            SizedBox(height: 30),
             CustomTextField(
               label: 'Address',
               controller: _addressController,
@@ -183,16 +185,20 @@ class _EditProfileViewState extends State<ProfileView> {
                 profileController.updateAddress(value);
               },
             ),
-            SizedBox(height: 12),
-            Align(alignment: Alignment.centerLeft,child: Text('Gender', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.blurtext,))),
-            SizedBox(height: 10,),
+            SizedBox(height: 30),
+            Align(alignment: Alignment.centerLeft,child: Text('Gender', style: h4.copyWith(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.gray1,))),
+            SizedBox(height: 5,),
             Obx(() => DropdownButtonFormField<String>(
               decoration: InputDecoration(
                 labelStyle: h4,
                 helperStyle: h4,
                 floatingLabelStyle: h4,
                 hintText: 'Select Your Gender',
-                prefixIcon: Icon(Icons.male_rounded),
+                prefixIcon: const Icon(Icons.male_rounded),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 10, // Reduced vertical padding to decrease height
+                  horizontal: 12, // Adjusted horizontal padding for consistency
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                   borderSide: const BorderSide(color: Colors.grey),
@@ -206,7 +212,10 @@ class _EditProfileViewState extends State<ProfileView> {
               items: ['Male', 'Female', 'Other']
                   .map((gender) => DropdownMenuItem<String>(
                 value: gender,
-                child: Text(gender,style: h4,),
+                child: Text(
+                  gender,
+                  style: h4.copyWith(fontSize: 14), // Optional: Reduced font size for compactness
+                ),
               ))
                   .toList(),
               onChanged: (value) {
@@ -215,8 +224,10 @@ class _EditProfileViewState extends State<ProfileView> {
                   homeController.gender.value = value;
                 }
               },
+              dropdownColor: Colors.white, // Optional: Customize dropdown background
+              menuMaxHeight: 150, // Optional: Limit dropdown menu height
             )),
-            const SizedBox(height: 20),
+            const SizedBox(height: 30),
             CustomButton(
               text: 'Save',
               onPressed: () async {
