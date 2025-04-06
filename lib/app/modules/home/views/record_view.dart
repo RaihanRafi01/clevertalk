@@ -40,8 +40,7 @@ class RecordView extends GetView<RecordController> {
               // Update the DashboardController's currentIndex before navigating
               final dashboardController = Get.find<DashboardController>();
               dashboardController.updateIndex(index); // Set the desired index
-              // Navigate to DashboardView
-              Get.off(() => const DashboardView());
+              Get.offAll(() => const DashboardView(), arguments: index); // Pass index 1
             },
           ),
           body: SingleChildScrollView(

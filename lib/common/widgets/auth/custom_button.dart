@@ -31,7 +31,7 @@ class CustomButton extends StatelessWidget {
     this.padding = const EdgeInsets.symmetric(vertical: 5),
     this.isEditPage = false,
     this.width = double.maxFinite,
-    this.height = 45,
+    this.height = 40,
     this.fontSize = 16,
     this.svgAsset = 'assets/images/profile/gem.svg',
   });

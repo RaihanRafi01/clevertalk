@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -5,7 +6,6 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:sqflite/sql.dart';
 import '../../../data/database_helper.dart';
 import '../../../data/services/api_services.dart';
 import '../../../data/services/notification_services.dart';
@@ -23,12 +23,24 @@ class AudioPlayerController extends GetxController {
   RxBool isLoading = false.obs; // Observable for loading state
   String? _currentFilePath;
   RxBool isSeeking = false.obs;
+  RxDouble waveformOffset = 0.0.obs;
+  Timer? _animationTimer;
 
   @override
   void onInit() {
     super.onInit();
     fetchAudioFiles();
+    _setupAudioPlayerListeners();
+  }
 
+  @override
+  void onClose() {
+    _animationTimer?.cancel();
+    _audioPlayer.dispose();
+    super.onClose();
+  }
+
+  void _setupAudioPlayerListeners() {
     _audioPlayer.positionStream.listen((position) {
       currentPosition.value = position.inSeconds.toDouble();
     });
@@ -39,7 +51,28 @@ class AudioPlayerController extends GetxController {
 
     _audioPlayer.playerStateStream.listen((state) {
       isPlaying.value = state.playing;
+      if (state.playing) {
+        _startWaveformAnimation();
+      } else {
+        _stopWaveformAnimation();
+      }
     });
+  }
+
+  void _startWaveformAnimation() {
+    _animationTimer?.cancel();
+    _animationTimer = Timer.periodic(Duration(milliseconds: 50), (timer) {
+      if (isPlaying.value) {
+        waveformOffset.value -= 2; // Same as RecordController
+        if (waveformOffset.value <= -Get.width) {
+          waveformOffset.value = 0.0; // Reset to 0 when it reaches screen width
+        }
+      }
+    });
+  }
+
+  void _stopWaveformAnimation() {
+    _animationTimer?.cancel();
   }
 
   Future<void> fetchAudioFiles() async {
@@ -141,6 +174,7 @@ class AudioPlayerController extends GetxController {
     currentPosition.value = 0.0;
     isPlaying.value = false;
     _currentFilePath = null; // Clear the current file path
+    _stopWaveformAnimation(); // Ensure animation stops
   }
 
   Future<void> convertToText() async {
@@ -173,9 +207,6 @@ class AudioPlayerController extends GetxController {
 
         if (existingTranscription != null && existingTranscription.toString().isNotEmpty) {
           print('::::::::::::::::::::::::::::::::::::Transcription found in database');
-
-          // Decode the transcription and navigate to ConvertView
-          //final data = json.decode(existingTranscription.toString()) as List;
           Get.to(() => ConvertView(
             text: existingTranscription.toString(),
             filePath: filePath,
@@ -183,11 +214,9 @@ class AudioPlayerController extends GetxController {
           ));
           Get.snackbar('Success', 'Loaded transcription from database');
         } else {
-          // Fetch transcription from the API if not available in the database
           await fetchTranscriptionFromApi(filePath, fileName, db);
         }
       } else {
-        // File not found in the database
         Get.snackbar('Error', 'File not found in the database. Please add the file first.');
       }
     } catch (e) {
@@ -208,7 +237,6 @@ class AudioPlayerController extends GetxController {
         final result = json.decode(response.body);
         final data = result['Data'];
 
-        // Save the transcription to the database
         await db.update(
           'audio_files',
           {'transcription': json.encode(data)},
@@ -216,7 +244,6 @@ class AudioPlayerController extends GetxController {
           whereArgs: [filePath],
         );
 
-        // Navigate to ConvertView with the fetched transcription
         Get.to(() => ConvertView(
           text: json.encode(data),
           filePath: filePath,
@@ -234,11 +261,9 @@ class AudioPlayerController extends GetxController {
 
   Future<void> fetchKeyPoints(String filePath, String fileName) async {
     try {
-      //isLoading.value = true; // Start loading
       final dbHelper = DatabaseHelper();
       final db = await dbHelper.database;
 
-      // Check if the file exists in the database
       final result = await db.query(
         'audio_files',
         where: 'file_name = ?',
@@ -249,33 +274,29 @@ class AudioPlayerController extends GetxController {
         final existingKeypoint = result.first['key_point'];
 
         if (existingKeypoint != null && existingKeypoint.toString().isNotEmpty) {
-          // If the summary already exists, show it
           print('::::::::existingKeypoint::::::::::::::::::${existingKeypoint.toString()}');
-          Get.to(() => SummaryKeyPointView(/*keyPoints: existingKeypoint.toString(),*/ fileName: fileName,filePath: filePath,));
+          Get.to(() => SummaryKeyPointView(fileName: fileName, filePath: filePath));
         } else {
-          Get.snackbar('Summarization in progress...', 'This may take some time, but don\'t worry! We\'ll notify you as soon as it\'s ready. Feel free to using the app while you wait.',duration: Duration(seconds: 4));
-          // If the summary is not available, fetch it from the API
+          Get.snackbar(
+            'Summarization in progress...',
+            'This may take some time, but don\'t worry! We\'ll notify you as soon as it\'s ready. Feel free to use the app while you wait.',
+            duration: Duration(seconds: 4),
+          );
           final response = await _apiService.fetchKeyPoints(filePath, fileName);
-
 
           print('::::::::::statusCode::::::::::::::::${response.statusCode}');
           print('::::::::body1::::::::::::::::::${response.body}');
-
 
           if (response.statusCode == 200 || response.statusCode == 201) {
             final jsonResponse = json.decode(response.body);
             final keyPointText = jsonResponse['Data']['content'];
 
-            // Update the summary in the database
             await db.update(
               'audio_files',
               {'key_point': keyPointText},
               where: 'file_name = ?',
               whereArgs: [fileName],
             );
-
-            // Navigate to SummaryKeyPointView with the new summary
-            print('::::::::key::::::::::::::::::$keyPointText');
 
             NotificationService.showNotification(
               title: "Summary Ready!",
@@ -285,13 +306,11 @@ class AudioPlayerController extends GetxController {
               fileName: fileName,
               filePath: filePath,
             );
-
           } else {
             Get.snackbar('Error', 'Failed to fetch keyPoint: ${response.body}');
           }
         }
       } else {
-        // If the file doesn't exist in the database, show an error
         Get.snackbar('Error', 'File not found in the database. Please add the file first.');
       }
     } catch (e) {
@@ -299,10 +318,9 @@ class AudioPlayerController extends GetxController {
     }
   }
 
-
-  @override
-  void onClose() {
-    _audioPlayer.dispose();
-    super.onClose();
+  String formatTime(int seconds, int milliseconds) {
+    final int minutes = seconds ~/ 60;
+    final int remainingSeconds = seconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
   }
 }
