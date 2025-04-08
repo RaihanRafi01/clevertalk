@@ -25,7 +25,7 @@ class CustomUserText extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
         decoration: BoxDecoration(
-          color: isHighlighted ? Colors.yellow.withOpacity(0.2) : Colors.transparent,  // Highlight background if true
+          color: isHighlighted ? Colors.yellow.withOpacity(0.1) : Colors.transparent,  // Highlight background if true
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: isHighlighted ? AppColors.appColor : Colors.transparent,), // Optional border for highlighted state
         ),
