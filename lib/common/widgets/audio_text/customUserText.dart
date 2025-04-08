@@ -21,13 +21,13 @@ class CustomUserText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: isHighlighted ? const EdgeInsets.symmetric(horizontal: 20,vertical: 5) : const EdgeInsets.symmetric(vertical: 5),
+      padding: isHighlighted ? const EdgeInsets.symmetric(horizontal: 10,vertical: 5) : const EdgeInsets.symmetric(vertical: 5),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
         decoration: BoxDecoration(
           color: isHighlighted ? Colors.yellow.withOpacity(0.1) : Colors.transparent,  // Highlight background if true
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: isHighlighted ? AppColors.appColor : Colors.transparent,), // Optional border for highlighted state
+          border: Border.all(color: isHighlighted ? AppColors.gray1 : Colors.transparent,), // Optional border for highlighted state
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

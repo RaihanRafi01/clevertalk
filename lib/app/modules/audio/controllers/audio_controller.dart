@@ -56,6 +56,11 @@ class AudioPlayerController extends GetxController {
       } else {
         _stopWaveformAnimation();
       }
+
+      if (state.processingState == ProcessingState.completed) {
+        _stopWaveformAnimation();
+      }
+
     });
   }
 

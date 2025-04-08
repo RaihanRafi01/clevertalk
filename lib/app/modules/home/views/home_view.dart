@@ -100,6 +100,7 @@ class HomeView extends GetView<HomeController> {
                   // If no audio files, center the button
                   return Center(
                     child: CustomButton(
+                      isBold: true,
                       width: 250,
                       borderRadius: 5,
                       text: 'Start Recording',
@@ -157,6 +158,7 @@ class HomeView extends GetView<HomeController> {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10),
                         child: CustomButton(
+                          isBold: true,
                           borderRadius: 30,
                           text: 'START RECORDING',
                           onPressed: () => Get.to(() => RecordView()),

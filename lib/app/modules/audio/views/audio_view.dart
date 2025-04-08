@@ -34,7 +34,7 @@ class AudioView extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: Text('Audio', style: h1.copyWith(fontSize: 30)),
+                child: Text('Files', style: h1.copyWith(fontSize: 28)),
               ),
             ),
             const SizedBox(height: 20),

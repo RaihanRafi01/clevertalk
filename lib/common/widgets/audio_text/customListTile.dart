@@ -45,7 +45,7 @@ class CustomListTile extends StatelessWidget {
       ),
       title: Text(
         title,
-        style: h4.copyWith(fontSize: 17),
+        style: h4.copyWith(fontSize: 15),
         overflow: TextOverflow.ellipsis,
       ),
       subtitle: Row(
@@ -53,7 +53,7 @@ class CustomListTile extends StatelessWidget {
           Flexible(
             child: Text(
               subtitle,
-              style: h4.copyWith(fontSize: 14),
+              style: h4.copyWith(fontSize: 12),
               overflow: TextOverflow.ellipsis,
             ),
           ),
