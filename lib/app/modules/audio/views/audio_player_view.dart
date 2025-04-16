@@ -84,7 +84,7 @@ class AudioPlayerView extends StatelessWidget {
                               controller.currentPosition.value.toInt(),
                               (controller.currentPosition.value * 1000).toInt() % 1000,
                             ),
-                            style: h3.copyWith(fontSize: 17),
+                            style: h3.copyWith(fontSize: 15),
                           ),
                         ),
                       ),
@@ -130,7 +130,7 @@ class AudioPlayerView extends StatelessWidget {
                         controller.audioFiles.isNotEmpty && controller.currentIndex.value >= 0
                             ? controller.audioFiles[controller.currentIndex.value]['file_name']
                             : fileName,
-                        style: h1.copyWith(fontSize: 20, color: AppColors.textHeader),
+                        style: h1.copyWith(fontSize: 18, color: AppColors.textHeader),
                       ),
                       const SizedBox(height: 30),
                       Slider(
@@ -148,12 +148,12 @@ class AudioPlayerView extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           SvgIcon(
-                            height: 50,
+                            height: 40,
                             svgPath: 'assets/images/audio/previous_icon.svg',
                             onTap: controller.playPrevious,
                           ),
                           SvgIcon(
-                            height: 30,
+                            height: 20,
                             svgPath: 'assets/images/audio/previous_10_icon.svg',
                             onTap: () async {
                               final newPosition = (controller.currentPosition.value - 10)
@@ -162,7 +162,7 @@ class AudioPlayerView extends StatelessWidget {
                             },
                           ),
                           SvgIcon(
-                            height: 76,
+                            height: 60,
                             svgPath: controller.isPlaying.value
                                 ? 'assets/images/audio/pause_icon.svg'
                                 : 'assets/images/audio/play_icon.svg',
@@ -176,7 +176,7 @@ class AudioPlayerView extends StatelessWidget {
                             },
                           ),
                           SvgIcon(
-                            height: 30,
+                            height: 20,
                             svgPath: 'assets/images/audio/next_10_icon.svg',
                             onTap: () async {
                               final newPosition = (controller.currentPosition.value + 10)
@@ -185,7 +185,7 @@ class AudioPlayerView extends StatelessWidget {
                             },
                           ),
                           SvgIcon(
-                            height: 50,
+                            height: 40,
                             svgPath: 'assets/images/audio/next_icon.svg',
                             onTap: controller.playNext,
                           ),

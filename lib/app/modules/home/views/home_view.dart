@@ -40,7 +40,8 @@ class HomeView extends GetView<HomeController> {
                   children: [
                     Expanded(
                       child: CustomButton(
-                        height: 50,
+                        height: 40,
+                        fontSize: 12,
                         text: 'Connect Clevertalk',
                         onPressed: () {
                           Get.to(BeforeConnectView());
@@ -51,7 +52,8 @@ class HomeView extends GetView<HomeController> {
                     SizedBox(width: 40),
                     Expanded(
                       child: CustomButton(
-                        height: 50,
+                        height: 40,
+                        fontSize: 12,
                         text: 'Explore Plans',
                         onPressed: () {
                           Get.to(SubscriptionView());
@@ -68,7 +70,7 @@ class HomeView extends GetView<HomeController> {
                   child: GestureDetector(
                     onTap: () {}, // Add your onTap functionality here
                     child: Container(
-                      height: 40,
+                      height: 36,
                       decoration: BoxDecoration(
                         color: Colors.transparent, // Transparent background
                         borderRadius: BorderRadius.circular(10), // Rounded corners
@@ -82,7 +84,7 @@ class HomeView extends GetView<HomeController> {
                           '120 minutes remaining',
                           style: TextStyle(
                             color: Colors.black, // Black text
-                            fontSize: 16, // Adjust font size as needed
+                            fontSize: 14, // Adjust font size as needed
                           ),
                         ),
                       ),
@@ -103,7 +105,7 @@ class HomeView extends GetView<HomeController> {
                       isBold: true,
                       width: 250,
                       borderRadius: 5,
-                      text: 'Start Recording',
+                      text: 'START RECORDING',
                       onPressed: () => Get.to(() => RecordView()),
                     ),
                   );

@@ -24,6 +24,7 @@ class SettingView extends GetView<SettingController> {
 
     final FlutterSecureStorage _storage = FlutterSecureStorage();
     Future<void> logout() async {
+      await FlutterSecureStorage().deleteAll();
       await _storage.delete(key: 'access_token');
       await _storage.delete(key: 'refresh_token');
 

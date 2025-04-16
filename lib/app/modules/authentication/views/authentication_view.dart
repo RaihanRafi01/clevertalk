@@ -71,6 +71,7 @@ class AuthenticationView extends GetView<AuthenticationController> {
                     prefixIcon: Icons.person_outline_rounded,
                     controller: _usernameController,
                   ),
+                  SizedBox(height: 30),
                   CustomTextField(
                     label: "Password",
                     hint: "Enter Password",

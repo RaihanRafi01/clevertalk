@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ffi';
 import 'package:clevertalk/app/modules/audio/controllers/audio_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

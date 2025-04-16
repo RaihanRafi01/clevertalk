@@ -34,7 +34,7 @@ class CustomButton extends StatelessWidget {
     this.isEditPage = false,
     this.width = double.maxFinite,
     this.height = 40,
-    this.fontSize = 16,
+    this.fontSize = 14,
     this.svgAsset = 'assets/images/profile/gem.svg',
   });
 

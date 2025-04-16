@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -36,6 +37,7 @@ class ConvertToTextController extends GetxController {
   }
 
   Future<void> fetchMessages(String filePath) async {
+    print('::::::::::::::::::::::::::::::::::::HITTING TRANS ::::::::::::::::::::::::::::::');
     final ApiService _apiService = ApiService();
     try {
       isLoading.value = true;
@@ -60,6 +62,9 @@ class ConvertToTextController extends GetxController {
           _updateMessages(data);
         } else {
           final response = await _apiService.fetchTranscription(filePath);
+
+          print('::::::::::::::::::::::::::::::::::::CODE: ${response.statusCode}');
+          print('::::::::::::::::::::::::::::::::::::body: ${response.body}');
 
           if (response.statusCode == 200) {
             final jsonData = json.decode(response.body);

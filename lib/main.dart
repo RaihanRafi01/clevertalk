@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:get/get.dart';
 import 'app/data/services/notification_services.dart';
+import 'app/modules/audio/controllers/audio_controller.dart';
 import 'app/routes/app_pages.dart';
 
 Future<void> main() async {
@@ -11,6 +12,7 @@ Future<void> main() async {
   //await Firebase.initializeApp();
   final initialRoute = await AppPages.getInitialRoute();
   FlutterForegroundTask.initCommunicationPort();
+  Get.put(AudioPlayerController(), permanent: true);
 
   runApp(
     GetMaterialApp(

@@ -19,8 +19,8 @@ class AudioPlayerController extends GetxController {
   RxDouble totalDuration = 1.0.obs;
   RxBool isPlaying = false.obs;
   RxList<Map<String, dynamic>> audioFiles = <Map<String, dynamic>>[].obs;
-  RxInt currentIndex = (-1).obs; // Default to -1 (no file selected)
-  RxBool isLoading = false.obs; // Observable for loading state
+  RxInt currentIndex = (-1).obs;
+  RxBool isLoading = false.obs;
   String? _currentFilePath;
   RxBool isSeeking = false.obs;
   RxDouble waveformOffset = 0.0.obs;
@@ -29,18 +29,21 @@ class AudioPlayerController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchAudioFiles();
+    print('AudioPlayerController onInit called');
     _setupAudioPlayerListeners();
+    fetchAudioFiles();
   }
 
   @override
   void onClose() {
+    print('AudioPlayerController onClose called');
     _animationTimer?.cancel();
     _audioPlayer.dispose();
     super.onClose();
   }
 
   void _setupAudioPlayerListeners() {
+    print('Setting up AudioPlayer listeners');
     _audioPlayer.positionStream.listen((position) {
       currentPosition.value = position.inSeconds.toDouble();
     });
@@ -51,6 +54,7 @@ class AudioPlayerController extends GetxController {
 
     _audioPlayer.playerStateStream.listen((state) {
       isPlaying.value = state.playing;
+      print('AudioPlayer state: playing=${state.playing}, processingState=${state.processingState}');
       if (state.playing) {
         _startWaveformAnimation();
       } else {
@@ -59,8 +63,23 @@ class AudioPlayerController extends GetxController {
 
       if (state.processingState == ProcessingState.completed) {
         _stopWaveformAnimation();
+        currentPosition.value = 0.0;
+        isPlaying.value = false;
+      } else if (state.processingState == ProcessingState.ready) {
+        print('AudioPlayer is ready to play');
+      } else if (state.processingState == ProcessingState.buffering) {
+        print('AudioPlayer is buffering...');
+      } else if (state.processingState == ProcessingState.idle) {
+        print('AudioPlayer is idle');
       }
+    });
 
+    _audioPlayer.playbackEventStream.listen((event) {
+      print('Playback event: $event');
+    }, onError: (Object e, StackTrace st) {
+      print('Playback error: $e');
+      Get.snackbar('Error', 'Failed to play audio: $e');
+      isPlaying.value = false;
     });
   }
 
@@ -68,9 +87,9 @@ class AudioPlayerController extends GetxController {
     _animationTimer?.cancel();
     _animationTimer = Timer.periodic(Duration(milliseconds: 50), (timer) {
       if (isPlaying.value) {
-        waveformOffset.value -= 2; // Same as RecordController
+        waveformOffset.value -= 2;
         if (waveformOffset.value <= -Get.width) {
-          waveformOffset.value = 0.0; // Reset to 0 when it reaches screen width
+          waveformOffset.value = 0.0;
         }
       }
     });
@@ -81,6 +100,7 @@ class AudioPlayerController extends GetxController {
   }
 
   Future<void> fetchAudioFiles() async {
+    print('Fetching audio files...');
     final dbHelper = DatabaseHelper();
     final files = await dbHelper.fetchAudioFiles();
     audioFiles.assignAll(files);
@@ -88,20 +108,21 @@ class AudioPlayerController extends GetxController {
     if (files.isNotEmpty) {
       currentIndex.value = files.indexWhere((file) => file['file_name'] == Get.arguments);
       if (currentIndex.value == -1) {
-        currentIndex.value = 0; // Default to the first file if no match is found
+        currentIndex.value = 0;
       }
     } else {
-      currentIndex.value = -1; // No files available
+      currentIndex.value = -1;
     }
+    print('Audio files fetched: ${audioFiles.length}');
   }
 
   Duration get currentAudioPosition => _audioPlayer.position;
 
   Future<void> seekAudio(Duration position) async {
-    isSeeking.value = true; // Set seeking flag
+    isSeeking.value = true;
     print('Seeking to: ${position.inSeconds}');
     await _audioPlayer.seek(position);
-    isSeeking.value = false; // Reset flag after seek
+    isSeeking.value = false;
   }
 
   Future<void> pauseAudio() async {
@@ -112,47 +133,89 @@ class AudioPlayerController extends GetxController {
   }
 
   Future<void> playAudio({String? filePath}) async {
-    if (filePath == null) {
-      if (audioFiles.isEmpty || currentIndex.value < 0 || currentIndex.value >= audioFiles.length) {
-        Get.snackbar('Error', 'No file to play');
+    try {
+      if (filePath == null) {
+        if (audioFiles.isEmpty || currentIndex.value < 0 || currentIndex.value >= audioFiles.length) {
+          Get.snackbar('Error', 'No file to play');
+          return;
+        }
+        filePath = audioFiles[currentIndex.value]['file_path'];
+      }
+
+      final file = File(filePath!);
+      if (!await file.exists()) {
+        print('File does not exist: $filePath');
+        Get.snackbar('Error', 'File does not exist: $filePath');
         return;
       }
-      filePath = audioFiles[currentIndex.value]['file_path'];
-    }
 
-    if (await File(filePath!).exists()) {
+      try {
+        final canRead = await file.openRead().isEmpty;
+        print('File is readable: $canRead');
+      } catch (e) {
+        print('Cannot read file: $e');
+        Get.snackbar('Error', 'Cannot read file: $e');
+        return;
+      }
+
       print('Setting file path: $filePath');
-      _currentFilePath = filePath; // Store the current file path
+      _currentFilePath = filePath;
+
+      // Ensure the AudioPlayer is in a valid state
+      if (_audioPlayer.playing || _audioPlayer.processingState != ProcessingState.idle) {
+        print('AudioPlayer is not idle, stopping...');
+        await _audioPlayer.stop();
+      }
+      print('AudioPlayer stopped');
+
+      // Set the audio source
       await _audioPlayer.setFilePath(filePath);
+      print('Audio source set successfully');
+
+      // Reset position to start
+      await _audioPlayer.seek(Duration.zero);
+      currentPosition.value = 0.0;
+      print('Position reset to 0');
+
+      // Start playback
       print('Starting playback...');
       await _audioPlayer.play();
       isPlaying.value = true;
-    } else {
-      print('File does not exist: $filePath');
-      Get.snackbar('Error', 'File does not exist');
+      print('Playback started');
+    } catch (e, stackTrace) {
+      print('Error in playAudio: $e');
+      print('Stack trace: $stackTrace');
+      Get.snackbar('Error', 'Failed to play audio: $e');
+      isPlaying.value = false;
     }
   }
 
   Future<void> resumeAudio({String? filePath}) async {
-    if (_audioPlayer.audioSource == null || (filePath != null && filePath != _currentFilePath)) {
-      print('Audio source not set or file changed. Re-setting file path: $filePath');
-      if (filePath == null) {
-        if (audioFiles.isNotEmpty && currentIndex.value >= 0) {
-          filePath = audioFiles[currentIndex.value]['file_path'];
-        } else {
-          Get.snackbar('Error', 'No audio file available to resume');
-          return;
+    try {
+      if (_audioPlayer.audioSource == null || (filePath != null && filePath != _currentFilePath)) {
+        print('Audio source not set or file changed. Re-setting file path: $filePath');
+        if (filePath == null) {
+          if (audioFiles.isNotEmpty && currentIndex.value >= 0) {
+            filePath = audioFiles[currentIndex.value]['file_path'];
+          } else {
+            Get.snackbar('Error', 'No audio file available to resume');
+            return;
+          }
         }
+        await playAudio(filePath: filePath);
+        return;
       }
-      await playAudio(filePath: filePath); // Re-start playback if source is lost
-      return;
-    }
 
-    print('Resuming audio from position: ${currentPosition.value}');
-    await _audioPlayer.seek(Duration(seconds: currentPosition.value.toInt())); // Ensure position
-    await _audioPlayer.play();
-    isPlaying.value = true;
-    print('Resume completed. Position: ${currentPosition.value}');
+      print('Resuming audio from position: ${currentPosition.value}');
+      await _audioPlayer.seek(Duration(seconds: currentPosition.value.toInt()));
+      await _audioPlayer.play();
+      isPlaying.value = true;
+      print('Resume completed. Position: ${currentPosition.value}');
+    } catch (e) {
+      print('Error in resumeAudio: $e');
+      Get.snackbar('Error', 'Failed to resume audio: $e');
+      isPlaying.value = false;
+    }
   }
 
   void playPrevious() {
@@ -174,12 +237,17 @@ class AudioPlayerController extends GetxController {
   }
 
   Future<void> stopAudio() async {
-    print('Stopping audio...');
-    await _audioPlayer.stop();
-    currentPosition.value = 0.0;
-    isPlaying.value = false;
-    _currentFilePath = null; // Clear the current file path
-    _stopWaveformAnimation(); // Ensure animation stops
+    try {
+      print('Stopping audio...');
+      await _audioPlayer.stop();
+      currentPosition.value = 0.0;
+      isPlaying.value = false;
+      _currentFilePath = null;
+      _stopWaveformAnimation();
+      print('Audio stopped');
+    } catch (e) {
+      print('Error in stopAudio: $e');
+    }
   }
 
   Future<void> convertToText() async {
@@ -195,12 +263,11 @@ class AudioPlayerController extends GetxController {
       print('::::::::::::::::::::::::::::::::::::filePath: $filePath');
       print('::::::::::::::::::::::::::::::::::::fileName: $fileName');
 
-      isLoading.value = true; // Start loading
+      isLoading.value = true;
 
       final dbHelper = DatabaseHelper();
       final db = await dbHelper.database;
 
-      // Check if the transcription exists in the database
       final result = await db.query(
         'audio_files',
         where: 'file_path = ?',
@@ -227,7 +294,7 @@ class AudioPlayerController extends GetxController {
     } catch (e) {
       Get.snackbar('Error', 'Error: $e');
     } finally {
-      isLoading.value = false; // Stop loading
+      isLoading.value = false;
     }
   }
 

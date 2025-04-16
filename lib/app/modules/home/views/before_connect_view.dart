@@ -51,7 +51,7 @@ class BeforeConnectView extends StatelessWidget {
                     Text(
                       'Connect Your Clevertalk Recorder',
                       style: h1.copyWith(
-                        fontSize: 26,
+                        fontSize: 23,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
@@ -72,7 +72,7 @@ class BeforeConnectView extends StatelessWidget {
                                 'This section is exclusively for users who have purchased the Clevertalk Recorder. '
                                     'If you plan to use the app by itself to record with your phone, please go back.',
                                 style: h4.copyWith(
-                                  fontSize: 14,
+                                  fontSize: 13,
                                   color: Colors.black,
                                 ),
                               ),

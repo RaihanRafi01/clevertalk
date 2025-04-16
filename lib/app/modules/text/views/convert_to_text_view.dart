@@ -7,13 +7,13 @@ import '../../../../common/customFont.dart';
 import '../../../../common/widgets/audio_text/customUserText.dart';
 import '../../../../common/widgets/auth/custom_button.dart';
 import '../../../../common/widgets/customAppBar.dart';
-import '../../../../common/widgets/customNavigationBar.dart'; // Add this import
+import '../../../../common/widgets/customNavigationBar.dart';
 import '../../../../common/widgets/svgIcon.dart';
 import '../../audio/bindings/language_model.dart';
 import '../../audio/controllers/audio_controller.dart';
 import '../controllers/text_controller.dart';
-import '../../dashboard/controllers/dashboard_controller.dart'; // Add this import
-import '../../dashboard/views/dashboard_view.dart'; // Add this import
+import '../../dashboard/controllers/dashboard_controller.dart';
+import '../../dashboard/views/dashboard_view.dart';
 
 class ConvertToTextView extends StatelessWidget {
   final String fileName;
@@ -255,29 +255,39 @@ class ConvertToTextView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Ensure the AudioPlayerController is truly permanent
     final audioController = Get.put(AudioPlayerController(), permanent: true);
     final textController = Get.put(ConvertToTextController());
-    textController.fetchMessages(filePath);
 
-    audioController.fetchAudioFiles().then((_) {
-      final index = audioController.audioFiles.indexWhere((file) => file['file_name'] == fileName);
-      if (index != -1) {
-        audioController.currentIndex.value = index;
-        textController.fetchMessages(filePath).then((_) {
-          audioController.playAudio(filePath: filePath);
-          textController.syncScrollingWithAudio(audioController);
-        });
-      }
-    });
+    // Fetch messages and initialize audio playback only if not already initialized
+    if (audioController.currentIndex.value == -1) {
+      textController.fetchMessages(filePath);
+      audioController.fetchAudioFiles().then((_) {
+        final index = audioController.audioFiles.indexWhere((file) => file['file_name'] == fileName);
+        if (index != -1) {
+          audioController.currentIndex.value = index;
+          textController.fetchMessages(filePath).then((_) {
+            audioController.playAudio(filePath: filePath);
+            textController.syncScrollingWithAudio(audioController);
+          });
+        } else {
+          Get.snackbar('Error', 'Audio file not found: $fileName');
+        }
+      });
+    } else {
+      // If already initialized, just resume or play the audio
+      audioController.playAudio(filePath: filePath);
+      textController.fetchMessages(filePath);
+      textController.syncScrollingWithAudio(audioController);
+    }
 
     return PopScope(
       onPopInvokedWithResult: (canPop, result) async {
         if (canPop) {
           await audioController.stopAudio();
-          // Update DashboardController to "Recordings" tab (index 1)
           final dashboardController = Get.find<DashboardController>();
-          dashboardController.updateIndex(1); // Set to "Recordings" tab
-          Get.offAll(() => const DashboardView(), arguments: 1); // Navigate without back icon
+          dashboardController.updateIndex(1);
+          Get.offAll(() => const DashboardView(), arguments: 1);
         }
       },
       child: Scaffold(
@@ -288,14 +298,9 @@ class ConvertToTextView extends StatelessWidget {
         ),
         bottomNavigationBar: CustomNavigationBar(
           onItemTapped: (index) async {
-            // Pause audio before navigating if it's playing
-            if (audioController.isPlaying.value) {
-              await audioController.pauseAudio();
-            }
-            // Update the DashboardController's currentIndex before navigating
+            await audioController.stopAudio();
             final dashboardController = Get.find<DashboardController>();
-            dashboardController.updateIndex(index); // Set the desired index
-            // Navigate to DashboardView, clear stack, and pass the index
+            dashboardController.updateIndex(index);
             Get.offAll(() => const DashboardView(), arguments: index);
           },
         ),
@@ -519,8 +524,7 @@ class ConvertToTextView extends StatelessWidget {
                           ),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child:
-                            SvgPicture.asset('assets/images/summary/arrow_icon.svg'),
+                            child: SvgPicture.asset('assets/images/summary/arrow_icon.svg'),
                           ),
                           Obx(() => Container(
                             height: 30,
@@ -540,8 +544,7 @@ class ConvertToTextView extends StatelessWidget {
                                         textController.selectedLanguage.value.isEmpty
                                             ? 'Select Language'
                                             : textController.selectedLanguage.value,
-                                        style: h4.copyWith(
-                                            fontSize: 11, color: Colors.white),
+                                        style: h4.copyWith(fontSize: 11, color: Colors.white),
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
@@ -555,8 +558,7 @@ class ConvertToTextView extends StatelessWidget {
                           const Spacer(),
                           CustomButton(
                             text: 'Translate',
-                            onPressed: () =>
-                                textController.translateText(filePath, fileName),
+                            onPressed: () => textController.translateText(filePath, fileName),
                             height: 30,
                             width: 80,
                             fontSize: 11,

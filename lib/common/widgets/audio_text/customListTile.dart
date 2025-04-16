@@ -37,7 +37,7 @@ class CustomListTile extends StatelessWidget {
       contentPadding: const EdgeInsets.symmetric(horizontal: 10),
       minLeadingWidth: 0,
       leading: SvgIcon(
-        height: 30,
+        height: 26,
         svgPath: showPlayIcon ? 'assets/images/audio/music_icon.svg' : 'assets/images/text/text_icon.svg',
         onTap: () {
           // Handle leading icon tap
@@ -45,7 +45,7 @@ class CustomListTile extends StatelessWidget {
       ),
       title: Text(
         title,
-        style: h4.copyWith(fontSize: 15),
+        style: h4.copyWith(fontSize: 13),
         overflow: TextOverflow.ellipsis,
       ),
       subtitle: Row(
@@ -53,7 +53,7 @@ class CustomListTile extends StatelessWidget {
           Flexible(
             child: Text(
               subtitle,
-              style: h4.copyWith(fontSize: 12),
+              style: h4.copyWith(fontSize: 10),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -61,13 +61,13 @@ class CustomListTile extends StatelessWidget {
           const SizedBox(width: 5),
           if(showPlayIcon) Icon(
             Icons.access_time,
-            size: 10,
+            size: 8,
             color: Colors.grey,
           ),
           if(showPlayIcon) const SizedBox(width: 2),
           if(showPlayIcon) Text(
             duration,
-            style: h4.copyWith(fontSize: 10, color: Colors.grey),
+            style: h4.copyWith(fontSize: 8, color: Colors.grey),
             overflow: TextOverflow.ellipsis,
           ),
         ],
@@ -85,7 +85,7 @@ class CustomListTile extends StatelessWidget {
               ),
             if (showPlayIcon) const SizedBox(width: 10),*/ // Spacing only if play_icon exists
             SvgIcon(
-              height: 24,
+              height: 20,
               svgPath: 'assets/images/audio/edit_icon.svg',
               onTap: () {
                 TextEditingController controller = TextEditingController(text: title); // Pre-fill the controller with the file name
@@ -119,7 +119,7 @@ class CustomListTile extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             SvgIcon(
-              height: 24,
+              height: 20,
               svgPath: 'assets/images/audio/delete_icon.svg',
               onTap: () {
                 showDialog(
