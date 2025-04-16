@@ -32,11 +32,11 @@ class SettingsList extends StatelessWidget {
           children: [
             Row(
               children: [
-                SvgPicture.asset(svgPath),
+                SvgPicture.asset(svgPath,height: 16,),
                 SizedBox(width: 10),
                 Text(
                   text,
-                  style: h4.copyWith(fontSize: 14),
+                  style: h4.copyWith(fontSize: 13),
                 ),
                 Spacer(),
                 isTogol

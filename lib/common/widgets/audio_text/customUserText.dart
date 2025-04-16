@@ -40,14 +40,14 @@ class CustomUserText extends StatelessWidget {
                     TextSpan(
                       text: '$name ',
                       style: h4.copyWith(
-                        fontSize: 18,
+                        fontSize: 16,
                         color: UserColor,
                         fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal, // Bold for highlighted
                       ),
                     ),
                     TextSpan(
                       text: time,
-                      style: h4.copyWith(fontSize: 18, color: Colors.black),
+                      style: h4.copyWith(fontSize: 16, color: Colors.black),
                     ),
                   ],
                 ),
@@ -57,7 +57,7 @@ class CustomUserText extends StatelessWidget {
             Text(
               description,
               style: h4.copyWith(
-                fontSize: 16,
+                fontSize: 14,
                 fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal,  // Bold for highlighted
               ),
             ),

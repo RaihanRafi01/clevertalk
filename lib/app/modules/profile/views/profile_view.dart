@@ -91,7 +91,7 @@ class _EditProfileViewState extends State<ProfileView> {
         },
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.symmetric(horizontal: 24,vertical: 14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -101,7 +101,7 @@ class _EditProfileViewState extends State<ProfileView> {
                 Stack(
                   children: [
                     CircleAvatar(
-                      radius: 50,
+                      radius: 40,
                       backgroundImage: _pickedImage != null
                           ? FileImage(File(_pickedImage!.path))
                           : homeController.profilePicUrl.value.isNotEmpty
@@ -134,7 +134,8 @@ class _EditProfileViewState extends State<ProfileView> {
                       CustomButton(
                         backgroundColor: AppColors.appColor,
                         isGem: true,
-                        width: 210,
+                        width: 180,
+                        fontSize: 12,
                         text: 'Standard Account',
                         onPressed: () {},
                       ),
@@ -153,7 +154,7 @@ class _EditProfileViewState extends State<ProfileView> {
               },
               hint: 'Enter Your Name',
             ),
-            SizedBox(height: 30),
+            SizedBox(height: 40),
             CustomTextField(
               readOnly: true,
               label: 'Email',
@@ -162,7 +163,7 @@ class _EditProfileViewState extends State<ProfileView> {
               keyboardType: TextInputType.emailAddress,
               hint: 'Enter Your Email',
             ),
-            SizedBox(height: 30),
+            SizedBox(height: 40),
             CustomTextField(
               phone: true,
               prefixIcon: Icons.phone,
@@ -174,7 +175,7 @@ class _EditProfileViewState extends State<ProfileView> {
                 profileController.updatePhone(value);
               },
             ),
-            SizedBox(height: 30),
+            SizedBox(height: 40),
             CustomTextField(
               label: 'Address',
               controller: _addressController,
@@ -185,49 +186,72 @@ class _EditProfileViewState extends State<ProfileView> {
                 profileController.updateAddress(value);
               },
             ),
-            SizedBox(height: 30),
-            Align(alignment: Alignment.centerLeft,child: Text('Gender', style: h4.copyWith(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.gray1,))),
-            SizedBox(height: 5,),
-            Obx(() => DropdownButtonFormField<String>(
-              decoration: InputDecoration(
-                labelStyle: h4,
-                helperStyle: h4,
-                floatingLabelStyle: h4,
-                hintText: 'Select Your Gender',
-                prefixIcon: const Icon(Icons.male_rounded),
-                contentPadding: const EdgeInsets.symmetric(
-                  vertical: 10, // Reduced vertical padding to decrease height
-                  horizontal: 12, // Adjusted horizontal padding for consistency
+            SizedBox(height: 40),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    'Gender',
+                    style: h4.copyWith(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.gray1,
+                    ),
+                  ),
                 ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(color: Colors.grey),
+                const SizedBox(height: 4),
+                SizedBox(
+                  height: 40, // Match CustomTextField height
+                  child: Obx(() => DropdownButtonFormField<String>(
+                    decoration: InputDecoration(
+                      hintText: 'Select Your Gender',
+                      hintStyle: h4.copyWith(fontSize: 12),
+                      prefixIcon: const Icon(
+                        Icons.male_rounded,
+                        color: Colors.grey,
+                        size: 20, // Match CustomTextField icon size
+                      ),
+                      isDense: true, // Compact layout
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 10, // Match CustomTextField padding
+                        horizontal: 12,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10), // Match CustomTextField radius
+                        borderSide: const BorderSide(color: AppColors.gray1),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: const BorderSide(color: AppColors.gray1),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: const BorderSide(color: AppColors.appColor, width: 1),
+                      ),
+                    ),
+                    value: homeController.gender.value.isNotEmpty ? homeController.gender.value : null,
+                    items: ['Male', 'Female', 'Other'].map((gender) => DropdownMenuItem<String>(
+                      value: gender,
+                      child: Text(
+                        gender,
+                        style: h4.copyWith(fontSize: 12), // Match CustomTextField text size
+                      ),
+                    )).toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        profileController.updateGender(value);
+                        homeController.gender.value = value;
+                      }
+                    },
+                    dropdownColor: Colors.white,
+                    menuMaxHeight: 150,
+                  )),
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(color: AppColors.appColor2, width: 2),
-                ),
-              ),
-              value: homeController.gender.value.isNotEmpty ? homeController.gender.value : null,
-              items: ['Male', 'Female', 'Other']
-                  .map((gender) => DropdownMenuItem<String>(
-                value: gender,
-                child: Text(
-                  gender,
-                  style: h4.copyWith(fontSize: 14), // Optional: Reduced font size for compactness
-                ),
-              ))
-                  .toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  profileController.updateGender(value);
-                  homeController.gender.value = value;
-                }
-              },
-              dropdownColor: Colors.white, // Optional: Customize dropdown background
-              menuMaxHeight: 150, // Optional: Limit dropdown menu height
-            )),
-            const SizedBox(height: 30),
+              ],
+            ),
+            const SizedBox(height: 40),
             CustomButton(
               text: 'Save',
               onPressed: () async {

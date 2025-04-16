@@ -64,57 +64,65 @@ class _CustomTextFieldState extends State<CustomTextField> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          widget.label,
-          style: h4.copyWith(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: widget.textColor,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Text(
+            widget.label,
+            style: h4.copyWith(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: widget.textColor,
+            ),
           ),
         ),
         const SizedBox(height: 4),
-        TextField(
-          cursorColor: AppColors.appColor,
-          controller: widget.controller,
-          onChanged: widget.onChanged,
-          obscureText: widget.isPassword ? _obscureText : false,
-          readOnly: widget.readOnly,
-          keyboardType: widget.keyboardType,
-          onTap: widget.onTap,
-          decoration: InputDecoration(
-            hintText: widget.hint,
-            hintStyle: h4.copyWith(fontSize: 14),
-            prefixIcon: widget.prefixIcon != null
-                ? Icon(widget.prefixIcon, color: Colors.grey.shade600)
-                : null,
-            suffixIcon: widget.isPassword
-                ? IconButton(
-              icon: Icon(
-                _obscureText
-                    ? Icons.visibility_off_rounded
-                    : Icons.visibility_rounded,
-                color: AppColors.gray1,
+        SizedBox(
+          height: 40,
+          child: TextField(
+            style: TextStyle(fontSize: 12),
+            cursorColor: AppColors.appColor,
+            controller: widget.controller,
+            onChanged: widget.onChanged,
+            obscureText: widget.isPassword ? _obscureText : false,
+            readOnly: widget.readOnly,
+            keyboardType: widget.keyboardType,
+            onTap: widget.onTap,
+            decoration: InputDecoration(
+              hintText: widget.hint,
+              hintStyle: h4.copyWith(fontSize: 12),
+              prefixIcon: widget.prefixIcon != null
+                  ? Icon(widget.prefixIcon, color: Colors.grey.shade600,size: 20)
+                  : null,
+              suffixIcon: widget.isPassword
+                  ? IconButton(
+                icon: Icon(
+                  size: 20,
+                  _obscureText
+                      ? Icons.visibility_off_rounded
+                      : Icons.visibility_rounded,
+                  color: AppColors.gray1,
+                ),
+                onPressed: _togglePasswordVisibility,
+              )
+                  : (widget.suffixIcon != null
+                  ? Icon(widget.suffixIcon, color: AppColors.gray1)
+                  : null),
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 10, // Reduced vertical padding to decrease height
+                horizontal: 12, // Adjusted horizontal padding for consistency
               ),
-              onPressed: _togglePasswordVisibility,
-            )
-                : (widget.suffixIcon != null
-                ? Icon(widget.suffixIcon, color: AppColors.gray1)
-                : null),
-            contentPadding: const EdgeInsets.symmetric(
-              vertical: 10, // Reduced vertical padding to decrease height
-              horizontal: 12, // Adjusted horizontal padding for consistency
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(widget.radius),
-              borderSide: const BorderSide(color: AppColors.gray1),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(widget.radius),
-              borderSide: const BorderSide(color: AppColors.gray1),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(widget.radius),
-              borderSide: const BorderSide(color: AppColors.appColor, width: 1),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(widget.radius),
+                borderSide: const BorderSide(color: AppColors.gray1),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(widget.radius),
+                borderSide: const BorderSide(color: AppColors.gray1),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(widget.radius),
+                borderSide: const BorderSide(color: AppColors.appColor, width: 1),
+              ),
             ),
           ),
         ),

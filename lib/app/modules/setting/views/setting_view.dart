@@ -49,16 +49,16 @@ class SettingView extends GetView<SettingController> {
         },
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 26),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Settings', style: h1.copyWith(fontSize: 35)),
+              Text('Settings', style: h1.copyWith(fontSize: 32)),
               SizedBox(height: 30),
 
               // Account Section
-              Text('Account', style: h1.copyWith(fontSize: 19)),
+              Text('Account', style: h1.copyWith(fontSize: 16)),
               SizedBox(height: 10),
               SettingsList(
                   svgPath: 'assets/images/settings/subscription_icon.svg',
@@ -97,7 +97,7 @@ class SettingView extends GetView<SettingController> {
               ),
 
               // Help Section
-              Text('Help', style:h1.copyWith(fontSize: 19)),
+              Text('Help', style:h1.copyWith(fontSize: 16)),
               SizedBox(height: 10),
               SettingsList(
                   svgPath: 'assets/images/settings/email_icon.svg',
@@ -106,7 +106,7 @@ class SettingView extends GetView<SettingController> {
               ),
 
               // Notification Section with Toggle
-              Text('Notification', style: h1.copyWith(fontSize: 19)),
+              Text('Notification', style: h1.copyWith(fontSize: 16)),
               SizedBox(height: 10),
               Obx(() {
                 return SettingsList(
@@ -126,7 +126,7 @@ class SettingView extends GetView<SettingController> {
                 );
               }),
               // Language Section with Dropdown
-              Text('Language', style: h1.copyWith(fontSize: 19)),
+              Text('Language', style: h1.copyWith(fontSize: 16)),
               SizedBox(height: 10),
 
               // DropdownButton with full width and border
@@ -156,7 +156,7 @@ class SettingView extends GetView<SettingController> {
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Text(
                             'English',
-                            style: h4.copyWith(fontSize: 16),
+                            style: h4.copyWith(fontSize: 14),
                           ),
                         ),
                       ),
@@ -166,7 +166,7 @@ class SettingView extends GetView<SettingController> {
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Text(
                             'Spanish',
-                            style: h4.copyWith(fontSize: 16),
+                            style: h4.copyWith(fontSize: 14),
                           ),
                         ),
                       ),
@@ -176,7 +176,7 @@ class SettingView extends GetView<SettingController> {
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Text(
                             'French',
-                            style: h4.copyWith(fontSize: 16),
+                            style: h4.copyWith(fontSize: 14),
                           ),
                         ),
                       ),
@@ -192,7 +192,7 @@ class SettingView extends GetView<SettingController> {
                   showDialog(
                     context: context,
                     builder: (context) => AlertDialog(
-                      title: Text('Log Out',style: h2,),
+                      title: Text('Log Out',style: h2),
                       content: Text('Are you sure you want to log out?',style: h3),
                       actions: [
                         TextButton(
