@@ -43,7 +43,7 @@ class BeforeConnectView extends StatelessWidget {
             children: [
               // Scrollable content
               SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -51,12 +51,12 @@ class BeforeConnectView extends StatelessWidget {
                     Text(
                       'Connect Your Clevertalk Recorder',
                       style: h1.copyWith(
-                        fontSize: 23,
+                        fontSize: 21,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 20),
 
                     // Description and "How to connect" on the left, image on the right
                     Row(
@@ -70,7 +70,7 @@ class BeforeConnectView extends StatelessWidget {
                               // Description text
                               Text(
                                 'This section is exclusively for users who have purchased the Clevertalk Recorder. '
-                                    'If you plan to use the app by itself to record with your phone, please go back.',
+                                'If you plan to use the app by itself to record with your phone, please go back.',
                                 style: h4.copyWith(
                                   fontSize: 13,
                                   color: Colors.black,
@@ -95,11 +95,13 @@ class BeforeConnectView extends StatelessWidget {
                                 children: [
                                   // Step 1
                                   Container(
-                                    width: double.infinity, // Same width for all boxes
+                                    width: double.infinity,
+                                    // Same width for all boxes
                                     padding: const EdgeInsets.all(10),
                                     margin: const EdgeInsets.only(bottom: 12),
                                     decoration: BoxDecoration(
-                                      color: Colors.transparent, // Transparent background
+                                      color: Colors.transparent,
+                                      // Transparent background
                                       border: Border.all(
                                         color: Colors.grey, // Gray border
                                         width: 1,
@@ -114,19 +116,22 @@ class BeforeConnectView extends StatelessWidget {
                                             style: h4.copyWith(
                                               fontSize: 14,
                                               fontWeight: FontWeight.bold,
-                                              color: Colors.red, // Red color for numbering
+                                              color: Colors
+                                                  .red, // Red color for numbering
                                             ),
                                           ),
                                           TextSpan(
                                             text: 'Plug ',
                                             style: h4.copyWith(
                                               fontSize: 14,
-                                              fontWeight: FontWeight.bold, // Bold "Plug"
+                                              fontWeight: FontWeight.bold,
+                                              // Bold "Plug"
                                               color: Colors.black,
                                             ),
                                           ),
                                           TextSpan(
-                                            text: 'the USB cable into your Clevertalk Recorder.',
+                                            text:
+                                                'the USB cable into your Clevertalk Recorder.',
                                             style: h4.copyWith(
                                               fontSize: 14,
                                               color: Colors.black,
@@ -139,11 +144,13 @@ class BeforeConnectView extends StatelessWidget {
 
                                   // Step 2
                                   Container(
-                                    width: double.infinity, // Same width for all boxes
+                                    width: double.infinity,
+                                    // Same width for all boxes
                                     padding: const EdgeInsets.all(16),
                                     margin: const EdgeInsets.only(bottom: 12),
                                     decoration: BoxDecoration(
-                                      color: Colors.transparent, // Transparent background
+                                      color: Colors.transparent,
+                                      // Transparent background
                                       border: Border.all(
                                         color: Colors.grey, // Gray border
                                         width: 1,
@@ -158,19 +165,22 @@ class BeforeConnectView extends StatelessWidget {
                                             style: h4.copyWith(
                                               fontSize: 14,
                                               fontWeight: FontWeight.bold,
-                                              color: Colors.red, // Red color for numbering
+                                              color: Colors
+                                                  .red, // Red color for numbering
                                             ),
                                           ),
                                           TextSpan(
                                             text: 'Connect ',
                                             style: h4.copyWith(
                                               fontSize: 14,
-                                              fontWeight: FontWeight.bold, // Bold "Connect"
+                                              fontWeight: FontWeight.bold,
+                                              // Bold "Connect"
                                               color: Colors.black,
                                             ),
                                           ),
                                           TextSpan(
-                                            text: 'the other end to your phone.',
+                                            text:
+                                                'the other end to your phone.',
                                             style: h4.copyWith(
                                               fontSize: 14,
                                               color: Colors.black,
@@ -183,11 +193,13 @@ class BeforeConnectView extends StatelessWidget {
 
                                   // Step 3
                                   Container(
-                                    width: double.infinity, // Same width for all boxes
+                                    width: double.infinity,
+                                    // Same width for all boxes
                                     padding: const EdgeInsets.all(16),
                                     margin: const EdgeInsets.only(bottom: 12),
                                     decoration: BoxDecoration(
-                                      color: Colors.transparent, // Transparent background
+                                      color: Colors.transparent,
+                                      // Transparent background
                                       border: Border.all(
                                         color: Colors.grey, // Gray border
                                         width: 1,
@@ -202,7 +214,8 @@ class BeforeConnectView extends StatelessWidget {
                                             style: h4.copyWith(
                                               fontSize: 14,
                                               fontWeight: FontWeight.bold,
-                                              color: Colors.red, // Red color for numbering
+                                              color: Colors
+                                                  .red, // Red color for numbering
                                             ),
                                           ),
                                           TextSpan(
@@ -216,7 +229,8 @@ class BeforeConnectView extends StatelessWidget {
                                             text: 'Press Continue.',
                                             style: h4.copyWith(
                                               fontSize: 14,
-                                              fontWeight: FontWeight.bold, // Bold "Press"
+                                              fontWeight: FontWeight.bold,
+                                              // Bold "Press"
                                               color: Colors.black,
                                             ),
                                           ),
@@ -251,8 +265,10 @@ class BeforeConnectView extends StatelessWidget {
                 right: 0,
                 bottom: 0,
                 child: Container(
-                  color: Colors.white, // Background to prevent content from showing through
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                  color: Colors.white,
+                  // Background to prevent content from showing through
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                   child: SizedBox(
                     width: double.infinity,
                     child: CustomButton(

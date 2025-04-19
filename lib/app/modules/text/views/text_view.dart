@@ -32,7 +32,7 @@ class TextView extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: Text('Text', style: h1.copyWith(fontSize: 30)),
+                child: Text('Recordings', style: h1.copyWith(fontSize: 30)),
               ),
             ),
             const SizedBox(height: 20),

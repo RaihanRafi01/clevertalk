@@ -27,14 +27,14 @@ class AudioView extends StatelessWidget {
         },
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 5),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: Text('Files', style: h1.copyWith(fontSize: 28)),
+                child: Text('Recordings', style: h1.copyWith(fontSize: 24)),
               ),
             ),
             const SizedBox(height: 20),

@@ -54,7 +54,7 @@ class SettingView extends GetView<SettingController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Settings', style: h1.copyWith(fontSize: 32)),
+              Text('Settings', style: h1.copyWith(fontSize: 24)),
               SizedBox(height: 30),
 
               // Account Section

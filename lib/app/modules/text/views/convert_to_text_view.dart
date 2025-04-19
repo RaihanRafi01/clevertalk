@@ -259,7 +259,7 @@ class ConvertToTextView extends StatelessWidget {
     final audioController = Get.put(AudioPlayerController(), permanent: true);
     final textController = Get.put(ConvertToTextController());
 
-    // Fetch messages and initialize audio playback only if not already initialized
+    /*// Fetch messages and initialize audio playback only if not already initialized
     if (audioController.currentIndex.value == -1) {
       textController.fetchMessages(filePath);
       audioController.fetchAudioFiles().then((_) {
@@ -279,7 +279,21 @@ class ConvertToTextView extends StatelessWidget {
       audioController.playAudio(filePath: filePath);
       textController.fetchMessages(filePath);
       textController.syncScrollingWithAudio(audioController);
-    }
+    }*/
+
+    // Fetch audio files and set the current index based on fileName
+    audioController.fetchAudioFiles(fileName: fileName).then((_) {
+      final index = audioController.audioFiles.indexWhere((file) => file['file_name'] == fileName);
+      if (index != -1) {
+        audioController.currentIndex.value = index;
+        textController.fetchMessages(filePath).then((_) {
+          audioController.playAudio(filePath: filePath);
+          textController.syncScrollingWithAudio(audioController);
+        });
+      } else {
+        Get.snackbar('Error', 'Audio file not found: $fileName');
+      }
+    });
 
     return PopScope(
       onPopInvokedWithResult: (canPop, result) async {
@@ -579,7 +593,7 @@ class ConvertToTextView extends StatelessWidget {
                 children: [
                   const SizedBox(height: 10),
                   CustomButton(
-                    backgroundColor: AppColors.appColor3,
+                    backgroundColor: AppColors.appColor,
                     text: 'Summary',
                     onPressed: () async {
                       await audioController.pauseAudio();

@@ -99,16 +99,18 @@ class AudioPlayerController extends GetxController {
     _animationTimer?.cancel();
   }
 
-  Future<void> fetchAudioFiles() async {
+  Future<void> fetchAudioFiles({String? fileName}) async {
     print('Fetching audio files...');
     final dbHelper = DatabaseHelper();
     final files = await dbHelper.fetchAudioFiles();
     audioFiles.assignAll(files);
 
     if (files.isNotEmpty) {
-      currentIndex.value = files.indexWhere((file) => file['file_name'] == Get.arguments);
+      if (fileName != null) {
+        currentIndex.value = files.indexWhere((file) => file['file_name'] == fileName);
+      }
       if (currentIndex.value == -1) {
-        currentIndex.value = 0;
+        currentIndex.value = 0; // Fallback to first file if fileName not found
       }
     } else {
       currentIndex.value = -1;
