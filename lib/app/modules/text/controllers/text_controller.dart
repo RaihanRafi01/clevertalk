@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import '../../../../config/secrets.dart';
 import '../../../data/database_helper.dart';
 import '../../../data/services/api_services.dart';
 import '../../../data/services/notification_services.dart';
@@ -204,7 +205,6 @@ class ConvertToTextController extends GetxController {
     );
 
     try {
-      const apiKey = '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'; // Replace with your actual API key
       const apiUrl = 'https://api.openai.com/v1/chat/completions';
       const chunkSize = 20;
 
