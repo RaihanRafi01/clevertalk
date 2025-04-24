@@ -112,7 +112,8 @@ class NotificationService {
 }
 */
 
-
+import 'package:clevertalk/app/modules/authentication/views/authentication_view.dart';
+import 'package:clevertalk/app/modules/notification_subscription/views/subscription_view.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
@@ -126,7 +127,7 @@ import '../../modules/text/views/convert_to_text_view.dart';
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _notificationsPlugin =
-  FlutterLocalNotificationsPlugin();
+      FlutterLocalNotificationsPlugin();
 
   FirebaseMessaging messaging = FirebaseMessaging.instance;
 
@@ -134,7 +135,7 @@ class NotificationService {
     await requestNotificationPermission();
     Get.put(NotificationSubscriptionController());
     const AndroidInitializationSettings androidSettings =
-    AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings('@mipmap/ic_launcher');
 
     final InitializationSettings settings = InitializationSettings(
       android: androidSettings,
@@ -182,13 +183,15 @@ class NotificationService {
     String jsonPayload = jsonEncode({
       'type': payload,
       'message': body,
-      'time': DateTime.now().toLocal().toString().substring(11, 16), // HH:MM format
+      'time': DateTime.now().toLocal().toString().substring(11, 16),
+      // HH:MM format
       'keyPoints': keyPoints,
       'fileName': fileName,
       'filePath': filePath,
     });
 
-    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
       'channel_id_one',
       'Default Channel',
       importance: Importance.high,
@@ -201,17 +204,17 @@ class NotificationService {
     );
 
     // Show notification in system tray
-    await _notificationsPlugin.show(id, title, body, details, payload: jsonPayload);
+    await _notificationsPlugin.show(id, title, body, details,
+        payload: jsonPayload);
 
     // **Update the UI with new notification**
     if (Get.isRegistered<NotificationSubscriptionController>()) {
-
-      Get.find<NotificationSubscriptionController>().addNotification(jsonPayload);
+      Get.find<NotificationSubscriptionController>()
+          .addNotification(jsonPayload);
     } else {
       print("NotificationSubscriptionController is not registered");
     }
   }
-
 
   static void _handleNotificationClick(String payload) {
     try {
@@ -220,23 +223,23 @@ class NotificationService {
       String? fileName = data['fileName'];
       String? filePath = data['filePath'];
 
-
-
       if (type == "notification_page") {
         Get.to(ProfileView());
+      } else if (type == "subscription_page") {
+        Get.to(SubscriptionView());
       } else if (type == "Summary") {
         print('REGENERATE noti ::::: filePath ::::::::: $filePath');
         print('REGENERATE noti ::::: fileName ::::::::: $fileName');
         Get.to(() => SummaryKeyPointView(
-          //keyPoints: keyPoints ?? "No Key Points",
-          fileName: fileName ?? "Unknown File",
-          filePath: filePath ?? "Unknown FilePath",
-        ));
+              //keyPoints: keyPoints ?? "No Key Points",
+              fileName: fileName ?? "Unknown File",
+              filePath: filePath ?? "Unknown FilePath",
+            ));
       } else if (type == "Conversion") {
         Get.to(() => ConvertToTextView(
-          filePath: filePath ?? "No file path",
-          fileName: fileName ?? "Unknown File",
-        ));
+              filePath: filePath ?? "No file path",
+              fileName: fileName ?? "Unknown File",
+            ));
       } else {
         print("Unknown payload type: $type");
       }
@@ -245,4 +248,3 @@ class NotificationService {
     }
   }
 }
-

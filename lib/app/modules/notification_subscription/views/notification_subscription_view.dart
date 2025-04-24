@@ -1,3 +1,4 @@
+import 'package:clevertalk/app/modules/notification_subscription/views/subscription_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../common/appColors.dart';
@@ -85,6 +86,7 @@ class NotificationSubscriptionView
                                 controller.markAsRead(index);
                                 print(':::::::::::::::: check keypoint: ${notification.keyPoints}');
                                 print(':::::::::::::::: check: ${notification.fileName}');
+                                print(':::::::::::::::: type: ${notification.type}');
                                 if (notification.type == 'Conversion') {
                                   Get.to(() => ConvertToTextView(
                                     filePath: notification.keyPoints ?? "No file path",
@@ -96,9 +98,12 @@ class NotificationSubscriptionView
                                     filePath: notification.filePath ?? 'Unknown FilePath',
                                   ));
                                 }
+                                else if (notification.type == 'subscription_page') {
+                                  Get.to(SubscriptionView());
+                                }
                               },
                               child: NotificationCard(
-                                message: '${notification.message} of ${notification.fileName}',
+                                message: '${notification.message} ${notification.fileName}',
                                 time: notification.time,
                                 isRead: notification.isRead,
                               ),

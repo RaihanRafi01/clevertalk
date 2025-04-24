@@ -210,7 +210,7 @@ class ApiService {
   Future<http.Response> getProfileInformation() async {
     final Uri url = Uri.parse('${baseUrl}authentication_app/user_profile/');
 
-    print('::::::::::::::::::::::::::::::::::::::::::::::::::HIT');
+    print('::::::::::::::::::::::::::::::::::::::::::::::::::HIT    getProfileInformation');
     // Retrieve the stored access token
     String? accessToken = await _storage.read(key: 'access_token');
 

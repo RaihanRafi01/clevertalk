@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import '../../../../common/appColors.dart';
 import '../../../../common/widgets/audio_text/customListTile.dart';
 import '../../../../common/widgets/customAppBar.dart';
-import '../../../data/services/fcm_services.dart';
 import '../../notification_subscription/views/subscription_view.dart';
 import '../controllers/home_controller.dart';
 import 'before_connect_view.dart';
@@ -85,14 +84,18 @@ class HomeView extends GetView<HomeController> {
                           width: 1, // Thin border
                         ),
                       ),
-                      child: const Center(
-                        child: Text(
-                          '120 minutes remaining',
-                          style: TextStyle(
-                            color: Colors.black, // Black text
-                            fontSize: 14, // Adjust font size as needed
-                          ),
-                        ),
+                      child: Center(
+                        child: Obx(() {
+                          // Prioritize paid plan, then recorder, then free plan
+                          num remainingMinutes = controller.total_minutes_left.value;
+                          return Text(
+                            '$remainingMinutes minutes remaining',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 14,
+                            ),
+                          );
+                        }),
                       ),
                     ),
                   ),

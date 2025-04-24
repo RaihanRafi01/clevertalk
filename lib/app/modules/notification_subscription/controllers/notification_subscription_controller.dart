@@ -22,6 +22,7 @@ class NotificationSubscriptionController extends GetxController {
       String? message = data['message'];
       String? time = data['time'] ?? "Just now";
       String? fileName = data['fileName'];
+      String? fullFileName = 'of $fileName';
       String? filePath = data['filePath'];
       String? keyPoints = data['keyPoints'];
 
@@ -31,7 +32,7 @@ class NotificationSubscriptionController extends GetxController {
           type: type ?? "General",
           message: message ?? "New notification received",
           time: time!,
-          fileName: fileName,
+          fileName: fileName.isNull ? "" : fullFileName,
           filePath: filePath,
           keyPoints: keyPoints,
           isRead: false,
