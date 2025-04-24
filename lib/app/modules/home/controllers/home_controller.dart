@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ffi';
 import 'package:clevertalk/app/modules/audio/controllers/audio_controller.dart';
 import 'package:clevertalk/app/modules/authentication/views/authentication_view.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -18,7 +17,7 @@ class HomeController extends GetxController {
   var password = ''.obs;
   var username = ''.obs;
   var isLoading = false.obs;
-  var profilePicUrl = ''.obs; // Store the profile picture URL
+  var profilePicUrl = ''.obs;
   final RxString usernameOBS = ''.obs;
   var name = ''.obs;
   var gender = ''.obs;
@@ -37,6 +36,19 @@ class HomeController extends GetxController {
   RxInt total_minutes_left = 0.obs;
   RxBool hasSentLowMinutesNotification = false.obs;
 
+  @override
+  void onInit() {
+    super.onInit();
+    _loadNotificationFlag(); // Load the notification flag on initialization
+  }
+
+  // Load the notification flag from SharedPreferences
+  Future<void> _loadNotificationFlag() async {
+    print('hitttt  _loadNotificationFlag: ');
+    final prefs = await SharedPreferences.getInstance();
+    hasSentLowMinutesNotification.value = prefs.getBool('hasSentLowMinutesNotification') ?? false;
+  }
+
   // Save the notification flag to SharedPreferences
   Future<void> _saveNotificationFlag(bool value) async {
     final prefs = await SharedPreferences.getInstance();
@@ -44,9 +56,7 @@ class HomeController extends GetxController {
     hasSentLowMinutesNotification.value = value;
   }
 
-
   Future<void> fetchProfileData() async {
-    // Check if the account is verified
     final http.Response verificationResponse = await _service.getProfileInformation();
 
     print('fetchProfileData CODE : ${verificationResponse.statusCode}');
@@ -54,9 +64,6 @@ class HomeController extends GetxController {
 
     if (verificationResponse.statusCode == 200) {
       final responseData = jsonDecode(verificationResponse.body);
-      //String? _subscriptionStatus = responseData['subscription_status'];
-      //String? _subscriptionExpireDate = responseData['subscription_expires_on'];
-      //bool? _isExpired = responseData['is_expired'];
 
       print('::::::::::::::::::::::::::::::::RESPONSE: ${responseData.toString()}');
 
@@ -68,12 +75,11 @@ class HomeController extends GetxController {
       String? _name = responseData['full_name'];
       String? _gender = responseData['gender'];
       String? _user_type = responseData['user_type'];
-      bool? _is_verified = responseData['is_verified']; // Corrected type
+      bool? _is_verified = responseData['is_verified'];
       String? _device_id_number = responseData['device_id_number'];
       int? _paid_plan_minutes_left = responseData['paid_plan_minutes_left'];
       int? _recorder_plan_minutes_left = responseData['recorder_plan_minutes_left'];
       int? _free_plan_minutes_left = responseData['free_plan_minutes_left'];
-
 
       username.value = _username ?? '';
       email.value = _email ?? '';
@@ -83,20 +89,15 @@ class HomeController extends GetxController {
       name.value = _name ?? '';
       gender.value = _gender ?? '';
       user_type.value = _user_type ?? '';
-      isVerified.value = _is_verified ?? false; // Corrected assignment
+      isVerified.value = _is_verified ?? false;
       device_id_number.value = _device_id_number ?? '';
       paid_plan_minutes_left.value = _paid_plan_minutes_left ?? 0;
       recorder_plan_minutes_left.value = _recorder_plan_minutes_left ?? 0;
       free_plan_minutes_left.value = _free_plan_minutes_left ?? 0;
 
-      //subscriptionStatus.value = _subscriptionStatus ?? '';
-      //subscriptionExpireDate.value = _subscriptionExpireDate ?? '';
-      //isExpired.value = _isExpired ?? false;
-
-
       total_minutes_left.value = paid_plan_minutes_left.value +
           recorder_plan_minutes_left.value +
-          free_plan_minutes_left.value - 590;
+          free_plan_minutes_left.value - 550;
 
       if (total_minutes_left.value < 20 && !hasSentLowMinutesNotification.value) {
         await NotificationService.showNotification(
@@ -112,34 +113,26 @@ class HomeController extends GetxController {
       print('::::::::::::::::::::paid_plan_minutes_left:::::::::::::::::::::::::::$paid_plan_minutes_left');
       print('::::::::::::::::::::recorder_plan_minutes_left:::::::::::::::::::::::::::$recorder_plan_minutes_left');
       print('::::::::::::::::::::free_plan_minutes_left:::::::::::::::::::::::::::$free_plan_minutes_left');
-
-      //isFree.value = subscriptionStatus.value != 'not_subscribed';
-
-    }
-    else if (verificationResponse.statusCode == 401){
-
+      print('::::::::::::::::::::total_minutes_left:::::::::::::::::::::::::::$total_minutes_left');
+    } else if (verificationResponse.statusCode == 401) {
       await NotificationService.showNotification(
         title: 'Session Expired',
         body: 'Your session has expired. Please log in again.',
-        payload: 'login_page', // Payload to navigate to AuthenticationView
+        payload: 'login_page',
       );
       final FlutterSecureStorage storage = FlutterSecureStorage();
-      await FlutterSecureStorage().deleteAll();
+      await storage.deleteAll();
       await storage.delete(key: 'access_token');
       await storage.delete(key: 'refresh_token');
-      // SharedPreferences
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('isLoggedIn', false); // User is logged out
-      Get.offAll(() => AuthenticationView()); // Navigate to the login screen
-
-    }
-    else {
+      await prefs.setBool('isLoggedIn', false);
+      Get.offAll(() => AuthenticationView());
+    } else {
       //Get.snackbar('Error', 'Verification status check failed');
     }
   }
 
   Future<void> checkVerified(String username) async {
-    // Check if the account is verified
     final http.Response verificationResponse = await _service.getProfileInformation();
 
     if (verificationResponse.statusCode == 200) {
@@ -147,21 +140,14 @@ class HomeController extends GetxController {
 
       bool isVerified = responseData['is_verified'];
 
-
       if (isVerified) {
-        // Navigate to the Dashboard if verified
-        //Get.snackbar('Success', 'Account verified!');
-        Get.offAll(() => DashboardView()); // Navigate to DashboardView
+        Get.offAll(() => DashboardView());
       } else {
-        // Show a page to request further action if not verified
         Get.snackbar('Verification', 'Account not verified. Please check your email.');
         Get.off(() => VerifyOTPView(username: username));
       }
-
     } else {
       //Get.snackbar('Error', 'Verification status check failed');
     }
   }
-
-
 }
