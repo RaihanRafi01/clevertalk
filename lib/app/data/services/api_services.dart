@@ -349,7 +349,7 @@ class ApiService {
 ///////////////////////////////////////////////////////////// AUDIO ///////////////////////////
 
 
-  Future<http.Response> convertToText(String filePath) async {
+  /*Future<http.Response> convertToText(String filePath) async {
     final Uri url = Uri.parse('${baseUrl}handle_recording_stuff/speech_to_text/');
 
     // Retrieve the stored access token
@@ -377,11 +377,11 @@ class ApiService {
     // Send the request and return the response
     final response = await request.send();
     return http.Response.fromStream(response);
-  }
+  }*/
 
 
 
-  // Method for fetching summary
+  /*// Method for fetching summary
   Future<http.Response> fetchSummary(String filePath, String fileName) async {
     final Uri url = Uri.parse('${baseUrl}handle_recording_stuff/generate_summary/');
     String? accessToken = await _storage.read(key: 'access_token');
@@ -406,7 +406,7 @@ class ApiService {
 
     final response = await request.send();
     return http.Response.fromStream(response);
-  }
+  }*/
 
   // Method for fetching key points
   Future<http.Response> fetchKeyPoints(String filePath, String fileName) async {

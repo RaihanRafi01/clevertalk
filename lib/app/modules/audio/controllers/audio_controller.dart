@@ -252,7 +252,7 @@ class AudioPlayerController extends GetxController {
     }
   }
 
-  Future<void> convertToText() async {
+  /*Future<void> convertToText() async {
     try {
       if (audioFiles.isEmpty || currentIndex.value < 0) {
         throw Exception('No audio file selected');
@@ -298,9 +298,9 @@ class AudioPlayerController extends GetxController {
     } finally {
       isLoading.value = false;
     }
-  }
+  }*/
 
-  Future<void> fetchTranscriptionFromApi(String filePath, String fileName, Database db) async {
+  /*Future<void> fetchTranscriptionFromApi(String filePath, String fileName, Database db) async {
     try {
       final response = await _apiService.fetchTranscription(filePath);
 
@@ -331,7 +331,7 @@ class AudioPlayerController extends GetxController {
     } catch (e) {
       Get.snackbar('Error', 'Error fetching transcription: $e');
     }
-  }
+  }*/
 
   Future<void> fetchKeyPoints(String filePath, String fileName) async {
     try {

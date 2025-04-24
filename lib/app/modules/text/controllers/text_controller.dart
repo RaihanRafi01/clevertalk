@@ -28,6 +28,7 @@ class ConvertToTextController extends GetxController {
   var currentLanguage = 'English'.obs;
   String parsedDate = "Unknown Date";
   var title = ''.obs;
+  var duration = ''.obs;
   final ItemScrollController itemScrollController = ItemScrollController();
   List<TextEditingController> nameControllers = [];
   List<TextEditingController> descControllers = [];
@@ -56,7 +57,12 @@ class ConvertToTextController extends GetxController {
         final existingTranscription = result.first['transcription'];
         title.value = result.first['file_name'].toString();
         parsedDate = result.first['parsed_date']?.toString() ?? "Unknown Date";
+
+        duration.value = result.first['duration']?.toString() ?? "00:00:00";
         currentLanguage.value = result.first['language_transcription']?.toString() ?? 'English';
+
+
+        print(':::::::::::duration.value::::::::duration.value:::::duration.value::::::::::::CODE: ${duration.value}');
 
         if (existingTranscription != null && existingTranscription.toString().isNotEmpty) {
           final data = json.decode(existingTranscription.toString()) as List;
