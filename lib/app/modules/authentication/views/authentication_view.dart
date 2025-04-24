@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import '../../../../common/appColors.dart';
 import '../../../../common/widgets/auth/custom_HeaderText.dart';
 import '../../../../common/widgets/auth/signupWithOther.dart';
+import '../../../data/services/notification_services.dart';
 import '../../dashboard/views/dashboard_view.dart';
 import '../../home/controllers/home_controller.dart';
 import '../controllers/authentication_controller.dart';
@@ -21,7 +22,9 @@ class AuthenticationView extends GetView<AuthenticationController> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  void _handleLogin() {
+  final NotificationService _notificationService = NotificationService();
+
+  Future<void> _handleLogin() async {
     if (_usernameController.text.trim().isEmpty ||
         _passwordController.text.trim().isEmpty) {
       Get.snackbar(
@@ -31,14 +34,31 @@ class AuthenticationView extends GetView<AuthenticationController> {
       );
       return;
     }
+
     homeController.usernameOBS.value = _usernameController.text.trim();
 
     print(
         ':::::::::::::usernameOBS:::::::::::::::::${homeController.usernameOBS.value}');
 
-    // Proceed with login logic if validations pass
-    _controller.login(
-        _usernameController.text.trim(), _passwordController.text.trim());
+    try {
+      // Retrieve FCM token
+      String fcmToken = await _notificationService.getDeviceToken();
+      print('FCM Token: $fcmToken');
+
+      // Proceed with login logic, passing the FCM token
+      await _controller.login(
+        _usernameController.text.trim(),
+        _passwordController.text.trim(),
+        fcmToken,
+      );
+    } catch (e) {
+      print('Error retrieving FCM token or logging in: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to login. Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
   }
 
   @override

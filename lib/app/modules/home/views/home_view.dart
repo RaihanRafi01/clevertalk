@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import '../../../../common/appColors.dart';
 import '../../../../common/widgets/audio_text/customListTile.dart';
 import '../../../../common/widgets/customAppBar.dart';
+import '../../../data/services/fcm_services.dart';
 import '../../notification_subscription/views/subscription_view.dart';
 import '../controllers/home_controller.dart';
 import 'before_connect_view.dart';
@@ -16,7 +17,9 @@ class HomeView extends GetView<HomeController> {
 
   @override
   Widget build(BuildContext context) {
-    final AudioPlayerController audioPlayerController = Get.put(AudioPlayerController());
+    final AudioPlayerController audioPlayerController =
+        Get.put(AudioPlayerController());
+
     return Scaffold(
       appBar: CustomAppBar(
         isSearch: true,
@@ -72,10 +75,13 @@ class HomeView extends GetView<HomeController> {
                     child: Container(
                       height: 36,
                       decoration: BoxDecoration(
-                        color: Colors.transparent, // Transparent background
-                        borderRadius: BorderRadius.circular(10), // Rounded corners
+                        color: Colors.transparent,
+                        // Transparent background
+                        borderRadius: BorderRadius.circular(10),
+                        // Rounded corners
                         border: Border.all(
-                          color: Colors.grey.withOpacity(0.5), // Light gray border
+                          color: Colors.grey.withOpacity(0.5),
+                          // Light gray border
                           width: 1, // Thin border
                         ),
                       ),
@@ -124,15 +130,19 @@ class HomeView extends GetView<HomeController> {
                         endIndent: 16,
                       ),
                       itemBuilder: (context, index) {
-                        final audioFile = audioPlayerController.audioFiles[index];
-                        final fileName = audioFile['file_name'] ?? 'Unknown Title';
+                        final audioFile =
+                            audioPlayerController.audioFiles[index];
+                        final fileName =
+                            audioFile['file_name'] ?? 'Unknown Title';
                         final filePath = audioFile['file_path'];
-                        final parsedDate = audioFile['parsed_date'] ?? 'Unknown Date';
+                        final parsedDate =
+                            audioFile['parsed_date'] ?? 'Unknown Date';
                         final id = audioFile['id'];
 
                         return GestureDetector(
-                          onTap: (){
-                            navigateBasedOnTranscription(context, fileName, filePath);
+                          onTap: () {
+                            navigateBasedOnTranscription(
+                                context, fileName, filePath);
                           },
                           child: CustomListTile(
                             filepath: filePath,
@@ -140,7 +150,8 @@ class HomeView extends GetView<HomeController> {
                             subtitle: parsedDate,
                             duration: audioFile['duration'] ?? '00:00:00',
                             id: id,
-                            onUpdate: () => audioPlayerController.fetchAudioFiles(),
+                            onUpdate: () =>
+                                audioPlayerController.fetchAudioFiles(),
                           ),
                         );
                       },

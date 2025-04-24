@@ -77,11 +77,11 @@ class AuthenticationController extends GetxController {
     }
   }
 
-  Future<void> signUp(String email, String password, String username) async {
+  Future<void> signUp(String email, String password, String username , String fcm_token) async {
     isLoading.value = true; // Show the loading screen
     try {
       final http.Response response = await _service.signUp(
-          email, password, username);
+          email, password, username,fcm_token);
 
       print(':::::::::::::::RESPONSE:::::::::::::::::::::${response.body.toString()}');
       print(':::::::::::::::CODE:::::::::::::::::::::${response.statusCode}');
@@ -124,10 +124,10 @@ class AuthenticationController extends GetxController {
     }
   }
 
-  Future<void> login(String username, String password) async {
+  Future<void> login(String username, String password,String fcm_token) async {
     isLoading.value = true; // Show the loading screen
     try {
-      final http.Response response = await _service.login(username,password);
+      final http.Response response = await _service.login(username,password,fcm_token);
 
       print(':::::::::::::::RESPONSE:::::::::::::::::::::${response.body.toString()}');
       print(':::::::::::::::CODE:::::::::::::::::::::${response.statusCode}');

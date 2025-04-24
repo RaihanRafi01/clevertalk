@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:get/get.dart';
@@ -9,7 +10,7 @@ Future<void> main() async {
   // Load SharedPreferences
   WidgetsFlutterBinding.ensureInitialized();
   await NotificationService.initialize();
-  //await Firebase.initializeApp();
+  await Firebase.initializeApp();
   final initialRoute = await AppPages.getInitialRoute();
   FlutterForegroundTask.initCommunicationPort();
   Get.put(AudioPlayerController(), permanent: true);

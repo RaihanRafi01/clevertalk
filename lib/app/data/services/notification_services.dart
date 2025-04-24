@@ -113,6 +113,7 @@ class NotificationService {
 */
 
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -126,6 +127,8 @@ import '../../modules/text/views/convert_to_text_view.dart';
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _notificationsPlugin =
   FlutterLocalNotificationsPlugin();
+
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
 
   static Future<void> initialize() async {
     await requestNotificationPermission();
@@ -146,6 +149,12 @@ class NotificationService {
         }
       },
     );
+  }
+
+  Future<String> getDeviceToken() async {
+    String? token = await messaging.getToken();
+    print('DEVICE token :::::::::::::::::::::::::::    $token');
+    return token!;
   }
 
   static Future<void> requestNotificationPermission() async {

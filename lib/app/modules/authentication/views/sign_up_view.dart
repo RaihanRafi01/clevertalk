@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../common/appColors.dart';
 import '../../../../common/widgets/auth/terms_and_conditions_checkbox.dart';
+import '../../../data/services/notification_services.dart';
 import '../../home/controllers/home_controller.dart';
 import '../../home/views/home_view.dart';
 import '../controllers/authentication_controller.dart';
@@ -26,6 +27,8 @@ class _SignUpViewState extends State<SignUpView> {
   final TextEditingController _confirmPasswordController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
 
+  final NotificationService _notificationService = NotificationService();
+
   bool _isChecked = false;
     // Handle checkbox change
   void _onCheckboxChanged(bool isChecked) {
@@ -34,19 +37,11 @@ class _SignUpViewState extends State<SignUpView> {
     });
   }
 
-  void _handleSignUp() {
-    if (_usernameController.text
-        .trim()
-        .isEmpty ||
-        _emailController.text
-            .trim()
-            .isEmpty ||
-        _passwordController.text
-            .trim()
-            .isEmpty ||
-        _confirmPasswordController.text
-            .trim()
-            .isEmpty) {
+  Future<void> _handleSignUp() async {
+    if (_usernameController.text.trim().isEmpty ||
+        _emailController.text.trim().isEmpty ||
+        _passwordController.text.trim().isEmpty ||
+        _confirmPasswordController.text.trim().isEmpty) {
       Get.snackbar('Error', 'Please fill in all fields');
       return;
     }
@@ -56,16 +51,35 @@ class _SignUpViewState extends State<SignUpView> {
       return;
     }
 
+    if (!_isChecked) {
+      Get.snackbar('Error', 'Please accept Terms & Conditions & Privacy Policy');
+      return;
+    }
+
     homeController.usernameOBS.value = _usernameController.text.trim();
 
-   print(':::::::::::::usernameOBS:::::::::::::::::${homeController.usernameOBS.value}');
+    print(':::::::::::::usernameOBS:::::::::::::::::${homeController.usernameOBS.value}');
 
-    // Proceed with sign-up logic if validations pass
-    _controller.signUp(
-      _emailController.text.trim(),
-      _passwordController.text.trim(),
-      _usernameController.text.trim(),
-    );
+    try {
+      // Retrieve FCM token
+      String fcmToken = await _notificationService.getDeviceToken();
+      print('FCM Token: $fcmToken');
+
+      // Proceed with sign-up logic, passing the FCM token
+      await _controller.signUp(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+        _usernameController.text.trim(),
+        fcmToken,
+      );
+    } catch (e) {
+      print('Error retrieving FCM token or signing up: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to sign up. Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
   }
 
   @override

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "76832069388",
+    "project_id": "clevertalk-67326",
+    "storage_bucket": "clevertalk-67326.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:76832069388:android:b18489c8089f8536095b29",
+        "android_client_info": {
+          "package_name": "com.jvai.clevertalk"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAV3q5qIqUdV2OIA-eEyIlJm3Po7bfNX08"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

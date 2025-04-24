@@ -36,7 +36,7 @@ class ApiService {
 
 
   // Sign-up method
-  Future<http.Response> signUp(String email, String password, String username) async {
+  Future<http.Response> signUp(String email, String password, String username , String fcm_token) async {
     // Construct the endpoint URL
     final Uri url = Uri.parse('${baseUrl}authentication_app/normal_signup_signin/');
 
@@ -50,6 +50,7 @@ class ApiService {
       "email": email,
       "password": password,
       "username": username,
+      "fcm_token": fcm_token,
     };
 
     // Make the POST request
@@ -61,7 +62,7 @@ class ApiService {
   }
 
   // login method
-  Future<http.Response> login(String username, String password) async {
+  Future<http.Response> login(String username, String password,String fcm_token) async {
     // Construct the endpoint URL
     final Uri url = Uri.parse('${baseUrl}authentication_app/normal_signup_signin/');
 
@@ -74,6 +75,7 @@ class ApiService {
     final Map<String, String> body = {
       "username": username,
       "password": password,
+      "fcm_token": fcm_token,
     };
 
     // Make the POST request
