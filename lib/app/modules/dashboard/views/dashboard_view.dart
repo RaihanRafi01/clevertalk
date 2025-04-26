@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../common/appColors.dart';
 import '../../../../common/widgets/customNavigationBar.dart';
 import '../../home/controllers/home_controller.dart';
+import '../../notification_subscription/controllers/subscription_controller.dart';
 import '../controllers/dashboard_controller.dart';
 import 'package:clevertalk/app/modules/home/views/home_view.dart';
 import 'package:clevertalk/app/modules/audio/views/audio_view.dart';
@@ -23,7 +24,8 @@ class _DashboardViewState extends State<DashboardView> {
     final controller = Get.put(DashboardController(), permanent: true);
     final homeController = Get.put(HomeController());
     homeController.fetchProfileData();
-
+    final subscriptionController = Get.put(SubscriptionController(), permanent: true);
+    subscriptionController.fetchPackages();
     // Check for navigation argument and update index if provided
     if (Get.arguments != null && Get.arguments is int) {
       controller.updateIndex(Get.arguments as int);

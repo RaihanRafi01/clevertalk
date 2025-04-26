@@ -1,11 +1,16 @@
 import 'package:clevertalk/common/widgets/auth/custom_button.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 
 import '../../../../common/appColors.dart';
 import '../../../../common/customFont.dart';
 import '../../../../common/widgets/customAppBar.dart';
+import '../controllers/subscription_controller.dart';
+
+// Model for API response
+
 
 class SubscriptionView extends GetView<SubscriptionController> {
   const SubscriptionView({super.key});
@@ -31,20 +36,28 @@ class SubscriptionView extends GetView<SubscriptionController> {
 class _SubscriptionContent extends GetView<SubscriptionController> {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            _buildBillingButtons(),
-            const SizedBox(height: 20),
-            _buildPricingCards(),
-            const SizedBox(height: 20),
-            _buildFeaturesList(),
-          ],
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return Center(child: CircularProgressIndicator());
+      }
+      if (controller.packages.isEmpty) {
+        return Center(child: Text("No packages available"));
+      }
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              _buildBillingButtons(),
+              const SizedBox(height: 20),
+              _buildPricingCards(),
+              const SizedBox(height: 20),
+              _buildFeaturesList(),
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 
   Widget _buildBillingButtons() {
@@ -87,29 +100,46 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
   }
 
   Widget _buildPricingCards() {
-    return Obx(() => Row(
-      children: [
-        Expanded(
-          child: _buildExactPricingCard(
-            title: "BASIC",
-            price: controller.isYearly.value ? "\$7.99" : "\$14.99",
-            billedAnnually: controller.isYearly.value,
-            savingsPercentage: controller.isYearly.value ? 46 : null,
-            minutes: 1500,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _buildExactPricingCard(
-            title: "PREMIUM",
-            price: controller.isYearly.value ? "\$12.99" : "\$24.99",
-            billedAnnually: controller.isYearly.value,
-            savingsPercentage: controller.isYearly.value ? 48 : null,
-            minutes: 3000,
-          ),
-        ),
-      ],
-    ));
+    return Obx(() {
+      final packages = controller.getFilteredPackages();
+      final basicPackage = packages.firstWhereOrNull((p) => p.packageName.toLowerCase() == 'basic');
+      final premiumPackage = packages.firstWhereOrNull((p) => p.packageName.toLowerCase() == 'premium');
+
+      return Row(
+        children: [
+          if (basicPackage != null)
+            Expanded(
+              child: _buildExactPricingCard(
+                title: basicPackage.packageName.toUpperCase(),
+                price: basicPackage.packagePriceEuro,
+                billedAnnually: basicPackage.packageType == 'Yearly',
+                savingsPercentage: basicPackage.packageType == 'Yearly' ? _getSavingsPercentage(basicPackage) : null,
+                descriptions: basicPackage.descriptions.map((d) => d.description).toList(),
+              ),
+            ),
+          if (basicPackage != null && premiumPackage != null) const SizedBox(width: 16),
+          if (premiumPackage != null)
+            Expanded(
+              child: _buildExactPricingCard(
+                title: premiumPackage.packageName.toUpperCase(),
+                price: premiumPackage.packagePriceEuro,
+                billedAnnually: premiumPackage.packageType == 'Yearly',
+                savingsPercentage: premiumPackage.packageType == 'Yearly' ? _getSavingsPercentage(premiumPackage) : null,
+                descriptions: premiumPackage.descriptions.map((d) => d.description).toList(),
+              ),
+            ),
+        ],
+      );
+    });
+  }
+
+  int? _getSavingsPercentage(Package package) {
+    final description = package.descriptions.firstWhereOrNull((d) => d.description.contains('save'));
+    if (description != null) {
+      final match = RegExp(r'\d+').firstMatch(description.description);
+      return match != null ? int.tryParse(match.group(0)!) : null;
+    }
+    return null;
   }
 
   Widget _buildExactPricingCard({
@@ -117,8 +147,11 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
     required String price,
     required bool billedAnnually,
     int? savingsPercentage,
-    required int minutes,
+    required List<String> descriptions,
   }) {
+
+    String cleanedPrice = price.replaceAll('€', '\u20AC').split('/').first.trim();
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -143,15 +176,17 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
                   textBaseline: TextBaseline.alphabetic,
                   children: [
                     Text(
-                      price,
-                      style: h1.copyWith(
+                      cleanedPrice,
+                      style: GoogleFonts.roboto(
                         fontWeight: FontWeight.bold,
                         fontSize: 26,
                       ),
                     ),
-                    Text(
-                      " per month",
-                      style: h1.copyWith(fontSize: 12),
+                    Flexible(
+                      child: Text(
+                        " per month",
+                        style: h1.copyWith(fontSize: 12),
+                      ),
                     ),
                   ],
                 ),
@@ -185,11 +220,16 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
                     ],
                   ),
                 const SizedBox(height: 8),
-                Text(
-                  "$minutes transcription\nminutes/month",
-                  textAlign: TextAlign.center,
-                  style: h1.copyWith(fontSize: 11),
-                ),
+                ...descriptions
+                    .where((desc) => !desc.contains('save') && !desc.contains('fas fa-tachometer-alt'))
+                    .map((desc) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  child: Text(
+                    desc,
+                    textAlign: TextAlign.center,
+                    style: h1.copyWith(fontSize: 11),
+                  ),
+                )),
               ],
             ),
           ),
@@ -198,10 +238,11 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
             child: SizedBox(
               width: double.infinity,
               child: CustomButton(
-                  text: 'Buy Now',
-                  onPressed: () {
-                    print("Buy ${title.toLowerCase()} Plan");
-                  }),
+                text: 'Buy Now',
+                onPressed: () {
+                  print("Buy ${title.toLowerCase()} Plan");
+                },
+              ),
             ),
           ),
         ],
@@ -253,10 +294,3 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
   }
 }
 
-class SubscriptionController extends GetxController {
-  var isYearly = true.obs;
-
-  void setYearly(bool value) {
-    isYearly.value = value;
-  }
-}

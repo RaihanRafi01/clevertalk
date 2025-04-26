@@ -10,6 +10,17 @@ class ApiService {
   // Base URL for the API
   final String baseUrl = 'http://137.184.134.23/'; // https://apparently-intense-toad.ngrok-free.app/     //     https://agcourt.pythonanywhere.com/   // https://charming-willingly-starfish.ngrok-free.app/
 
+  // New method to fetch package information
+  Future<http.Response> getAllPackageInformation() async {
+    final Uri url = Uri.parse('${baseUrl}admin_things/get_all_package_information/');
+    // Assuming the endpoint might require authentication
+    final Map<String, String> headers = {
+      "Content-Type": "application/json",
+    };
+    return await http.get(url, headers: headers);
+  }
+
+
   Future<http.Response> signUpWithOther(
       String username, String email) async {
     // Construct the endpoint URL
