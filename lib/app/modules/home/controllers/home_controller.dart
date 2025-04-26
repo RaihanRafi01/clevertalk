@@ -25,6 +25,8 @@ class HomeController extends GetxController {
   var address = ''.obs;
   var user_type = ''.obs;
   var device_id_number = ''.obs;
+  var package_name = ''.obs;
+  var package_type = ''.obs;
   var subscriptionExpireDate = ''.obs;
   var subscriptionStatus = ''.obs;
   RxBool isExpired = false.obs;
@@ -76,11 +78,15 @@ class HomeController extends GetxController {
       String? _gender = responseData['gender'];
       String? _user_type = responseData['user_type'];
       bool? _is_verified = responseData['is_verified'];
+      String? _package_name = responseData['package_name'];
+      String? _package_type = responseData['package_type'];
       String? _device_id_number = responseData['device_id_number'];
       double? _paid_plan_minutes_left = responseData['paid_plan_minutes_left'];
       double? _recorder_plan_minutes_left = responseData['recorder_plan_minutes_left'];
       double? _free_plan_minutes_left = responseData['free_plan_minutes_left'];
 
+      package_name.value = _package_name ?? '';
+      package_type.value = _package_type ?? '';
       username.value = _username ?? '';
       email.value = _email ?? '';
       profilePicUrl.value = _profilePicture ?? '';

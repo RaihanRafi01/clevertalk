@@ -18,7 +18,7 @@ class SettingsList extends StatelessWidget {
     required this.text,
     this.isTogol = false,
     required this.onTap, // Required onTap callback
-    this.isToggled= false, // Toggle state
+    this.isToggled = false, // Toggle state
     this.onToggleChanged, // Optional toggle callback
   });
 
@@ -26,31 +26,28 @@ class SettingsList extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap, // Call the provided callback when tapped
-      child: Padding(
+      behavior: HitTestBehavior.opaque, // Makes the entire area tappable
+      child: Container(
         padding: const EdgeInsets.only(right: 16, bottom: 20),
-        child: Column(
+        child: Row(
           children: [
-            Row(
-              children: [
-                SvgPicture.asset(svgPath,height: 16,),
-                SizedBox(width: 10),
-                Text(
-                  text,
-                  style: h4.copyWith(fontSize: 13),
-                ),
-                Spacer(),
-                isTogol
-                    ? Switch(
-                  activeColor: AppColors.appColor,
-                  inactiveThumbColor: AppColors.appColor,
-                  inactiveTrackColor: AppColors.appColor3,
-                  activeTrackColor: AppColors.appColor3,
-                  value: isToggled, // Use the value from the controller
-                  onChanged: onToggleChanged, // Update state when toggled
-                )
-                    : Icon(Icons.navigate_next),
-              ],
+            SvgPicture.asset(svgPath, height: 16),
+            const SizedBox(width: 10),
+            Text(
+              text,
+              style: h4.copyWith(fontSize: 13),
             ),
+            const Spacer(),
+            isTogol
+                ? Switch(
+              activeColor: AppColors.appColor,
+              inactiveThumbColor: AppColors.appColor,
+              inactiveTrackColor: AppColors.appColor3,
+              activeTrackColor: AppColors.appColor3,
+              value: isToggled, // Use the value from the controller
+              onChanged: onToggleChanged, // Update state when toggled
+            )
+                : const Icon(Icons.navigate_next),
           ],
         ),
       ),
