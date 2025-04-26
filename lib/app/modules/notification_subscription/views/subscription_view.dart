@@ -6,7 +6,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../common/appColors.dart';
 import '../../../../common/customFont.dart';
 import '../../../../common/widgets/customAppBar.dart';
+import '../../home/controllers/home_controller.dart';
 import '../controllers/subscription_controller.dart';
+import 'subscribed_view.dart';
 
 class SubscriptionView extends GetView<SubscriptionController> {
   const SubscriptionView({super.key});
@@ -14,6 +16,9 @@ class SubscriptionView extends GetView<SubscriptionController> {
   @override
   Widget build(BuildContext context) {
     Get.put(SubscriptionController());
+    final HomeController homeController = Get.find<HomeController>();
+
+    // Check if user is subscribed
     return Scaffold(
       appBar: CustomAppBar(
         title: "CLEVERTALK",
@@ -242,7 +247,7 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
               child: CustomButton(
                 text: 'Buy Now',
                 onPressed: () {
-                  print(":::::::::::::::::::::Buy ${title.toLowerCase()} Plan");
+                  print("Buy ${title.toLowerCase()} Plan");
                   controller.buySubscription(
                     priceId: priceId,
                     packageName: packageName,

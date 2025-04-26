@@ -4,15 +4,18 @@ import 'dart:convert';
 
 import '../../../data/services/api_services.dart';
 import '../../dashboard/views/dashboard_view.dart';
-import '../views/webViewScreen.dart';
+import '../../home/controllers/home_controller.dart';
+import '../views/subscription_view.dart';
+import '../views/webViewScreen.dart'; // Import HomeController
 
 class SubscriptionController extends GetxController {
   var isYearly = true.obs;
   var packages = <Package>[].obs;
   var isLoading = true.obs;
 
-  // Inject ApiService
+  // Inject ApiService and HomeController
   final ApiService apiService = Get.put(ApiService());
+  final HomeController homeController = Get.find<HomeController>();
 
   @override
   void onInit() {
@@ -46,7 +49,6 @@ class SubscriptionController extends GetxController {
     }
   }
 
-  // New method to handle subscription purchase
   Future<void> buySubscription({
     required String priceId,
     required String packageName,
@@ -76,6 +78,9 @@ class SubscriptionController extends GetxController {
           Get.off(() => WebViewScreen(
             url: checkoutUrl,
             onUrlMatched: () {
+              homeController.package_name.value = packageName;
+              homeController.package_type.value = packageType;
+              Get.snackbar('Success', 'Subscription purchased successfully');
               Get.offAll(() => DashboardView());
             },
           ));
@@ -85,6 +90,26 @@ class SubscriptionController extends GetxController {
         }
       } else {
         Get.snackbar('Error', 'Failed to purchase subscription: ${response.statusCode}');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'An error occurred: $e');
+    }
+  }
+
+  // New method to cancel subscription
+  Future<void> cancelSubscription() async {
+    try {
+      final response = await apiService.cancelSubscription();
+
+      if (response.statusCode == 200) {
+        // Clear subscription details in HomeController
+        homeController.package_name.value = '';
+        homeController.package_type.value = '';
+        Get.snackbar('Success', 'Subscription canceled successfully');
+        // Navigate back to SubscriptionView to select a new plan
+        Get.off(() => SubscriptionView());
+      } else {
+        Get.snackbar('Error', 'Failed to cancel subscription: ${response.statusCode}');
       }
     } catch (e) {
       Get.snackbar('Error', 'An error occurred: $e');

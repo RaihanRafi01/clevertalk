@@ -40,6 +40,17 @@ class ApiService {
     return await http.post(url, headers: headers, body: jsonEncode(body));
   }
 
+  // New method for canceling a subscription
+  Future<http.Response> cancelSubscription() async {
+    final Uri url = Uri.parse('${baseUrl}pay/cancel_subscription/');
+    String? accessToken = await _storage.read(key: 'access_token');
+    final Map<String, String> headers = {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer $accessToken",
+    };
+    return await http.get(url, headers: headers);
+  }
+
 
   Future<http.Response> signUpWithOther(
       String username, String email) async {
