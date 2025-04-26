@@ -6,14 +6,13 @@ import '../../../data/services/api_services.dart';
 import '../../dashboard/views/dashboard_view.dart';
 import '../../home/controllers/home_controller.dart';
 import '../views/subscription_view.dart';
-import '../views/webViewScreen.dart'; // Import HomeController
+import '../views/webViewScreen.dart';
 
 class SubscriptionController extends GetxController {
   var isYearly = true.obs;
   var packages = <Package>[].obs;
   var isLoading = true.obs;
 
-  // Inject ApiService and HomeController
   final ApiService apiService = Get.put(ApiService());
   final HomeController homeController = Get.find<HomeController>();
 
@@ -66,14 +65,11 @@ class SubscriptionController extends GetxController {
 
       if (response.statusCode == 200) {
         final responseBody = jsonDecode(response.body);
-
         final checkoutUrl = responseBody['checkout_url'];
         final message = responseBody['Message'];
         if (message != null && message.isNotEmpty) {
-          // Show the message in a snackbar
           Get.snackbar('Message', message);
         } else if (checkoutUrl != null && checkoutUrl.isNotEmpty) {
-          // Navigate to the WebViewScreen if checkoutUrl is valid
           print(':::::::::checkout_url:::::::::::::::::::::::::::::$checkoutUrl');
           Get.off(() => WebViewScreen(
             url: checkoutUrl,
@@ -85,7 +81,6 @@ class SubscriptionController extends GetxController {
             },
           ));
         } else {
-          // Show a generic error message for unexpected responses
           Get.snackbar('Error', 'Unexpected response. Please try again.');
         }
       } else {
@@ -96,20 +91,104 @@ class SubscriptionController extends GetxController {
     }
   }
 
-  // New method to cancel subscription
   Future<void> cancelSubscription() async {
     try {
       final response = await apiService.cancelSubscription();
 
       if (response.statusCode == 200) {
-        // Clear subscription details in HomeController
         homeController.package_name.value = '';
         homeController.package_type.value = '';
         Get.snackbar('Success', 'Subscription canceled successfully');
-        // Navigate back to SubscriptionView to select a new plan
         Get.off(() => SubscriptionView());
       } else {
         Get.snackbar('Error', 'Failed to cancel subscription: ${response.statusCode}');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'An error occurred: $e');
+    }
+  }
+
+  // New method to check if the user is trying to select the same plan
+  bool isSamePlan(String packageName, String packageType) {
+    return homeController.package_name.value.toLowerCase() == packageName.toLowerCase() &&
+        homeController.package_type.value.toLowerCase() == packageType.toLowerCase();
+  }
+
+  // New method to determine allowed actions based on current plan
+  Map<String, bool> getAllowedActions() {
+    final currentPlan = homeController.package_name.value.toLowerCase();
+    final currentType = homeController.package_type.value.toLowerCase();
+
+    if (currentPlan == 'basic' && currentType == 'monthly') {
+      return {'upgrade': true, 'downgrade': false};
+    } else if (currentPlan == 'premium' && currentType == 'yearly') {
+      return {'upgrade': false, 'downgrade': true};
+    } else {
+      return {'upgrade': true, 'downgrade': true};
+    }
+  }
+
+  // New method to upgrade subscription
+  Future<void> upgradeSubscription({
+    required String priceId,
+    required String packageName,
+    required String packageType,
+  }) async {
+    if (isSamePlan(packageName, packageType)) {
+      Get.snackbar('Info', 'You are already on this plan.');
+      return;
+    }
+
+    try {
+      final response = await apiService.upgradeSubscription(
+        priceId: priceId,
+        packageName: packageName,
+        packageType: packageType,
+      );
+      print(':::::::::upgradeSubscription priceId  : $priceId');
+      print(':::::::::upgradeSubscription CODE : ${response.statusCode}');
+      print(':::::::::upgradeSubscription body : ${response.body}');
+
+      if (response.statusCode == 200) {
+        homeController.package_name.value = packageName;
+        homeController.package_type.value = packageType;
+        Get.snackbar('Success', 'Subscription upgraded successfully');
+      } else {
+        Get.snackbar('Error', 'Failed to upgrade subscription: ${response.statusCode}');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'An error occurred: $e');
+    }
+  }
+
+  // New method to downgrade subscription
+  Future<void> downgradeSubscription({
+    required String priceId,
+    required String packageName,
+    required String packageType,
+  }) async {
+    if (isSamePlan(packageName, packageType)) {
+      Get.snackbar('Info', 'You are already on this plan.');
+      return;
+    }
+
+    try {
+      final response = await apiService.downgradeSubscription(
+        priceId: priceId,
+        packageName: packageName,
+        packageType: packageType,
+      );
+
+      print(':::::::::downgradeSubscription priceId  : $priceId');
+      print(':::::::::downgradeSubscription CODE : ${response.statusCode}');
+      print(':::::::::downgradeSubscription body : ${response.body}');
+
+      if (response.statusCode == 200) {
+        homeController.package_name.value = packageName;
+        homeController.package_type.value = packageType;
+        Get.snackbar('Success', 'Subscription downgraded successfully');
+      } else {
+        Get.snackbar('Error', 'Failed to downgrade subscription: ${response.statusCode}');
       }
     } catch (e) {
       Get.snackbar('Error', 'An error occurred: $e');

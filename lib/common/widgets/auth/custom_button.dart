@@ -7,7 +7,7 @@ import '../../customFont.dart';
 class CustomButton extends StatelessWidget {
   final String text;
   final bool isGem;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed; // Changed to nullable to support disabled state
   final Color backgroundColor;
   final Color textColor;
   final Color borderColor;
@@ -19,13 +19,14 @@ class CustomButton extends StatelessWidget {
   final double fontSize;
   final String svgAsset;
   final bool isBold;
+  final bool isDisabled; // New property for disabled state
 
   const CustomButton({
     super.key,
     required this.text,
     this.isGem = false,
     this.isBold = false,
-    required this.onPressed,
+    this.onPressed,
     this.backgroundColor = AppColors.appColor,
     this.borderColor = AppColors.appColor,
     this.textColor = Colors.white,
@@ -36,18 +37,24 @@ class CustomButton extends StatelessWidget {
     this.height = 40,
     this.fontSize = 14,
     this.svgAsset = 'assets/images/profile/gem.svg',
+    this.isDisabled = false, // Default to enabled
   });
 
   @override
   Widget build(BuildContext context) {
+    // Adjust colors for disabled state
+    final effectiveBackgroundColor = isDisabled ? Colors.grey[300]! : backgroundColor;
+    final effectiveTextColor = isDisabled ? Colors.grey[600]! : textColor;
+    final effectiveBorderColor = isDisabled ? Colors.grey[300]! : borderColor;
+
     return SizedBox(
       height: height,
       width: width,
       child: !isEditPage
           ? ElevatedButton(
-        onPressed: onPressed,
+        onPressed: isDisabled ? null : onPressed, // Disable interaction
         style: ElevatedButton.styleFrom(
-          backgroundColor: backgroundColor,
+          backgroundColor: effectiveBackgroundColor,
           padding: padding,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(borderRadius),
@@ -55,15 +62,15 @@ class CustomButton extends StatelessWidget {
         ),
         child: Center(
           child: isGem
-              ? textWithIcon()
-              : (isBold ? boldFirstWordText() : regularText()),
+              ? textWithIcon(effectiveTextColor)
+              : (isBold ? boldFirstWordText(effectiveTextColor) : regularText(effectiveTextColor)),
         ),
       )
           : OutlinedButton(
-        onPressed: onPressed,
+        onPressed: isDisabled ? null : onPressed, // Disable interaction
         style: OutlinedButton.styleFrom(
-          side: BorderSide(color: borderColor),
-          backgroundColor: backgroundColor,
+          side: BorderSide(color: effectiveBorderColor),
+          backgroundColor: effectiveBackgroundColor,
           padding: padding,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(borderRadius),
@@ -71,14 +78,14 @@ class CustomButton extends StatelessWidget {
         ),
         child: Center(
           child: isGem
-              ? textWithIcon()
-              : (isBold ? boldFirstWordText() : regularText()),
+              ? textWithIcon(effectiveTextColor)
+              : (isBold ? boldFirstWordText(effectiveTextColor) : regularText(effectiveTextColor)),
         ),
       ),
     );
   }
 
-  Widget regularText() {
+  Widget regularText(Color textColor) {
     return Text(
       isEditPage ? text.toUpperCase() : text,
       textAlign: TextAlign.center,
@@ -86,7 +93,7 @@ class CustomButton extends StatelessWidget {
     );
   }
 
-  Widget boldFirstWordText() {
+  Widget boldFirstWordText(Color textColor) {
     final words = text.split(' ');
     if (words.isEmpty) {
       return Text(
@@ -107,7 +114,7 @@ class CustomButton extends StatelessWidget {
             style: TextStyle(
               fontSize: fontSize,
               color: textColor,
-              fontWeight: FontWeight.bold, // Bold for the first word
+              fontWeight: FontWeight.bold,
             ),
           ),
           if (remainingWords.isNotEmpty)
@@ -116,7 +123,7 @@ class CustomButton extends StatelessWidget {
               style: TextStyle(
                 fontSize: fontSize,
                 color: textColor,
-                fontWeight: FontWeight.normal, // Normal for remaining words
+                fontWeight: FontWeight.normal,
               ),
             ),
         ],
@@ -124,7 +131,7 @@ class CustomButton extends StatelessWidget {
     );
   }
 
-  Widget textWithIcon() {
+  Widget textWithIcon(Color textColor) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -136,10 +143,12 @@ class CustomButton extends StatelessWidget {
               svgAsset,
               width: 20.0,
               height: 20.0,
+              // Optionally adjust icon color for disabled state
+              color: isDisabled ? Colors.grey[600] : null,
             ),
           ),
         isBold
-            ? boldFirstWordText()
+            ? boldFirstWordText(textColor)
             : Text(
           text,
           textAlign: TextAlign.center,

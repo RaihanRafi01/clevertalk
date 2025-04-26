@@ -16,6 +16,7 @@ class SubscribedView extends GetView<SubscriptionController> {
   @override
   Widget build(BuildContext context) {
     final HomeController homeController = Get.find<HomeController>();
+    final allowedActions = controller.getAllowedActions();
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -75,7 +76,8 @@ class SubscribedView extends GetView<SubscriptionController> {
                 Expanded(
                   child: CustomButton(
                     text: 'Update',
-                    onPressed: () {
+                    onPressed: allowedActions['upgrade']!
+                        ? () {
                       print("Update button pressed");
                       try {
                         Get.to(() => SubscriptionView());
@@ -83,14 +85,17 @@ class SubscribedView extends GetView<SubscriptionController> {
                       } catch (e) {
                         print("Navigation error: $e");
                       }
-                    },
+                    }
+                        : null,
+                    isDisabled: !allowedActions['upgrade']!,
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: CustomButton(
                     text: 'Downgrade',
-                    onPressed: () {
+                    onPressed: allowedActions['downgrade']!
+                        ? () {
                       print("Downgrade button pressed");
                       try {
                         Get.to(() => SubscriptionView());
@@ -98,12 +103,14 @@ class SubscribedView extends GetView<SubscriptionController> {
                       } catch (e) {
                         print("Navigation error: $e");
                       }
-                    },
+                    }
+                        : null,
+                    isDisabled: !allowedActions['downgrade']!,
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 20,),
+            const SizedBox(height: 20),
             CustomButton(
               text: 'Cancel',
               onPressed: () {

@@ -5,14 +5,16 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
 class ApiService {
-
-  final FlutterSecureStorage _storage = FlutterSecureStorage(); // For secure storage
+  final FlutterSecureStorage _storage =
+      FlutterSecureStorage(); // For secure storage
   // Base URL for the API
-  final String baseUrl = 'http://137.184.134.23/'; // https://apparently-intense-toad.ngrok-free.app/     //     https://agcourt.pythonanywhere.com/   // https://charming-willingly-starfish.ngrok-free.app/
+  final String baseUrl =
+      'http://137.184.134.23/'; // https://apparently-intense-toad.ngrok-free.app/     //     https://agcourt.pythonanywhere.com/   // https://charming-willingly-starfish.ngrok-free.app/
 
   // New method to fetch package information
   Future<http.Response> getAllPackageInformation() async {
-    final Uri url = Uri.parse('${baseUrl}admin_things/get_all_package_information/');
+    final Uri url =
+        Uri.parse('${baseUrl}admin_things/get_all_package_information/');
     // Assuming the endpoint might require authentication
     final Map<String, String> headers = {
       "Content-Type": "application/json",
@@ -30,7 +32,7 @@ class ApiService {
     String? accessToken = await _storage.read(key: 'access_token');
     final Map<String, String> headers = {
       "Content-Type": "application/json",
-      if (accessToken != null) "Authorization": "Bearer $accessToken",
+      "Authorization": "Bearer $accessToken",
     };
     final Map<String, String> body = {
       "price_id": priceId,
@@ -51,11 +53,48 @@ class ApiService {
     return await http.get(url, headers: headers);
   }
 
+  // New method for upgrading subscription
+  Future<http.Response> upgradeSubscription({
+    required String priceId,
+    required String packageName,
+    required String packageType,
+  }) async {
+    String? accessToken = await _storage.read(key: 'access_token');
+    final url = Uri.parse('${baseUrl}pay/upgrade_subscription/');
+    final body = jsonEncode({
+      'price_id': priceId,
+      'package_name': packageName,
+      'package_type': packageType,
+    });
+    return await http.patch(url, body: body, headers: {
+      'Content-Type': 'application/json',
+      "Authorization": "Bearer $accessToken",
+    });
+  }
 
-  Future<http.Response> signUpWithOther(
-      String username, String email) async {
+  // New method for downgrading subscription
+  Future<http.Response> downgradeSubscription({
+    required String priceId,
+    required String packageName,
+    required String packageType,
+  }) async {
+    String? accessToken = await _storage.read(key: 'access_token');
+    final url = Uri.parse('${baseUrl}pay/downgrade_subscription/');
+    final body = jsonEncode({
+      'price_id': priceId,
+      'package_name': packageName,
+      'package_type': packageType,
+    });
+    return await http.patch(url, body: body, headers: {
+      'Content-Type': 'application/json',
+      "Authorization": "Bearer $accessToken",
+    });
+  }
+
+  Future<http.Response> signUpWithOther(String username, String email) async {
     // Construct the endpoint URL
-    final Uri url = Uri.parse('${baseUrl}authentication_app/social_signup_signin/');
+    final Uri url =
+        Uri.parse('${baseUrl}authentication_app/social_signup_signin/');
 
     // Headers for the HTTP request
     final Map<String, String> headers = {
@@ -63,10 +102,7 @@ class ApiService {
     };
 
     // Request body
-    final Map<String, String> body = {
-      "username": username,
-      "email": email
-    };
+    final Map<String, String> body = {"username": username, "email": email};
 
     // Make the POST request
     return await http.post(
@@ -76,11 +112,12 @@ class ApiService {
     );
   }
 
-
   // Sign-up method
-  Future<http.Response> signUp(String email, String password, String username , String fcm_token) async {
+  Future<http.Response> signUp(
+      String email, String password, String username, String fcm_token) async {
     // Construct the endpoint URL
-    final Uri url = Uri.parse('${baseUrl}authentication_app/normal_signup_signin/');
+    final Uri url =
+        Uri.parse('${baseUrl}authentication_app/normal_signup_signin/');
 
     // Headers for the HTTP request
     final Map<String, String> headers = {
@@ -104,9 +141,11 @@ class ApiService {
   }
 
   // login method
-  Future<http.Response> login(String username, String password,String fcm_token) async {
+  Future<http.Response> login(
+      String username, String password, String fcm_token) async {
     // Construct the endpoint URL
-    final Uri url = Uri.parse('${baseUrl}authentication_app/normal_signup_signin/');
+    final Uri url =
+        Uri.parse('${baseUrl}authentication_app/normal_signup_signin/');
 
     // Headers for the HTTP request
     final Map<String, String> headers = {
@@ -131,7 +170,6 @@ class ApiService {
   Future<http.Response> helpAndSupport(String email, String query) async {
     // Construct the endpoint URL
     final Uri url = Uri.parse('${baseUrl}email_support/email_support/');
-
 
     String? accessToken = await _storage.read(key: 'access_token');
 
@@ -223,7 +261,6 @@ class ApiService {
     );
   }*/
 
-
   Future<http.Response> sendOTP(String username) async {
     // Construct the endpoint URL
     final Uri url = Uri.parse('${baseUrl}authentication_app/resend_otp/');
@@ -234,9 +271,7 @@ class ApiService {
     };
 
     // Request body
-    final Map<String, String> body = {
-      "username": username
-    };
+    final Map<String, String> body = {"username": username};
 
     // Make the POST request
     return await http.post(
@@ -246,13 +281,12 @@ class ApiService {
     );
   }
 
-
-
   // Method to check verification status with Bearer token
   Future<http.Response> getProfileInformation() async {
     final Uri url = Uri.parse('${baseUrl}authentication_app/user_profile/');
 
-    print('::::::::::::::::::::::::::::::::::::::::::::::::::HIT    getProfileInformation');
+    print(
+        '::::::::::::::::::::::::::::::::::::::::::::::::::HIT    getProfileInformation');
     // Retrieve the stored access token
     String? accessToken = await _storage.read(key: 'access_token');
 
@@ -266,8 +300,8 @@ class ApiService {
     return await http.get(url, headers: headers);
   }
 
-
-  Future<http.Response> updateProfile(String? name, String? phone, String? address, String? gender, File? profilePic) async {
+  Future<http.Response> updateProfile(String? name, String? phone,
+      String? address, String? gender, File? profilePic) async {
     print(':::::::::::::::::::::NAME:::::::::::$name');
 
     String? accessToken = await _storage.read(key: 'access_token');
@@ -297,7 +331,8 @@ class ApiService {
         var picLength = await profilePic.length();
 
         // Determine the file extension and set the content type accordingly
-        String extension = profilePic.uri.pathSegments.last.split('.').last.toLowerCase();
+        String extension =
+            profilePic.uri.pathSegments.last.split('.').last.toLowerCase();
         String contentType;
 
         switch (extension) {
@@ -309,7 +344,8 @@ class ApiService {
             contentType = 'image/jpeg';
             break;
           default:
-            contentType = 'application/octet-stream'; // Default if type is unknown
+            contentType =
+                'application/octet-stream'; // Default if type is unknown
             break;
         }
 
@@ -346,11 +382,9 @@ class ApiService {
     }
   }
 
-
-
-
   Future<http.Response> paymentRequest() async {
-    final Uri url = Uri.parse('${baseUrl}subscription_app/buy_subscription_on_app/');
+    final Uri url =
+        Uri.parse('${baseUrl}subscription_app/buy_subscription_on_app/');
 
     // Retrieve the stored access token
     String? accessToken = await _storage.read(key: 'access_token');
@@ -365,8 +399,7 @@ class ApiService {
     return await http.post(url, headers: headers);
   }
 
-
-  Future<http.Response> resetPassword(String userName,String password) async {
+  Future<http.Response> resetPassword(String userName, String password) async {
     final Uri url = Uri.parse('${baseUrl}authentication_app/reset_password/');
 
     // Headers for the HTTP request with Bearer token
@@ -389,7 +422,6 @@ class ApiService {
   }
 
 ///////////////////////////////////////////////////////////// AUDIO ///////////////////////////
-
 
   /*Future<http.Response> convertToText(String filePath) async {
     final Uri url = Uri.parse('${baseUrl}handle_recording_stuff/speech_to_text/');
@@ -421,8 +453,6 @@ class ApiService {
     return http.Response.fromStream(response);
   }*/
 
-
-
   /*// Method for fetching summary
   Future<http.Response> fetchSummary(String filePath, String fileName) async {
     final Uri url = Uri.parse('${baseUrl}handle_recording_stuff/generate_summary/');
@@ -452,7 +482,8 @@ class ApiService {
 
   // Method for fetching key points
   Future<http.Response> fetchKeyPoints(String filePath, String fileName) async {
-    final Uri url = Uri.parse('${baseUrl}handle_recording_stuff/get_key_points/');
+    final Uri url =
+        Uri.parse('${baseUrl}handle_recording_stuff/get_key_points/');
     String? accessToken = await _storage.read(key: 'access_token');
 
     if (accessToken == null) {
@@ -478,7 +509,8 @@ class ApiService {
   }
 
   Future<http.Response> fetchTranscription(String filePath) async {
-    final Uri url = Uri.parse('${baseUrl}handle_recording_stuff/generate_transcription/');
+    final Uri url =
+        Uri.parse('${baseUrl}handle_recording_stuff/generate_transcription/');
 
     String? accessToken = await _storage.read(key: 'access_token');
 
@@ -503,8 +535,6 @@ class ApiService {
     final response = await request.send();
     return http.Response.fromStream(response);
   }
-
-
 
   Future<http.Response> connectDevice(String deviceId) async {
     final Uri url = Uri.parse('${baseUrl}device/connect_device/');
@@ -553,5 +583,4 @@ class ApiService {
       body: jsonEncode(body),
     );
   }
-
 }

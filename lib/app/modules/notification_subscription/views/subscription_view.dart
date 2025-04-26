@@ -18,7 +18,6 @@ class SubscriptionView extends GetView<SubscriptionController> {
     Get.put(SubscriptionController());
     final HomeController homeController = Get.find<HomeController>();
 
-    // Check if user is subscribed
     return Scaffold(
       appBar: CustomAppBar(
         title: "CLEVERTALK",
@@ -149,6 +148,41 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
     return null;
   }
 
+  // Helper method to determine if the selected plan is an upgrade, downgrade, or same
+  String determineAction(String packageName, String packageType) {
+    final currentPlan = controller.homeController.package_name.value.toLowerCase();
+    final currentType = controller.homeController.package_type.value.toLowerCase();
+    final selectedPlan = packageName.toLowerCase();
+    final selectedType = packageType.toLowerCase();
+
+    // If no current plan, treat as a new subscription
+    if (currentPlan.isEmpty) {
+      return 'buy';
+    }
+
+    // Define plan hierarchy (higher number = higher plan)
+    final planValues = {
+      'monthly_basic': 1,
+      'monthly_premium': 2,
+      'yearly_basic': 3,
+      'yearly_premium': 4,
+    };
+
+    final currentKey = '${currentType}_${currentPlan}';
+    final selectedKey = '${selectedType}_${selectedPlan}';
+
+    final currentValue = planValues[currentKey] ?? 0;
+    final selectedValue = planValues[selectedKey] ?? 0;
+
+    if (selectedValue > currentValue) {
+      return 'upgrade';
+    } else if (selectedValue < currentValue) {
+      return 'downgrade';
+    } else {
+      return 'same';
+    }
+  }
+
   Widget _buildExactPricingCard({
     required String title,
     required String price,
@@ -159,6 +193,24 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
     int? savingsPercentage,
     required List<String> descriptions,
   }) {
+    final action = determineAction(packageName, packageType);
+    final isSamePlan = action == 'same';
+    final isUnsubscribed = action == 'buy';
+    final allowedActions = controller.getAllowedActions();
+    final isActionAllowed = isUnsubscribed ||
+        (action == 'upgrade' && allowedActions['upgrade']!) ||
+        (action == 'downgrade' && allowedActions['downgrade']!);
+
+    // Determine button text
+    String buttonText;
+    if (isUnsubscribed) {
+      buttonText = 'Buy Now';
+    } else if (isSamePlan) {
+      buttonText = 'Current Plan';
+    } else {
+      buttonText = action == 'upgrade' ? 'Upgrade' : 'Downgrade';
+    }
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -245,15 +297,32 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
             child: SizedBox(
               width: double.infinity,
               child: CustomButton(
-                text: 'Buy Now',
-                onPressed: () {
-                  print("Buy ${title.toLowerCase()} Plan");
-                  controller.buySubscription(
-                    priceId: priceId,
-                    packageName: packageName,
-                    packageType: packageType,
-                  );
+                text: buttonText,
+                onPressed: isSamePlan || !isActionAllowed
+                    ? null
+                    : () {
+                  print("Action: $action ${title.toLowerCase()} Plan");
+                  if (action == 'buy') {
+                    controller.buySubscription(
+                      priceId: priceId,
+                      packageName: packageName,
+                      packageType: packageType,
+                    );
+                  } else if (action == 'upgrade') {
+                    controller.upgradeSubscription(
+                      priceId: priceId,
+                      packageName: packageName,
+                      packageType: packageType,
+                    );
+                  } else if (action == 'downgrade') {
+                    controller.downgradeSubscription(
+                      priceId: priceId,
+                      packageName: packageName,
+                      packageType: packageType,
+                    );
+                  }
                 },
+                isDisabled: isSamePlan || !isActionAllowed,
               ),
             ),
           ),
