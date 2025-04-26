@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:clevertalk/app/modules/home/controllers/home_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
@@ -39,7 +40,8 @@ class ConvertToTextController extends GetxController {
   }
 
   Future<void> fetchMessages(String filePath) async {
-    print('::::::::::::::::::::::::::::::::::::HITTING TRANS ::::::::::::::::::::::::::::::');
+    print(
+        '::::::::::::::::::::::::::::::::::::HITTING TRANS ::::::::::::::::::::::::::::::');
     final ApiService _apiService = ApiService();
     try {
       isLoading.value = true;
@@ -59,21 +61,41 @@ class ConvertToTextController extends GetxController {
         parsedDate = result.first['parsed_date']?.toString() ?? "Unknown Date";
 
         duration.value = result.first['duration']?.toString() ?? "00:00:00";
-        currentLanguage.value = result.first['language_transcription']?.toString() ?? 'English';
-
+        currentLanguage.value =
+            result.first['language_transcription']?.toString() ?? 'English';
 
         print(':::::::::::duration.value::::::::duration.value:::::duration.value::::::::::::CODE: ${duration.value}');
+        final homeController = Get.find<HomeController>();
+
+        final durationParts = duration.value.split(':');
+        final minutes = int.parse(durationParts[0]);
+        final seconds = int.parse(durationParts[1]);
+        final totalDurationSeconds = minutes * 60 + seconds;
+
+        final totalMinutesLeftSeconds = homeController.total_minutes_left.value * 60;
 
         if (existingTranscription != null && existingTranscription.toString().isNotEmpty) {
           final data = json.decode(existingTranscription.toString()) as List;
           _updateMessages(data);
+        }
+        else if (totalMinutesLeftSeconds < totalDurationSeconds) {
+          print('::::::::::::::::::::::Insufficient time left! Total time left (${homeController.total_minutes_left.value} minutes = ${totalMinutesLeftSeconds} seconds) is less than duration (${minutes} minutes ${seconds} seconds = ${totalDurationSeconds} seconds).');
         } else {
           final response = await _apiService.fetchTranscription(filePath);
 
-          print('::::::::::::::::::::::::::::::::::::CODE: ${response.statusCode}');
+          print(
+              '::::::::::::::::::::::::::::::::::::CODE: ${response.statusCode}');
           print('::::::::::::::::::::::::::::::::::::body: ${response.body}');
 
           if (response.statusCode == 200) {
+            //// UPDATE TIME
+
+            final r1 = await _apiService.useMinute(duration.value);
+
+            print(
+                '::::::::::::::::::r1::::::::::::::::::CODE: ${r1.statusCode}');
+            print('::::::::::::::::::r1::::::::::::::::::body: ${r1.body}');
+
             final jsonData = json.decode(response.body);
             final data = jsonData['Data'] as List;
             await db.update(
@@ -87,11 +109,13 @@ class ConvertToTextController extends GetxController {
             );
             _updateMessages(data);
           } else {
-            Get.snackbar('Error', 'Failed to fetch data: ${response.reasonPhrase}');
+            Get.snackbar(
+                'Error', 'Failed to fetch data: ${response.reasonPhrase}');
           }
         }
       } else {
-        Get.snackbar('Error', 'File not found in the database. Please add the file first.');
+        Get.snackbar('Error',
+            'File not found in the database. Please add the file first.');
       }
     } catch (e) {
       Get.snackbar('Error', 'Error fetching messages: $e');
@@ -108,10 +132,14 @@ class ConvertToTextController extends GetxController {
       final startTime = (entry['Start_time'] as num).toDouble();
       final endTime = (entry['End_time'] as num).toDouble();
       final duration = endTime - startTime;
-      final speakerName = (entry['Speaker_Name'] ?? 'Unknown Speaker') as String;
+      final speakerName =
+          (entry['Speaker_Name'] ?? 'Unknown Speaker') as String;
       final transcript = (entry['Transcript'] ?? '') as String;
 
-      final sentences = transcript.split(RegExp(r'(?<=[.!?])\s+')).where((s) => s.trim().isNotEmpty).toList();
+      final sentences = transcript
+          .split(RegExp(r'(?<=[.!?])\s+'))
+          .where((s) => s.trim().isNotEmpty)
+          .toList();
 
       if (duration <= 30 || sentences.length <= 1) {
         splitData.add(entry);
@@ -145,10 +173,13 @@ class ConvertToTextController extends GetxController {
     }
 
     messages.value = splitData.map<Map<String, String>>((entry) {
-      final speakerName = (entry['Speaker_Name'] ?? 'Unknown Speaker') as String;
+      final speakerName =
+          (entry['Speaker_Name'] ?? 'Unknown Speaker') as String;
       final transcript = (entry['Transcript'] ?? '') as String;
-      final startTimeFormatted = formatTimestamp((entry['Start_time'] as num).toDouble());
-      final endTimeFormatted = formatTimestamp((entry['End_time'] as num).toDouble());
+      final startTimeFormatted =
+          formatTimestamp((entry['Start_time'] as num).toDouble());
+      final endTimeFormatted =
+          formatTimestamp((entry['End_time'] as num).toDouble());
 
       return {
         'name': speakerName,
@@ -161,8 +192,12 @@ class ConvertToTextController extends GetxController {
   }
 
   void _initializeControllers() {
-    nameControllers = messages.map((msg) => TextEditingController(text: msg['name'])).toList();
-    descControllers = messages.map((msg) => TextEditingController(text: msg['description'])).toList();
+    nameControllers = messages
+        .map((msg) => TextEditingController(text: msg['name']))
+        .toList();
+    descControllers = messages
+        .map((msg) => TextEditingController(text: msg['description']))
+        .toList();
   }
 
   Future<void> saveTranscription(String filePath, bool snackBar) async {
@@ -171,7 +206,7 @@ class ConvertToTextController extends GetxController {
 
     messages.value = List.generate(
       messages.length,
-          (i) => {
+      (i) => {
         'name': nameControllers[i].text,
         'time': messages[i]['time']!,
         'description': descControllers[i].text,
@@ -226,7 +261,9 @@ class ConvertToTextController extends GetxController {
 
       List<List<Map<String, dynamic>>> chunks = [];
       for (int i = 0; i < allMessages.length; i += chunkSize) {
-        final end = (i + chunkSize < allMessages.length) ? i + chunkSize : allMessages.length;
+        final end = (i + chunkSize < allMessages.length)
+            ? i + chunkSize
+            : allMessages.length;
         chunks.add(allMessages.sublist(i, end));
       }
 
@@ -245,11 +282,13 @@ class ConvertToTextController extends GetxController {
             'messages': [
               {
                 'role': 'system',
-                'content': 'You are a precise JSON translator. Return only valid JSON without additional text.',
+                'content':
+                    'You are a precise JSON translator. Return only valid JSON without additional text.',
               },
               {
                 'role': 'user',
-                'content': 'Translate the following JSON content from ${currentLanguage.value} to ${selectedLanguage.value}:\n\n$textToTranslate',
+                'content':
+                    'Translate the following JSON content from ${currentLanguage.value} to ${selectedLanguage.value}:\n\n$textToTranslate',
               },
             ],
             'max_tokens': 8000,
@@ -288,9 +327,12 @@ class ConvertToTextController extends GetxController {
   Future<void> generateAndSharePdf() async {
     final pdf = pw.Document();
 
-    final notoSansFont = pw.Font.ttf(await rootBundle.load("assets/fonts/NotoSans-Regular.ttf"));
-    final notoSansSCFont = pw.Font.ttf(await rootBundle.load("assets/fonts/NotoSansSC-Regular.ttf"));
-    final notoSansDevanagariFont = pw.Font.ttf(await rootBundle.load("assets/fonts/NotoSansDevanagari-Regular.ttf"));
+    final notoSansFont =
+        pw.Font.ttf(await rootBundle.load("assets/fonts/NotoSans-Regular.ttf"));
+    final notoSansSCFont = pw.Font.ttf(
+        await rootBundle.load("assets/fonts/NotoSansSC-Regular.ttf"));
+    final notoSansDevanagariFont = pw.Font.ttf(
+        await rootBundle.load("assets/fonts/NotoSansDevanagari-Regular.ttf"));
 
     String date;
     String time;
@@ -346,7 +388,10 @@ class ConvertToTextController extends GetxController {
                           fontSize: 16,
                           fontWeight: pw.FontWeight.bold,
                           font: notoSansFont,
-                          fontFallback: [notoSansSCFont, notoSansDevanagariFont],
+                          fontFallback: [
+                            notoSansSCFont,
+                            notoSansDevanagariFont
+                          ],
                         ),
                       ),
                       pw.SizedBox(width: 20),
@@ -356,7 +401,10 @@ class ConvertToTextController extends GetxController {
                           fontSize: 16,
                           fontWeight: pw.FontWeight.bold,
                           font: notoSansFont,
-                          fontFallback: [notoSansSCFont, notoSansDevanagariFont],
+                          fontFallback: [
+                            notoSansSCFont,
+                            notoSansDevanagariFont
+                          ],
                         ),
                       ),
                     ],
@@ -395,7 +443,10 @@ class ConvertToTextController extends GetxController {
                                 fontSize: 18,
                                 font: notoSansFont,
                                 fontWeight: pw.FontWeight.bold, // Bold the name
-                                fontFallback: [notoSansSCFont, notoSansDevanagariFont],
+                                fontFallback: [
+                                  notoSansSCFont,
+                                  notoSansDevanagariFont
+                                ],
                               ),
                             ),
                             pw.TextSpan(
@@ -403,7 +454,10 @@ class ConvertToTextController extends GetxController {
                               style: pw.TextStyle(
                                 fontSize: 15,
                                 font: notoSansFont,
-                                fontFallback: [notoSansSCFont, notoSansDevanagariFont],
+                                fontFallback: [
+                                  notoSansSCFont,
+                                  notoSansDevanagariFont
+                                ],
                               ),
                             ),
                           ],
@@ -428,7 +482,8 @@ class ConvertToTextController extends GetxController {
             );
 
             const estimatedItemHeight = 50.0;
-            if (currentHeight + estimatedItemHeight + itemSpacing > pageHeight) {
+            if (currentHeight + estimatedItemHeight + itemSpacing >
+                pageHeight) {
               pageContent.add(pw.Column(children: currentPageItems));
               currentPageItems = [item];
               currentHeight = estimatedItemHeight;
@@ -447,7 +502,8 @@ class ConvertToTextController extends GetxController {
       ),
     );
 
-    final file = File("${(await getTemporaryDirectory()).path}/transcription.pdf");
+    final file =
+        File("${(await getTemporaryDirectory()).path}/transcription.pdf");
     try {
       await file.writeAsBytes(await pdf.save());
       await Share.shareXFiles([XFile(file.path)], text: "Transcription PDF");
@@ -460,7 +516,8 @@ class ConvertToTextController extends GetxController {
   void editSpeakerName(BuildContext context, String filePath) {
     TextEditingController speakerNameController = TextEditingController();
     Set<String> uniqueSpeakers = messages.map((msg) => msg['name']!).toSet();
-    String selectedSpeaker = uniqueSpeakers.isNotEmpty ? uniqueSpeakers.first : "";
+    String selectedSpeaker =
+        uniqueSpeakers.isNotEmpty ? uniqueSpeakers.first : "";
 
     Get.dialog(
       AlertDialog(
@@ -516,8 +573,10 @@ class ConvertToTextController extends GetxController {
 
               if (result.isNotEmpty) {
                 final existingTranscription = result.first['transcription'];
-                if (existingTranscription != null && existingTranscription.toString().isNotEmpty) {
-                  List<dynamic> data = json.decode(existingTranscription.toString());
+                if (existingTranscription != null &&
+                    existingTranscription.toString().isNotEmpty) {
+                  List<dynamic> data =
+                      json.decode(existingTranscription.toString());
                   for (var entry in data) {
                     if (entry['Speaker_Name'] == selectedSpeaker) {
                       entry['Speaker_Name'] = newSpeakerName;
@@ -543,12 +602,12 @@ class ConvertToTextController extends GetxController {
 
   void syncScrollingWithAudio(AudioPlayerController audioController) {
     ever(audioController.currentPosition, (position) {
-      if (!isEditing.value) {  // Prevents unnecessary updates while editing
+      if (!isEditing.value) {
+        // Prevents unnecessary updates while editing
         updateHighlightAndScroll(position.toDouble());
       }
     });
   }
-
 
   void updateHighlightAndScroll(double time) {
     int newHighlightIndex = -1;
@@ -564,7 +623,8 @@ class ConvertToTextController extends GetxController {
       }
     }
 
-    if (newHighlightIndex != -1 && currentHighlightedIndex.value != newHighlightIndex) {
+    if (newHighlightIndex != -1 &&
+        currentHighlightedIndex.value != newHighlightIndex) {
       currentHighlightedIndex.value = newHighlightIndex;
       messages.refresh();
 
@@ -575,12 +635,11 @@ class ConvertToTextController extends GetxController {
     }
 
     // Enable smooth scrolling only when audio is playing normally
-    if (newHighlightIndex > 0 && !Get.find<AudioPlayerController>().isSeeking.value) {
+    if (newHighlightIndex > 0 &&
+        !Get.find<AudioPlayerController>().isSeeking.value) {
       _smoothAutoScroll();
     }
   }
-
-
 
   void _smoothAutoScroll() {
     if (!itemScrollController.isAttached) return;
@@ -597,10 +656,6 @@ class ConvertToTextController extends GetxController {
       );
     }
   }
-
-
-
-
 
   double parseTimeToSeconds(String time) {
     final parts = time.split(':');
@@ -625,6 +680,7 @@ class ConvertToTextController extends GetxController {
     super.onClose();
   }
 }
+
 class TextViewController extends GetxController {
   var textFiles = <Map<String, dynamic>>[].obs;
 

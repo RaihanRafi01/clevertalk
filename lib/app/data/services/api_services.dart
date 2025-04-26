@@ -462,4 +462,54 @@ class ApiService {
     return http.Response.fromStream(response);
   }
 
+
+
+  Future<http.Response> connectDevice(String deviceId) async {
+    final Uri url = Uri.parse('${baseUrl}device/connect_device/');
+
+    String? accessToken = await _storage.read(key: 'access_token');
+
+    // Headers for the HTTP request with Bearer token
+    final Map<String, String> headers = {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer $accessToken", // Add the Bearer token
+    };
+
+    // Request body
+    final Map<String, String> body = {
+      "device_id": deviceId,
+    };
+
+    // Make the POST request
+    return await http.post(
+      url,
+      headers: headers,
+      body: jsonEncode(body),
+    );
+  }
+
+  Future<http.Response> useMinute(String minute) async {
+    final Uri url = Uri.parse('${baseUrl}device/use_minute/');
+
+    String? accessToken = await _storage.read(key: 'access_token');
+
+    // Headers for the HTTP request with Bearer token
+    final Map<String, String> headers = {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer $accessToken", // Add the Bearer token
+    };
+
+    // Request body
+    final Map<String, String> body = {
+      "number_of_minutes": minute,
+    };
+
+    // Make the POST request
+    return await http.post(
+      url,
+      headers: headers,
+      body: jsonEncode(body),
+    );
+  }
+
 }

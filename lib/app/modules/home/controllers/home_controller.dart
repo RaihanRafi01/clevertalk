@@ -30,10 +30,10 @@ class HomeController extends GetxController {
   RxBool isExpired = false.obs;
   RxBool isFree = false.obs;
   RxBool isVerified = false.obs;
-  RxInt paid_plan_minutes_left = 0.obs;
-  RxInt recorder_plan_minutes_left = 0.obs;
-  RxInt free_plan_minutes_left = 0.obs;
-  RxInt total_minutes_left = 0.obs;
+  RxDouble paid_plan_minutes_left = 0.0.obs;
+  RxDouble recorder_plan_minutes_left = 0.0.obs;
+  RxDouble free_plan_minutes_left = 0.0.obs;
+  RxDouble total_minutes_left = 0.0.obs;
   RxBool hasSentLowMinutesNotification = false.obs;
 
   @override
@@ -77,9 +77,9 @@ class HomeController extends GetxController {
       String? _user_type = responseData['user_type'];
       bool? _is_verified = responseData['is_verified'];
       String? _device_id_number = responseData['device_id_number'];
-      int? _paid_plan_minutes_left = responseData['paid_plan_minutes_left'];
-      int? _recorder_plan_minutes_left = responseData['recorder_plan_minutes_left'];
-      int? _free_plan_minutes_left = responseData['free_plan_minutes_left'];
+      double? _paid_plan_minutes_left = responseData['paid_plan_minutes_left'];
+      double? _recorder_plan_minutes_left = responseData['recorder_plan_minutes_left'];
+      double? _free_plan_minutes_left = responseData['free_plan_minutes_left'];
 
       username.value = _username ?? '';
       email.value = _email ?? '';
@@ -97,16 +97,16 @@ class HomeController extends GetxController {
 
       total_minutes_left.value = paid_plan_minutes_left.value +
           recorder_plan_minutes_left.value +
-          free_plan_minutes_left.value - 550;
+          free_plan_minutes_left.value - 574.6;
 
-      if (total_minutes_left.value < 20 && !hasSentLowMinutesNotification.value) {
+      if (total_minutes_left.value < 20.0 && !hasSentLowMinutesNotification.value) {
         await NotificationService.showNotification(
           title: 'Low Minutes Warning',
           body: 'You have less than 20 minutes remaining. Explore plans to add more!',
           payload: 'subscription_page',
         );
         await _saveNotificationFlag(true); // Save flag to prevent duplicates
-      } else if (total_minutes_left.value >= 20 && hasSentLowMinutesNotification.value) {
+      } else if (total_minutes_left.value >= 20.0 && hasSentLowMinutesNotification.value) {
         await _saveNotificationFlag(false); // Reset flag when minutes are sufficient
       }
 
