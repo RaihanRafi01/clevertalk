@@ -3,14 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-
 import '../../../../common/appColors.dart';
 import '../../../../common/customFont.dart';
 import '../../../../common/widgets/customAppBar.dart';
 import '../controllers/subscription_controller.dart';
-
-// Model for API response
-
 
 class SubscriptionView extends GetView<SubscriptionController> {
   const SubscriptionView({super.key});
@@ -112,6 +108,9 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
               child: _buildExactPricingCard(
                 title: basicPackage.packageName.toUpperCase(),
                 price: basicPackage.packagePriceEuro,
+                priceId: basicPackage.priceIdEuro,
+                packageName: basicPackage.packageName,
+                packageType: basicPackage.packageType,
                 billedAnnually: basicPackage.packageType == 'Yearly',
                 savingsPercentage: basicPackage.packageType == 'Yearly' ? _getSavingsPercentage(basicPackage) : null,
                 descriptions: basicPackage.descriptions.map((d) => d.description).toList(),
@@ -123,6 +122,9 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
               child: _buildExactPricingCard(
                 title: premiumPackage.packageName.toUpperCase(),
                 price: premiumPackage.packagePriceEuro,
+                priceId: premiumPackage.priceIdEuro,
+                packageName: premiumPackage.packageName,
+                packageType: premiumPackage.packageType,
                 billedAnnually: premiumPackage.packageType == 'Yearly',
                 savingsPercentage: premiumPackage.packageType == 'Yearly' ? _getSavingsPercentage(premiumPackage) : null,
                 descriptions: premiumPackage.descriptions.map((d) => d.description).toList(),
@@ -145,13 +147,13 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
   Widget _buildExactPricingCard({
     required String title,
     required String price,
+    required String priceId,
+    required String packageName,
+    required String packageType,
     required bool billedAnnually,
     int? savingsPercentage,
     required List<String> descriptions,
   }) {
-
-    String cleanedPrice = price.replaceAll('€', '\u20AC').split('/').first.trim();
-
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -176,7 +178,7 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
                   textBaseline: TextBaseline.alphabetic,
                   children: [
                     Text(
-                      cleanedPrice,
+                      price,
                       style: GoogleFonts.roboto(
                         fontWeight: FontWeight.bold,
                         fontSize: 26,
@@ -240,7 +242,12 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
               child: CustomButton(
                 text: 'Buy Now',
                 onPressed: () {
-                  print("Buy ${title.toLowerCase()} Plan");
+                  print(":::::::::::::::::::::Buy ${title.toLowerCase()} Plan");
+                  controller.buySubscription(
+                    priceId: priceId,
+                    packageName: packageName,
+                    packageType: packageType,
+                  );
                 },
               ),
             ),
@@ -293,4 +300,3 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
     );
   }
 }
-

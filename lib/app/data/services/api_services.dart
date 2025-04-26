@@ -20,6 +20,26 @@ class ApiService {
     return await http.get(url, headers: headers);
   }
 
+  // New method for buying a subscription
+  Future<http.Response> buySubscription({
+    required String priceId,
+    required String packageName,
+    required String packageType,
+  }) async {
+    final Uri url = Uri.parse('${baseUrl}pay/buy_subscription/');
+    String? accessToken = await _storage.read(key: 'access_token');
+    final Map<String, String> headers = {
+      "Content-Type": "application/json",
+      if (accessToken != null) "Authorization": "Bearer $accessToken",
+    };
+    final Map<String, String> body = {
+      "price_id": priceId,
+      "package_name": packageName,
+      "package_type": packageType,
+    };
+    return await http.post(url, headers: headers, body: jsonEncode(body));
+  }
+
 
   Future<http.Response> signUpWithOther(
       String username, String email) async {

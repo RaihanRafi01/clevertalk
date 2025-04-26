@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import '../../../data/services/api_services.dart';
+import '../../dashboard/views/dashboard_view.dart';
+import '../views/webViewScreen.dart';
 
 class SubscriptionController extends GetxController {
   var isYearly = true.obs;
@@ -43,6 +45,51 @@ class SubscriptionController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  // New method to handle subscription purchase
+  Future<void> buySubscription({
+    required String priceId,
+    required String packageName,
+    required String packageType,
+  }) async {
+    try {
+      final response = await apiService.buySubscription(
+        priceId: priceId,
+        packageName: packageName,
+        packageType: packageType,
+      );
+
+      print('buySubscription CODE : ${response.statusCode}');
+      print('buySubscription body : ${response.body}');
+
+      if (response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+
+        final checkoutUrl = responseBody['checkout_url'];
+        final message = responseBody['Message'];
+        if (message != null && message.isNotEmpty) {
+          // Show the message in a snackbar
+          Get.snackbar('Message', message);
+        } else if (checkoutUrl != null && checkoutUrl.isNotEmpty) {
+          // Navigate to the WebViewScreen if checkoutUrl is valid
+          print(':::::::::checkout_url:::::::::::::::::::::::::::::$checkoutUrl');
+          Get.off(() => WebViewScreen(
+            url: checkoutUrl,
+            onUrlMatched: () {
+              Get.offAll(() => DashboardView());
+            },
+          ));
+        } else {
+          // Show a generic error message for unexpected responses
+          Get.snackbar('Error', 'Unexpected response. Please try again.');
+        }
+      } else {
+        Get.snackbar('Error', 'Failed to purchase subscription: ${response.statusCode}');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'An error occurred: $e');
+    }
+  }
 }
 
 class PackageDescription {
@@ -81,14 +128,12 @@ class Package {
     List<PackageDescription> descriptions =
     descriptionsList.map((desc) => PackageDescription.fromJson(desc)).toList();
 
-    // Clean and normalize package_price_euro
     String rawPrice = json['package_price_euro'] ?? '';
-    // Replace malformed Euro symbols and normalize currency to €
     String cleanedPrice = rawPrice
-        .replaceAll('â¬', '\u20AC') // Fix malformed Euro
-        .replaceAll('\$', '\u20AC')   // Replace $ with € (if all prices should be in Euro)
-        .replaceAll('/month', '')     // Normalize format
-        .replaceAll(' / month', '')   // Handle both formats
+        .replaceAll('â¬', '\u20AC')
+        .replaceAll('\$', '\u20AC')
+        .replaceAll('/month', '')
+        .replaceAll(' / month', '')
         .trim();
 
     return Package(
