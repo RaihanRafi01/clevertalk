@@ -111,8 +111,12 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
             Expanded(
               child: _buildExactPricingCard(
                 title: basicPackage.packageName.toUpperCase(),
-                price: basicPackage.packagePriceEuro,
-                priceId: basicPackage.priceIdEuro,
+                price: controller.currency.value == 'USD' && basicPackage.packagePriceUsd != null
+                    ? basicPackage.packagePriceUsd!
+                    : basicPackage.packagePriceEuro,
+                priceId: controller.currency.value == 'USD' && basicPackage.priceIdUsd != null
+                    ? basicPackage.priceIdUsd!
+                    : basicPackage.priceIdEuro,
                 packageName: basicPackage.packageName,
                 packageType: basicPackage.packageType,
                 billedAnnually: basicPackage.packageType == 'Yearly',
@@ -125,8 +129,12 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
             Expanded(
               child: _buildExactPricingCard(
                 title: premiumPackage.packageName.toUpperCase(),
-                price: premiumPackage.packagePriceEuro,
-                priceId: premiumPackage.priceIdEuro,
+                price: controller.currency.value == 'USD' && premiumPackage.packagePriceUsd != null
+                    ? premiumPackage.packagePriceUsd!
+                    : premiumPackage.packagePriceEuro,
+                priceId: controller.currency.value == 'USD' && premiumPackage.priceIdUsd != null
+                    ? premiumPackage.priceIdUsd!
+                    : premiumPackage.priceIdEuro,
                 packageName: premiumPackage.packageName,
                 packageType: premiumPackage.packageType,
                 billedAnnually: premiumPackage.packageType == 'Yearly',
@@ -148,23 +156,20 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
     return null;
   }
 
-  // Helper method to determine if the selected plan is an upgrade, downgrade, or same
   String determineAction(String packageName, String packageType) {
     final currentPlan = controller.homeController.package_name.value.toLowerCase();
     final currentType = controller.homeController.package_type.value.toLowerCase();
     final selectedPlan = packageName.toLowerCase();
     final selectedType = packageType.toLowerCase();
 
-    // If no current plan, treat as a new subscription
     if (currentPlan.isEmpty) {
       return 'buy';
     }
 
-    // Define plan hierarchy (higher number = higher plan)
     final planValues = {
       'monthly_basic': 1,
-      'monthly_premium': 2,
-      'yearly_basic': 3,
+      'monthly_premium': 3,
+      'yearly_basic': 2,
       'yearly_premium': 4,
     };
 
@@ -201,7 +206,6 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
         (action == 'upgrade' && allowedActions['upgrade']!) ||
         (action == 'downgrade' && allowedActions['downgrade']!);
 
-    // Determine button text
     String buttonText;
     if (isUnsubscribed) {
       buttonText = 'Buy Now';

@@ -12,6 +12,7 @@ class SubscriptionController extends GetxController {
   var isYearly = true.obs;
   var packages = <Package>[].obs;
   var isLoading = true.obs;
+  var currency = 'USD'.obs; // Default to USD
 
   final ApiService apiService = Get.put(ApiService());
   final HomeController homeController = Get.find<HomeController>();
@@ -19,6 +20,7 @@ class SubscriptionController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    fetchUserRegion();
     fetchPackages();
   }
 
@@ -27,7 +29,42 @@ class SubscriptionController extends GetxController {
   }
 
   List<Package> getFilteredPackages() {
-    return packages.where((p) => p.packageType == (isYearly.value ? 'Yearly' : 'Monthly')).toList();
+    return packages
+        .where((p) => p.packageType == (isYearly.value ? 'Yearly' : 'Monthly'))
+        .toList();
+  }
+
+  // Fetch user's region using freeipapi.com with retry logic
+  Future<void> fetchUserRegion({int retries = 2, int delayMs = 1000}) async {
+    for (int attempt = 0; attempt <= retries; attempt++) {
+      try {
+        final response =
+            await http.get(Uri.parse('https://freeipapi.com/api/json'));
+        print('----------->>>>fetchUserRegion CODE: ${response.statusCode}');
+        print('----------->>>>fetchUserRegion body: ${response.body}');
+
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          final continentCode = data['continentCode'];
+          // Set currency to EUR if user is in Europe, USD otherwise
+          currency.value = continentCode == 'EU' ? 'EUR' : 'EUR'; //  USD
+          return; // Success, exit the retry loop
+        } else {
+          print('Failed to fetch region: ${response.statusCode}');
+        }
+      } catch (e) {
+        print('Error fetching region: $e');
+      }
+
+      // Wait before retrying
+      if (attempt < retries) {
+        await Future.delayed(Duration(milliseconds: delayMs));
+      }
+    }
+
+    // Fallback to USD if all retries fail
+    currency.value = 'USD';
+    print('Geolocation failed after retries, falling back to USD');
   }
 
   Future<void> fetchPackages() async {
@@ -39,7 +76,8 @@ class SubscriptionController extends GetxController {
         final List<dynamic> data = jsonDecode(response.body);
         packages.assignAll(data.map((json) => Package.fromJson(json)).toList());
       } else {
-        Get.snackbar('Error', 'Failed to fetch packages: ${response.statusCode}');
+        Get.snackbar(
+            'Error', 'Failed to fetch packages: ${response.statusCode}');
       }
     } catch (e) {
       Get.snackbar('Error', 'An error occurred: $e');
@@ -60,8 +98,8 @@ class SubscriptionController extends GetxController {
         packageType: packageType,
       );
 
-      print('buySubscription CODE : ${response.statusCode}');
-      print('buySubscription body : ${response.body}');
+      print('buySubscription CODE: ${response.statusCode}');
+      print('buySubscription body: ${response.body}');
 
       if (response.statusCode == 200) {
         final responseBody = jsonDecode(response.body);
@@ -70,21 +108,24 @@ class SubscriptionController extends GetxController {
         if (message != null && message.isNotEmpty) {
           Get.snackbar('Message', message);
         } else if (checkoutUrl != null && checkoutUrl.isNotEmpty) {
-          print(':::::::::checkout_url:::::::::::::::::::::::::::::$checkoutUrl');
+          print(
+              ':::::::::checkout_url:::::::::::::::::::::::::::::$checkoutUrl');
           Get.off(() => WebViewScreen(
-            url: checkoutUrl,
-            onUrlMatched: () {
-              homeController.package_name.value = packageName;
-              homeController.package_type.value = packageType;
-              Get.snackbar('Success', 'Subscription purchased successfully');
-              Get.offAll(() => DashboardView());
-            },
-          ));
+                url: checkoutUrl,
+                onUrlMatched: () {
+                  homeController.package_name.value = packageName;
+                  homeController.package_type.value = packageType;
+                  Get.snackbar(
+                      'Success', 'Subscription purchased successfully');
+                  Get.offAll(() => DashboardView());
+                },
+              ));
         } else {
           Get.snackbar('Error', 'Unexpected response. Please try again.');
         }
       } else {
-        Get.snackbar('Error', 'Failed to purchase subscription: ${response.statusCode}');
+        Get.snackbar(
+            'Error', 'Failed to purchase subscription: ${response.statusCode}');
       }
     } catch (e) {
       Get.snackbar('Error', 'An error occurred: $e');
@@ -101,20 +142,21 @@ class SubscriptionController extends GetxController {
         Get.snackbar('Success', 'Subscription canceled successfully');
         Get.off(() => SubscriptionView());
       } else {
-        Get.snackbar('Error', 'Failed to cancel subscription: ${response.statusCode}');
+        Get.snackbar(
+            'Error', 'Failed to cancel subscription: ${response.statusCode}');
       }
     } catch (e) {
       Get.snackbar('Error', 'An error occurred: $e');
     }
   }
 
-  // New method to check if the user is trying to select the same plan
   bool isSamePlan(String packageName, String packageType) {
-    return homeController.package_name.value.toLowerCase() == packageName.toLowerCase() &&
-        homeController.package_type.value.toLowerCase() == packageType.toLowerCase();
+    return homeController.package_name.value.toLowerCase() ==
+            packageName.toLowerCase() &&
+        homeController.package_type.value.toLowerCase() ==
+            packageType.toLowerCase();
   }
 
-  // New method to determine allowed actions based on current plan
   Map<String, bool> getAllowedActions() {
     final currentPlan = homeController.package_name.value.toLowerCase();
     final currentType = homeController.package_type.value.toLowerCase();
@@ -128,7 +170,6 @@ class SubscriptionController extends GetxController {
     }
   }
 
-  // New method to upgrade subscription
   Future<void> upgradeSubscription({
     required String priceId,
     required String packageName,
@@ -145,23 +186,23 @@ class SubscriptionController extends GetxController {
         packageName: packageName,
         packageType: packageType,
       );
-      print(':::::::::upgradeSubscription priceId  : $priceId');
-      print(':::::::::upgradeSubscription CODE : ${response.statusCode}');
-      print(':::::::::upgradeSubscription body : ${response.body}');
+      print(':::::::::upgradeSubscription priceId: $priceId');
+      print(':::::::::upgradeSubscription CODE: ${response.statusCode}');
+      print(':::::::::upgradeSubscription body: ${response.body}');
 
       if (response.statusCode == 200) {
         homeController.package_name.value = packageName;
         homeController.package_type.value = packageType;
         Get.snackbar('Success', 'Subscription upgraded successfully');
       } else {
-        Get.snackbar('Error', 'Failed to upgrade subscription: ${response.statusCode}');
+        Get.snackbar(
+            'Error', 'Failed to upgrade subscription: ${response.statusCode}');
       }
     } catch (e) {
       Get.snackbar('Error', 'An error occurred: $e');
     }
   }
 
-  // New method to downgrade subscription
   Future<void> downgradeSubscription({
     required String priceId,
     required String packageName,
@@ -179,16 +220,17 @@ class SubscriptionController extends GetxController {
         packageType: packageType,
       );
 
-      print(':::::::::downgradeSubscription priceId  : $priceId');
-      print(':::::::::downgradeSubscription CODE : ${response.statusCode}');
-      print(':::::::::downgradeSubscription body : ${response.body}');
+      print(':::::::::downgradeSubscription priceId: $priceId');
+      print(':::::::::downgradeSubscription CODE: ${response.statusCode}');
+      print(':::::::::downgradeSubscription body: ${response.body}');
 
       if (response.statusCode == 200) {
         homeController.package_name.value = packageName;
         homeController.package_type.value = packageType;
         Get.snackbar('Success', 'Subscription downgraded successfully');
       } else {
-        Get.snackbar('Error', 'Failed to downgrade subscription: ${response.statusCode}');
+        Get.snackbar('Error',
+            'Failed to downgrade subscription: ${response.statusCode}');
       }
     } catch (e) {
       Get.snackbar('Error', 'An error occurred: $e');
@@ -229,24 +271,34 @@ class Package {
 
   factory Package.fromJson(Map<String, dynamic> json) {
     var descriptionsList = json['descriptions'] as List;
-    List<PackageDescription> descriptions =
-    descriptionsList.map((desc) => PackageDescription.fromJson(desc)).toList();
+    List<PackageDescription> descriptions = descriptionsList
+        .map((desc) => PackageDescription.fromJson(desc))
+        .toList();
 
-    String rawPrice = json['package_price_euro'] ?? '';
-    String cleanedPrice = rawPrice
+    String rawPriceEuro = json['package_price_euro'] ?? '';
+    String cleanedPriceEuro = rawPriceEuro
         .replaceAll('â¬', '\u20AC')
         .replaceAll('\$', '\u20AC')
         .replaceAll('/month', '')
         .replaceAll(' / month', '')
         .trim();
 
+    String? rawPriceUsd = json['package_price_usd'];
+    String? cleanedPriceUsd = rawPriceUsd != null
+        ? rawPriceUsd
+            .replaceAll('\$', '\$')
+            .replaceAll('/month', '')
+            .replaceAll(' / month', '')
+            .trim()
+        : null;
+
     return Package(
       id: json['id'],
       packageName: json['package_name'],
       packageType: json['package_type'],
-      packagePriceUsd: json['package_price_usd'],
+      packagePriceUsd: cleanedPriceUsd,
       priceIdUsd: json['price_id_usd'],
-      packagePriceEuro: cleanedPrice,
+      packagePriceEuro: cleanedPriceEuro,
       priceIdEuro: json['price_id_euro'],
       descriptions: descriptions,
     );
