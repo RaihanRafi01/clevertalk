@@ -15,6 +15,7 @@ import '../../../../common/widgets/home/customDeletePopUp.dart';
 import '../../authentication/views/authentication_view.dart';
 import '../../home/controllers/home_controller.dart';
 import '../controllers/setting_controller.dart';
+import 'customReferPopup.dart';
 import 'help_support_view.dart';
 
 class SettingView extends GetView<SettingController> {
@@ -98,6 +99,23 @@ class SettingView extends GetView<SettingController> {
                   svgPath: 'assets/images/settings/privacy_icon.svg',
                   text: 'Privacy policy',
                   onTap: () => Get.to(() => TermsPrivacyView(isTerms: false))),
+              SettingsList(
+                  svgPath: 'assets/images/settings/refer_icon.svg',
+                  text: 'Refer a friend',
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      barrierDismissible: true,
+                      builder: (BuildContext context) {
+                        return CustomReferPopup(
+                          onSendPressed: () {
+                            // Add your referral sending logic here (e.g., API call)
+                            print('Send referral button pressed');
+                          },
+                        );
+                      },
+                    );
+                  },),
 
               Text('Help', style: h1.copyWith(fontSize: 16)),
               SizedBox(height: 10),
