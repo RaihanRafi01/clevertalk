@@ -16,7 +16,6 @@ class SubscribedView extends GetView<SubscriptionController> {
   @override
   Widget build(BuildContext context) {
     final HomeController homeController = Get.find<HomeController>();
-    final allowedActions = controller.getAllowedActions();
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -71,45 +70,49 @@ class SubscribedView extends GetView<SubscriptionController> {
               )),
             ),
             const SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(
-                  child: CustomButton(
-                    text: 'Update',
-                    onPressed: allowedActions['upgrade']!
-                        ? () {
-                      print("Update button pressed");
-                      try {
-                        Get.to(() => SubscriptionView());
-                        print("Navigated to SubscriptionView");
-                      } catch (e) {
-                        print("Navigation error: $e");
+            // Use Obx for allowedActions
+            Obx(() {
+              final allowedActions = controller.allowedActions.value;
+              return Row(
+                children: [
+                  Expanded(
+                    child: CustomButton(
+                      text: 'Upgrade',
+                      onPressed: allowedActions['upgrade']!
+                          ? () {
+                        print("Upgrade button pressed");
+                        try {
+                          Get.to(() => const SubscriptionView());
+                          print("Navigated to SubscriptionView");
+                        } catch (e) {
+                          print("Navigation error: $e");
+                        }
                       }
-                    }
-                        : null,
-                    isDisabled: !allowedActions['upgrade']!,
+                          : null,
+                      isDisabled: !allowedActions['upgrade']!,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: CustomButton(
-                    text: 'Downgrade',
-                    onPressed: allowedActions['downgrade']!
-                        ? () {
-                      print("Downgrade button pressed");
-                      try {
-                        Get.to(() => SubscriptionView());
-                        print("Navigated to SubscriptionView");
-                      } catch (e) {
-                        print("Navigation error: $e");
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: CustomButton(
+                      text: 'Downgrade',
+                      onPressed: allowedActions['downgrade']!
+                          ? () {
+                        print("Downgrade button pressed");
+                        try {
+                          Get.to(() => const SubscriptionView());
+                          print("Navigated to SubscriptionView");
+                        } catch (e) {
+                          print("Navigation error: $e");
+                        }
                       }
-                    }
-                        : null,
-                    isDisabled: !allowedActions['downgrade']!,
+                          : null,
+                      isDisabled: !allowedActions['downgrade']!,
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              );
+            }),
             const SizedBox(height: 20),
             CustomButton(
               text: 'Cancel',
@@ -119,14 +122,17 @@ class SubscribedView extends GetView<SubscriptionController> {
                   context: context,
                   builder: (context) => AlertDialog(
                     title: Text('Cancel Subscription', style: h2),
-                    content: Text('Are you sure you want to cancel your subscription?', style: h3),
+                    content: Text(
+                        'Are you sure you want to cancel your subscription?',
+                        style: h3),
                     actions: [
                       TextButton(
                         onPressed: () {
                           print("Cancel dialog: No pressed");
                           Navigator.pop(context);
                         },
-                        child: Text('No', style: h2.copyWith(color: AppColors.appColor)),
+                        child: Text('No',
+                            style: h2.copyWith(color: AppColors.appColor)),
                       ),
                       TextButton(
                         onPressed: () {
@@ -134,7 +140,8 @@ class SubscribedView extends GetView<SubscriptionController> {
                           Navigator.pop(context);
                           controller.cancelSubscription();
                         },
-                        child: Text('Yes', style: h2.copyWith(color: Colors.red)),
+                        child: Text('Yes',
+                            style: h2.copyWith(color: Colors.red)),
                       ),
                     ],
                   ),

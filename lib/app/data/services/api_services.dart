@@ -169,14 +169,12 @@ class ApiService {
 
   Future<http.Response> helpAndSupport(String email, String query) async {
     // Construct the endpoint URL
-    final Uri url = Uri.parse('${baseUrl}email_support/email_support/');
+    final Uri url = Uri.parse('${baseUrl}email_support/send/');
 
-    String? accessToken = await _storage.read(key: 'access_token');
 
     // Headers for the HTTP request with Bearer token
     final Map<String, String> headers = {
       "Content-Type": "application/json",
-      "Authorization": "Bearer $accessToken", // Add the Bearer token
     };
 
     // Request body

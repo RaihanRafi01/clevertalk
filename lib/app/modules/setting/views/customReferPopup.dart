@@ -17,11 +17,13 @@ class CustomReferPopup extends StatefulWidget {
 
 class _CustomReferPopupState extends State<CustomReferPopup> {
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _userNameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
     _emailController.dispose();
+    _userNameController.dispose();
     super.dispose();
   }
 
@@ -36,8 +38,8 @@ class _CustomReferPopupState extends State<CustomReferPopup> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Enter your friend\'s email address', style: h3),
-            SizedBox(height: 10),
+            Text('Enter your friend\'s name and email address', style: h3),
+            SizedBox(height: 20),
             TextFormField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
@@ -56,6 +58,22 @@ class _CustomReferPopupState extends State<CustomReferPopup> {
                 return null;
               },
             ),
+            SizedBox(height: 20),
+            TextFormField(
+              controller: _userNameController,
+              keyboardType: TextInputType.text,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Name',
+                hintText: 'Enter the name of your friend',
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter a name';
+                }
+                return null;
+              },
+            ),
           ],
         ),
       ),
@@ -68,7 +86,7 @@ class _CustomReferPopupState extends State<CustomReferPopup> {
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
               Navigator.pop(context);
-              await settingController.sendInvite(_emailController.text, homeController.username.value);
+              await settingController.sendInvite(_emailController.text, _userNameController.text);
               print('Referral email: ${_emailController.text}');
             }
           },

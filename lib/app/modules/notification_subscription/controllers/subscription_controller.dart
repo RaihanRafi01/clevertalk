@@ -17,6 +17,26 @@ class SubscriptionController extends GetxController {
   final ApiService apiService = Get.put(ApiService());
   final HomeController homeController = Get.find<HomeController>();
 
+  // Reactive allowedActions
+  RxMap<String, bool> get allowedActions => _getAllowedActions().obs;
+
+  // Private method to compute allowed actions
+  Map<String, bool> _getAllowedActions() {
+    final currentPlan = homeController.package_name.value.toLowerCase();
+    final currentType = homeController.package_type.value.toLowerCase();
+
+    if (currentPlan == 'basic' && currentType == 'monthly') {
+      return {'upgrade': true, 'downgrade': false};
+    } else if (currentPlan == 'premium' && currentType == 'yearly') {
+      return {'upgrade': false, 'downgrade': true};
+    } else {
+      return {'upgrade': true, 'downgrade': true};
+    }
+  }
+
+  // Keep the non-reactive version for compatibility
+  Map<String, bool> getAllowedActions() => _getAllowedActions();
+
   @override
   void onInit() {
     super.onInit();
@@ -157,7 +177,7 @@ class SubscriptionController extends GetxController {
             packageType.toLowerCase();
   }
 
-  Map<String, bool> getAllowedActions() {
+  /*Map<String, bool> getAllowedActions() {
     final currentPlan = homeController.package_name.value.toLowerCase();
     final currentType = homeController.package_type.value.toLowerCase();
 
@@ -168,7 +188,7 @@ class SubscriptionController extends GetxController {
     } else {
       return {'upgrade': true, 'downgrade': true};
     }
-  }
+  }*/
 
   Future<void> upgradeSubscription({
     required String priceId,

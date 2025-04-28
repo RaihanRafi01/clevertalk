@@ -31,7 +31,7 @@ class SettingController extends GetxController {
       final http.Response response =
           await _service.helpAndSupport(email, query);
 
-      print('Response Body: ${response.body}');
+      print('support Response Body: ${response.body}');
       print('Status Code: ${response.statusCode}');
       print('Request: ${response.request}');
 

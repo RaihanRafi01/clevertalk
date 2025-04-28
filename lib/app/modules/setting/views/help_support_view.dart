@@ -35,6 +35,7 @@ class HelpSupportView extends GetView<SettingController> {
             ),
             const SizedBox(height: 20),
             CustomTextField(
+              maxLine: 4,
               label: 'Description',
               controller: problemController,
               hint: 'Write Your Problem',

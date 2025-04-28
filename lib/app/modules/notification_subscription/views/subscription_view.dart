@@ -16,7 +16,7 @@ class SubscriptionView extends GetView<SubscriptionController> {
   @override
   Widget build(BuildContext context) {
     Get.put(SubscriptionController());
-    final HomeController homeController = Get.find<HomeController>();
+
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -64,36 +64,58 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
     return Obx(() => Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        ElevatedButton(
-          onPressed: () {
-            controller.setYearly(false);
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: !controller.isYearly.value ? AppColors.appColor : Colors.white,
-            foregroundColor: !controller.isYearly.value ? Colors.white : AppColors.appColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-              side: BorderSide(color: AppColors.appColor),
+        SizedBox(
+          width: 120, // Set a smaller fixed width for the button
+          child: ElevatedButton(
+            onPressed: () {
+              controller.setYearly(false);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: !controller.isYearly.value
+                  ? AppColors.appColor
+                  : Colors.white,
+              foregroundColor: !controller.isYearly.value
+                  ? Colors.white
+                  : AppColors.appColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+                side: BorderSide(color: AppColors.appColor),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              minimumSize: const Size(0, 48), // Consistent height
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            child: Text(
+              "Monthly",
+              style: TextStyle(fontSize: 16),
+            ),
           ),
-          child: Text("Monthly"),
         ),
         const SizedBox(width: 16),
-        ElevatedButton(
-          onPressed: () {
-            controller.setYearly(true);
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: controller.isYearly.value ? AppColors.appColor : Colors.white,
-            foregroundColor: controller.isYearly.value ? Colors.white : AppColors.appColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-              side: BorderSide(color: AppColors.appColor),
+        SizedBox(
+          width: 120, // Same fixed width for the second button
+          child: ElevatedButton(
+            onPressed: () {
+              controller.setYearly(true);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: controller.isYearly.value
+                  ? AppColors.appColor
+                  : Colors.white,
+              foregroundColor: controller.isYearly.value
+                  ? Colors.white
+                  : AppColors.appColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+                side: BorderSide(color: AppColors.appColor),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              minimumSize: const Size(0, 48), // Consistent height
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            child: Text(
+              "Yearly",
+              style: TextStyle(fontSize: 16),
+            ),
           ),
-          child: Text("Yearly"),
         ),
       ],
     ));
@@ -304,27 +326,35 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
                 text: buttonText,
                 onPressed: isSamePlan || !isActionAllowed
                     ? null
-                    : () {
+                    : () async {
                   print("Action: $action ${title.toLowerCase()} Plan");
+                  String successMessage;
                   if (action == 'buy') {
                     controller.buySubscription(
                       priceId: priceId,
                       packageName: packageName,
                       packageType: packageType,
                     );
+                    successMessage = 'Successfully purchased ${title.toLowerCase()} plan!';
                   } else if (action == 'upgrade') {
                     controller.upgradeSubscription(
                       priceId: priceId,
                       packageName: packageName,
                       packageType: packageType,
                     );
-                  } else if (action == 'downgrade') {
+                    successMessage = 'Successfully upgraded to ${title.toLowerCase()} plan!';
+                  } else {
                     controller.downgradeSubscription(
                       priceId: priceId,
                       packageName: packageName,
                       packageType: packageType,
                     );
+                    successMessage = 'Successfully downgraded to ${title.toLowerCase()} plan!';
                   }
+                  Get.snackbar('Success!', successMessage);
+                  controller.getAllowedActions();
+                  final HomeController homeController = Get.find<HomeController>();
+                  await homeController.fetchProfileData();
                 },
                 isDisabled: isSamePlan || !isActionAllowed,
               ),

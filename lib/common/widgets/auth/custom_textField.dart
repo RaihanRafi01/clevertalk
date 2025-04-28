@@ -7,9 +7,10 @@ import '../../customFont.dart';
 class CustomTextField extends StatefulWidget {
   final String label;
   final String hint;
+  final int maxLine;
   final bool isPassword;
   final bool readOnly;
-  final bool phone; // New parameter
+  final bool phone;
   final TextEditingController? controller;
   final IconData? prefixIcon;
   final IconData? suffixIcon;
@@ -33,6 +34,7 @@ class CustomTextField extends StatefulWidget {
     this.keyboardType,
     this.onTap,
     this.radius = 10,
+    this.maxLine = 1,
     this.textColor = AppColors.gray1,
   });
 
@@ -77,9 +79,10 @@ class _CustomTextFieldState extends State<CustomTextField> {
         ),
         const SizedBox(height: 4),
         SizedBox(
-          height: 40,
+          height: widget.maxLine > 1 ? 150 : 40, // Increased height for multi-line fields
           child: TextField(
-            style: TextStyle(fontSize: 12),
+            maxLines: widget.maxLine,
+            style: const TextStyle(fontSize: 12),
             cursorColor: AppColors.appColor,
             controller: widget.controller,
             onChanged: widget.onChanged,
@@ -91,7 +94,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
               hintText: widget.hint,
               hintStyle: h4.copyWith(fontSize: 12),
               prefixIcon: widget.prefixIcon != null
-                  ? Icon(widget.prefixIcon, color: Colors.grey.shade600,size: 20)
+                  ? Icon(widget.prefixIcon, color: Colors.grey.shade600, size: 20)
                   : null,
               suffixIcon: widget.isPassword
                   ? IconButton(
@@ -108,8 +111,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
                   ? Icon(widget.suffixIcon, color: AppColors.gray1)
                   : null),
               contentPadding: const EdgeInsets.symmetric(
-                vertical: 10, // Reduced vertical padding to decrease height
-                horizontal: 12, // Adjusted horizontal padding for consistency
+                vertical: 10,
+                horizontal: 12,
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(widget.radius),
