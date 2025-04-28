@@ -193,6 +193,32 @@ class ApiService {
     );
   }
 
+  Future<http.Response> sendInvite(String email, String username) async {
+    // Construct the endpoint URL
+    final Uri url = Uri.parse('${baseUrl}refer/send_invite/');
+
+    String? accessToken = await _storage.read(key: 'access_token');
+
+    // Headers for the HTTP request with Bearer token
+    final Map<String, String> headers = {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer $accessToken", // Add the Bearer token
+    };
+
+    // Request body
+    final Map<String, String> body = {
+      "email": email,
+      "invitation_user_name": username,
+    };
+
+    // Make the POST request
+    return await http.post(
+      url,
+      headers: headers,
+      body: jsonEncode(body),
+    );
+  }
+
   // Add this method in ApiService
   Future<http.Response> verifyOTP(String username, String otp) async {
     // Construct the endpoint URL

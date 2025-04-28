@@ -1,7 +1,10 @@
+import 'package:clevertalk/app/modules/home/controllers/home_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../../../../common/appColors.dart';
 import '../../../../common/customFont.dart';
+import '../controllers/setting_controller.dart';
 
 class CustomReferPopup extends StatefulWidget {
   final VoidCallback onSendPressed;
@@ -24,6 +27,8 @@ class _CustomReferPopupState extends State<CustomReferPopup> {
 
   @override
   Widget build(BuildContext context) {
+    final SettingController settingController = Get.find<SettingController>();
+    final HomeController homeController = Get.find<HomeController>();
     return AlertDialog(
       title: Text('Refer a Friend', style: h2),
       content: Form(
@@ -60,12 +65,11 @@ class _CustomReferPopupState extends State<CustomReferPopup> {
           child: Text('Cancel', style: h2.copyWith(color: AppColors.appColor)),
         ),
         TextButton(
-          onPressed: () {
+          onPressed: () async {
             if (_formKey.currentState!.validate()) {
-              // Call your send referral logic here
-              print('Referral email: ${_emailController.text}');
-              widget.onSendPressed();
               Navigator.pop(context);
+              await settingController.sendInvite(_emailController.text, homeController.username.value);
+              print('Referral email: ${_emailController.text}');
             }
           },
           child: Text('Send', style: h2.copyWith(color: AppColors.appColor)),
