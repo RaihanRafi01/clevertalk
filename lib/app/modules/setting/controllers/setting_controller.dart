@@ -28,7 +28,8 @@ class SettingController extends GetxController {
   Future<void> helpAndSupport(String email, String query) async {
     isLoading.value = true; // Show the loading state
     try {
-      final http.Response response = await _service.helpAndSupport(email, query);
+      final http.Response response =
+          await _service.helpAndSupport(email, query);
 
       print('Response Body: ${response.body}');
       print('Status Code: ${response.statusCode}');
@@ -41,7 +42,8 @@ class SettingController extends GetxController {
         Get.dialog(
           AlertDialog(
             contentPadding: const EdgeInsets.all(20),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             title: Column(
               children: [
                 Text(
@@ -60,7 +62,8 @@ class SettingController extends GetxController {
             actions: [
               CustomButton(
                 text: 'OK',
-                onPressed: () => Get.back(), // Close the dialog
+                onPressed: () => Get.back(),
+                // Close the dialog
                 isEditPage: true,
                 textColor: AppColors.textColor,
                 backgroundColor: Colors.white,
@@ -71,7 +74,10 @@ class SettingController extends GetxController {
       } else {
         // Failure
         final responseBody = jsonDecode(response.body);
-        Get.snackbar('Error', responseBody['message'] ?? 'Something went wrong. Please try again.');
+        Get.snackbar(
+            'Error',
+            responseBody['message'] ??
+                'Something went wrong. Please try again.');
       }
     } catch (e) {
       // Exception handling
@@ -81,7 +87,6 @@ class SettingController extends GetxController {
       isLoading.value = false; // Hide the loading state
     }
   }
-
 
   Future<void> sendInvite(String email, String username) async {
     isLoading.value = true; // Show the loading state
@@ -97,7 +102,8 @@ class SettingController extends GetxController {
         Get.dialog(
           AlertDialog(
             contentPadding: const EdgeInsets.all(20),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             title: Column(
               children: [
                 Text(
@@ -116,7 +122,8 @@ class SettingController extends GetxController {
             actions: [
               CustomButton(
                 text: 'OK',
-                onPressed: () => Get.back(), // Close the dialog
+                onPressed: () => Get.back(),
+                // Close the dialog
                 isEditPage: true,
                 textColor: AppColors.textColor,
                 backgroundColor: Colors.white,
@@ -124,12 +131,12 @@ class SettingController extends GetxController {
             ],
           ),
         );
-      }
-      else if (response.statusCode == 400){
+      } else if (response.statusCode == 400) {
         Get.dialog(
           AlertDialog(
             contentPadding: const EdgeInsets.all(20),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             title: Column(
               children: [
                 Text(
@@ -148,7 +155,8 @@ class SettingController extends GetxController {
             actions: [
               CustomButton(
                 text: 'OK',
-                onPressed: () => Get.back(), // Close the dialog
+                onPressed: () => Get.back(),
+                // Close the dialog
                 isEditPage: true,
                 textColor: AppColors.textColor,
                 backgroundColor: Colors.white,
@@ -156,11 +164,13 @@ class SettingController extends GetxController {
             ],
           ),
         );
-      }
-      else {
+      } else {
         // Failure
         final responseBody = jsonDecode(response.body);
-        Get.snackbar('Error', responseBody['message'] ?? 'Something went wrong. Please try again.');
+        Get.snackbar(
+            'Error',
+            responseBody['message'] ??
+                'Something went wrong. Please try again.');
       }
     } catch (e) {
       // Exception handling
@@ -170,6 +180,4 @@ class SettingController extends GetxController {
       isLoading.value = false; // Hide the loading state
     }
   }
-
-
 }
