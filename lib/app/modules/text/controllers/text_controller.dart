@@ -294,6 +294,8 @@ class ConvertToTextController extends GetxController {
             'max_tokens': 8000,
           }),
         );
+        print(':::::::::::::::: -------------------->>> translation statusCode ${response.statusCode}');
+        print(':::::::::::::::: -------------------->>> translation body ${response.body}');
 
         if (response.statusCode == 200) {
           final responseBody = utf8.decode(response.bodyBytes);

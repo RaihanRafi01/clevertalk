@@ -281,6 +281,8 @@ class ConvertToTextView extends StatelessWidget {
       textController.syncScrollingWithAudio(audioController);
     }*/
 
+    print(':::::::::::::::: check Audio file ---->: $fileName');
+
     // Fetch audio files and set the current index based on fileName
     audioController.fetchAudioFiles(fileName: fileName).then((_) {
       final index = audioController.audioFiles.indexWhere((file) => file['file_name'] == fileName);
