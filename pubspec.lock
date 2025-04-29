@@ -53,10 +53,10 @@ packages:
     dependency: "direct main"
     description:
       name: audioplayers
-      sha256: a5341380a4f1d3a10a4edde5bb75de5127fe31e0faa8c4d860e64d2f91ad84c7
+      sha256: c346ba5a39dc208f1bab55fc239855f573d69b0e832402114bf0b793622adc4d
       url: "https://pub.dev"
     source: hosted
-    version: "6.4.0"
+    version: "6.1.0"
   audioplayers_android:
     dependency: transitive
     description:
@@ -193,6 +193,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.2"
+  etau:
+    dependency: transitive
+    description:
+      name: etau
+      sha256: "5859ee8438770e2887426dccf05bb55f2c78f20fe6db84043675155c2ebb9a7e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.14-alpha.5"
   fake_async:
     dependency: transitive
     description:
@@ -418,26 +426,26 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_sound
-      sha256: ef89477f6e8ce2fa395158ebc4a8b11982e3ada440b4021c06fd97a4e771554b
+      sha256: a4662bd1bb15a51569b908deb58a3e9ecc14c7080783487202d015644712f1ef
       url: "https://pub.dev"
     source: hosted
-    version: "9.28.0"
+    version: "9.23.1"
   flutter_sound_platform_interface:
     dependency: transitive
     description:
       name: flutter_sound_platform_interface
-      sha256: "3394d7e664a09796818014ff85a81db0dec397f4c286cbe52f8783886fa5a497"
+      sha256: "0ebd302180ddc91c993d4bb061f08d71a047ebb0f04b05befd2ee8de59ea947d"
       url: "https://pub.dev"
     source: hosted
-    version: "9.28.0"
+    version: "9.23.1"
   flutter_sound_web:
     dependency: transitive
     description:
       name: flutter_sound_web
-      sha256: "4e10c94a8574bd93bb8668af59bf76f5312a890bccd3778d73168a7133217dc5"
+      sha256: "0891d977674be94d8c3f4759c6cd11e7f29a1ed29dc287b874a1393666ac831f"
       url: "https://pub.dev"
     source: hosted
-    version: "9.28.0"
+    version: "9.23.1"
   flutter_svg:
     dependency: "direct main"
     description:
@@ -588,10 +596,10 @@ packages:
     dependency: "direct main"
     description:
       name: just_audio
-      sha256: f978d5b4ccea08f267dae0232ec5405c1b05d3f3cd63f82097ea46c015d5c09e
+      sha256: a49e7120b95600bd357f37a2bb04cd1e88252f7cdea8f3368803779b925b1049
       url: "https://pub.dev"
     source: hosted
-    version: "0.9.46"
+    version: "0.9.42"
   just_audio_platform_interface:
     dependency: transitive
     description:
@@ -680,6 +688,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
+  nested:
+    dependency: transitive
+    description:
+      name: nested
+      sha256: "03bac4c528c64c95c722ec99280375a6f2fc708eec17c7b3f07253b626cd2a20"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   path:
     dependency: "direct main"
     description:
@@ -840,6 +856,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.2"
+  provider:
+    dependency: transitive
+    description:
+      name: provider
+      sha256: "489024f942069c2920c844ee18bb3d467c69e48955a4f32d1677f71be103e310"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.1.4"
   qr:
     dependency: transitive
     description:
@@ -848,6 +872,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
+  recase:
+    dependency: transitive
+    description:
+      name: recase
+      sha256: e4eb4ec2dcdee52dcf99cb4ceabaffc631d7424ee55e56f280bc039737f89213
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.1.0"
   rxdart:
     dependency: transitive
     description:
@@ -1037,6 +1069,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.3.0+3"
+  tau_web:
+    dependency: transitive
+    description:
+      name: tau_web
+      sha256: "81c8a0dc264f87db84678e5957dd1e4ccc015047fdea0f2cdd86d91c3c8a838e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.14-alpha.5"
   term_glyph:
     dependency: transitive
     description:
