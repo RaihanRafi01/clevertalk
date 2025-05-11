@@ -89,7 +89,7 @@ class HomeView extends GetView<HomeController> {
                           // Prioritize paid plan, then recorder, then free plan
                           num remainingMinutes = controller.total_minutes_left.value;
                           return Text(
-                            '$remainingMinutes minutes remaining',
+                            '${remainingMinutes.toStringAsFixed(2)} minutes remaining',
                             style: TextStyle(
                               color: Colors.black,
                               fontSize: 14,

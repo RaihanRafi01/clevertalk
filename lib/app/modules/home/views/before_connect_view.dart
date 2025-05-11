@@ -69,8 +69,7 @@ class BeforeConnectView extends StatelessWidget {
                             children: [
                               // Description text
                               Text(
-                                'This section is exclusively for users who have purchased the Clevertalk Recorder. '
-                                'If you plan to use the app by itself to record with your phone, please go back.',
+                                'If you already a CleverTalk Recorder, connect it here! Otherwise, go back and continue recording with your phone as usual.',
                                 style: h4.copyWith(
                                   fontSize: 13,
                                   color: Colors.black,

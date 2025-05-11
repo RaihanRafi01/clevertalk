@@ -255,54 +255,60 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
                   style: h2.copyWith(fontWeight: FontWeight.bold, fontSize: 16),
                   textAlign: TextAlign.center,
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
-                  children: [
-                    Text(
-                      price,
-                      style: GoogleFonts.roboto(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 26,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        price,
+                        style: GoogleFonts.roboto(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 26,
+                        ),
                       ),
-                    ),
-                    Flexible(
-                      child: Text(
-                        " per month",
-                        style: h1.copyWith(fontSize: 12),
+                      Flexible(
+                        child: Text(
+                          " per month",
+                          style: h1.copyWith(fontSize: 12),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 4),
                 if (billedAnnually)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          "Billed Annually",
-                          style: h4.copyWith(fontSize: 11),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      if (savingsPercentage != null)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(4),
-                            border: Border.all(color: Colors.green),
-                          ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Flexible(
                           child: Text(
-                            "Save $savingsPercentage%",
-                            style: h2.copyWith(
-                              color: Colors.green,
-                              fontSize: 12,
+                            "Billed Annually",
+                            style: h4.copyWith(fontSize: 11),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        if (savingsPercentage != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(color: Colors.green),
+                            ),
+                            child: Text(
+                              "Save $savingsPercentage%",
+                              style: h2.copyWith(
+                                color: Colors.green,
+                                fontSize: 12,
+                              ),
                             ),
                           ),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
                 const SizedBox(height: 8),
                 ...descriptions

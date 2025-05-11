@@ -204,50 +204,61 @@ class _EditProfileViewState extends State<ProfileView> {
                 const SizedBox(height: 4),
                 SizedBox(
                   height: 40, // Match CustomTextField height
-                  child: Obx(() => DropdownButtonFormField<String>(
-                    decoration: InputDecoration(
-                      hintText: 'Select Your Gender',
-                      hintStyle: h4.copyWith(fontSize: 12),
-                      prefixIcon: const Icon(
-                        Icons.male_rounded,
-                        color: Colors.grey,
-                        size: 20, // Match CustomTextField icon size
-                      ),
-                      isDense: true, // Compact layout
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: 10, // Match CustomTextField padding
-                        horizontal: 12,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10), // Match CustomTextField radius
-                        borderSide: const BorderSide(color: AppColors.gray1),
-                      ),
-                      enabledBorder: OutlineInputBorder(
+                  child: Obx(() {
+                    // Determine if the dropdown is focused to change border color
+                    final isFocused = homeController.gender.value.isNotEmpty;
+                    return Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: isFocused ? AppColors.appColor : AppColors.gray1,
+                          width: isFocused ? 1 : 1,
+                        ),
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(color: AppColors.gray1),
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(color: AppColors.appColor, width: 1),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      child: Row(
+                        children: [
+                          // Prefix icon
+                          Icon(
+                            Icons.male_rounded,
+                            color: Colors.grey.shade600,
+                            size: 20, // Match CustomTextField icon size
+                          ),
+                          SizedBox(width: 12), // Space between icon and dropdown
+                          Expanded(
+                            child: DropdownButton<String>(
+                              hint: Text(
+                                'Select Your Gender',
+                                style: h4.copyWith(
+                                  fontSize: 12, // Desired font size
+                                  color: AppColors.gray1, // Desired color
+                                  //fontWeight: FontWeight.normal,
+                                ),
+                              ),
+                              value: homeController.gender.value.isNotEmpty ? homeController.gender.value : null,
+                              items: ['Male', 'Female', 'Other'].map((gender) => DropdownMenuItem<String>(
+                                value: gender,
+                                child: Text(
+                                  gender,
+                                  style: h4.copyWith(fontSize: 12), // Match CustomTextField text size
+                                ),
+                              )).toList(),
+                              onChanged: (value) {
+                                if (value != null) {
+                                  profileController.updateGender(value);
+                                  homeController.gender.value = value;
+                                }
+                              },
+                              isExpanded: true, // Make dropdown fill the container
+                              underline: SizedBox(), // Remove default underline
+                              icon: Icon(Icons.arrow_drop_down, color: Colors.grey),
+                              dropdownColor: Colors.white,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    value: homeController.gender.value.isNotEmpty ? homeController.gender.value : null,
-                    items: ['Male', 'Female', 'Other'].map((gender) => DropdownMenuItem<String>(
-                      value: gender,
-                      child: Text(
-                        gender,
-                        style: h4.copyWith(fontSize: 12), // Match CustomTextField text size
-                      ),
-                    )).toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        profileController.updateGender(value);
-                        homeController.gender.value = value;
-                      }
-                    },
-                    dropdownColor: Colors.white,
-                    menuMaxHeight: 150,
-                  )),
+                    );
+                  }),
                 ),
               ],
             ),

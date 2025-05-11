@@ -92,7 +92,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
             onTap: widget.onTap,
             decoration: InputDecoration(
               hintText: widget.hint,
-              hintStyle: h4.copyWith(fontSize: 12),
+              hintStyle: h4.copyWith(fontSize: 12,color: AppColors.gray1),
               prefixIcon: widget.prefixIcon != null
                   ? Icon(widget.prefixIcon, color: Colors.grey.shade600, size: 20)
                   : null,
