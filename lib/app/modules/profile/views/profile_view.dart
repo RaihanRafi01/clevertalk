@@ -144,7 +144,7 @@ class _EditProfileViewState extends State<ProfileView> {
                 ),
               ],
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 20),
             CustomTextField(
               label: 'Full Name',
               controller: _nameController,
@@ -154,7 +154,7 @@ class _EditProfileViewState extends State<ProfileView> {
               },
               hint: 'Enter Your Name',
             ),
-            SizedBox(height: 40),
+            SizedBox(height: 20),
             CustomTextField(
               readOnly: true,
               label: 'Email',
@@ -163,7 +163,7 @@ class _EditProfileViewState extends State<ProfileView> {
               keyboardType: TextInputType.emailAddress,
               hint: 'Enter Your Email',
             ),
-            SizedBox(height: 40),
+            SizedBox(height: 20),
             CustomTextField(
               phone: true,
               prefixIcon: Icons.phone,
@@ -175,7 +175,7 @@ class _EditProfileViewState extends State<ProfileView> {
                 profileController.updatePhone(value);
               },
             ),
-            SizedBox(height: 40),
+            SizedBox(height: 20),
             CustomTextField(
               label: 'Address',
               controller: _addressController,
@@ -186,7 +186,7 @@ class _EditProfileViewState extends State<ProfileView> {
                 profileController.updateAddress(value);
               },
             ),
-            SizedBox(height: 40),
+            SizedBox(height: 20),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

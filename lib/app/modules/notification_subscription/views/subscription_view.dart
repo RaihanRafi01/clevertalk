@@ -258,6 +258,7 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Row(
+                    mainAxisSize: MainAxisSize.min, // Minimize row size to keep content tight
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.baseline,
                     textBaseline: TextBaseline.alphabetic,
@@ -266,13 +267,15 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
                         price,
                         style: GoogleFonts.roboto(
                           fontWeight: FontWeight.bold,
-                          fontSize: 26,
+                          fontSize: 24,
                         ),
                       ),
                       Flexible(
                         child: Text(
                           " per month",
-                          style: h1.copyWith(fontSize: 12),
+                          style: h1.copyWith(fontSize: 10),
+                          softWrap: false, // Prevent text from wrapping
+                          overflow: TextOverflow.visible,
                         ),
                       ),
                     ],
@@ -288,7 +291,7 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
                         Flexible(
                           child: Text(
                             "Billed Annually",
-                            style: h4.copyWith(fontSize: 11),
+                            style: h4.copyWith(fontSize: 10),
                           ),
                         ),
                         const SizedBox(width: 4),
@@ -391,7 +394,7 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
         children: [
           Text(
             "Both plans include:",
-            style: h2.copyWith(fontWeight: FontWeight.bold, fontSize: 16),
+            style: h2.copyWith(fontWeight: FontWeight.bold, fontSize: 14),
           ),
           const SizedBox(height: 16),
           ...features.map((feature) {
@@ -400,10 +403,10 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.check),
+                  Icon(Icons.check,size: 20,),
                   const SizedBox(width: 6),
                   Expanded(
-                    child: Text(feature, style: h2.copyWith(fontSize: 14)),
+                    child: Text(feature, style: h2.copyWith(fontSize: 12)),
                   ),
                 ],
               ),
