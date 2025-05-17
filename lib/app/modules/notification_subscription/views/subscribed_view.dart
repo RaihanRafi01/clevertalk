@@ -33,7 +33,7 @@ class SubscribedView extends GetView<SubscriptionController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Your Subscription',
+              'your_subscription'.tr,
               style: h1.copyWith(fontSize: 24),
             ),
             const SizedBox(height: 20),
@@ -48,22 +48,22 @@ class SubscribedView extends GetView<SubscriptionController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Plan: ${homeController.package_name.value}',
+                    '${'plan'.tr}${homeController.package_name.value}',
                     style: h2.copyWith(fontWeight: FontWeight.bold, fontSize: 18),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Type: ${homeController.package_type.value}',
+                    '${'type'.tr}${homeController.package_type.value}',
                     style: h2.copyWith(fontSize: 16),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Details:',
+                    'details_label'.tr,
                     style: h2.copyWith(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Enjoy all premium features including unlimited recording, transcription in 36+ languages, and more.',
+                    'subscription_details'.tr,
                     style: h2.copyWith(fontSize: 14),
                   ),
                 ],
@@ -77,7 +77,7 @@ class SubscribedView extends GetView<SubscriptionController> {
                 children: [
                   Expanded(
                     child: CustomButton(
-                      text: 'Upgrade',
+                      text: 'upgrade'.tr,
                       onPressed: allowedActions['upgrade']!
                           ? () {
                         print("Upgrade button pressed");
@@ -95,7 +95,7 @@ class SubscribedView extends GetView<SubscriptionController> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: CustomButton(
-                      text: 'Downgrade',
+                      text: 'downgrade'.tr,
                       onPressed: allowedActions['downgrade']!
                           ? () {
                         print("Downgrade button pressed");
@@ -115,15 +115,15 @@ class SubscribedView extends GetView<SubscriptionController> {
             }),
             const SizedBox(height: 20),
             CustomButton(
-              text: 'Cancel',
+              text: 'cancel'.tr,
               onPressed: () {
                 print("Cancel button pressed");
                 showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
-                    title: Text('Cancel Subscription', style: h2),
+                    title: Text('cancel_subscription'.tr, style: h2), // Localized dialog title
                     content: Text(
-                        'Are you sure you want to cancel your subscription?',
+                        'cancel_subscription_confirm'.tr, // Localized dialog content
                         style: h3),
                     actions: [
                       TextButton(
@@ -131,7 +131,7 @@ class SubscribedView extends GetView<SubscriptionController> {
                           print("Cancel dialog: No pressed");
                           Navigator.pop(context);
                         },
-                        child: Text('No',
+                        child: Text('no'.tr,
                             style: h2.copyWith(color: AppColors.appColor)),
                       ),
                       TextButton(
@@ -140,7 +140,7 @@ class SubscribedView extends GetView<SubscriptionController> {
                           Navigator.pop(context);
                           controller.cancelSubscription();
                         },
-                        child: Text('Yes',
+                        child: Text('yes'.tr,
                             style: h2.copyWith(color: Colors.red)),
                       ),
                     ],

@@ -31,8 +31,8 @@ class ConvertToTextView extends StatelessWidget {
           TextField(
             controller: controller.nameControllers[index],
             style: h4.copyWith(fontSize: 15, fontWeight: FontWeight.bold),
-            decoration: const InputDecoration(
-              labelText: "Speaker Name",
+            decoration: InputDecoration(
+              labelText: "speaker_name".tr,
               border: OutlineInputBorder(),
             ),
           ),
@@ -41,8 +41,8 @@ class ConvertToTextView extends StatelessWidget {
             controller: controller.descControllers[index],
             style: h4.copyWith(fontSize: 15),
             maxLines: 2,
-            decoration: const InputDecoration(
-              labelText: "Transcription",
+            decoration: InputDecoration(
+              labelText: "transcription".tr,
               border: OutlineInputBorder(),
             ),
           ),
@@ -107,7 +107,7 @@ class ConvertToTextView extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Select Language',
+                        'select_language'.tr,
                         style: h4.copyWith(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -124,7 +124,7 @@ class ConvertToTextView extends StatelessWidget {
                   TextField(
                     controller: searchController,
                     decoration: InputDecoration(
-                      hintText: 'Search language...',
+                      hintText: 'search_language'.tr,
                       hintStyle: TextStyle(
                         color: Colors.grey.shade500,
                         fontStyle: FontStyle.italic,
@@ -181,7 +181,7 @@ class ConvertToTextView extends StatelessWidget {
                     child: filteredLanguages.isEmpty
                         ? Center(
                       child: Text(
-                        'No languages found',
+                        'no_languages_found'.tr,
                         style: h4.copyWith(
                           fontSize: 16,
                           color: Colors.grey.shade600,
@@ -367,7 +367,7 @@ class ConvertToTextView extends StatelessWidget {
                                     audioController.currentIndex.value >= 0
                                     ? audioController.audioFiles[audioController.currentIndex.value]
                                 ['file_name']
-                                    : 'No File Selected',
+                                    : 'no_file_selected'.tr,
                                 style: h1.copyWith(fontSize: 18, color: AppColors.gray2),
                               ),
                             ),
@@ -455,7 +455,7 @@ class ConvertToTextView extends StatelessWidget {
                           textController.messages.isNotEmpty
                               ? audioController.audioFiles[audioController.currentIndex.value]
                           ['file_name']
-                              : 'Please wait for a while...',
+                              : 'please_wait_for_a_while'.tr,
                           style: h1.copyWith(fontSize: 16, color: AppColors.gray2),
                         ),
                       ),
@@ -558,7 +558,7 @@ class ConvertToTextView extends StatelessWidget {
                                     Expanded(
                                       child: Text(
                                         textController.selectedLanguage.value.isEmpty
-                                            ? 'Select Language'
+                                            ? 'select_language'.tr
                                             : textController.selectedLanguage.value,
                                         style: h4.copyWith(fontSize: 11, color: Colors.white),
                                         overflow: TextOverflow.ellipsis,
@@ -573,7 +573,7 @@ class ConvertToTextView extends StatelessWidget {
                           )),
                           const Spacer(),
                           CustomButton(
-                            text: 'Translate',
+                            text: 'translate'.tr,
                             onPressed: () => textController.translateText(filePath, fileName),
                             height: 30,
                             width: 80,
@@ -596,7 +596,7 @@ class ConvertToTextView extends StatelessWidget {
                   const SizedBox(height: 10),
                   CustomButton(
                     backgroundColor: AppColors.appColor,
-                    text: 'Summary',
+                    text: 'summary'.tr,
                     onPressed: () async {
                       await audioController.pauseAudio();
                       audioController.fetchKeyPoints(filePath, fileName);

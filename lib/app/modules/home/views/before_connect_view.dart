@@ -49,7 +49,7 @@ class BeforeConnectView extends StatelessWidget {
                   children: [
                     // Title
                     Text(
-                      'Connect Your Clevertalk Recorder',
+                      'connect_your_clevertalk_recorder'.tr,
                       style: h1.copyWith(
                         fontSize: 21,
                         fontWeight: FontWeight.bold,
@@ -69,7 +69,7 @@ class BeforeConnectView extends StatelessWidget {
                             children: [
                               // Description text
                               Text(
-                                'If you already a CleverTalk Recorder, connect it here! Otherwise, go back and continue recording with your phone as usual.',
+                                'connect_description'.tr,
                                 style: h4.copyWith(
                                   fontSize: 13,
                                   color: Colors.black,
@@ -79,7 +79,7 @@ class BeforeConnectView extends StatelessWidget {
 
                               // "How to connect" title
                               Text(
-                                'How to connect',
+                                'how_to_connect'.tr,
                                 style: h1.copyWith(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -120,7 +120,7 @@ class BeforeConnectView extends StatelessWidget {
                                             ),
                                           ),
                                           TextSpan(
-                                            text: 'Plug ',
+                                            text: 'step1_plug'.tr,
                                             style: h4.copyWith(
                                               fontSize: 14,
                                               fontWeight: FontWeight.bold,
@@ -130,7 +130,7 @@ class BeforeConnectView extends StatelessWidget {
                                           ),
                                           TextSpan(
                                             text:
-                                                'the USB cable into your Clevertalk Recorder.',
+                                            'step1_usb_cable'.tr,
                                             style: h4.copyWith(
                                               fontSize: 14,
                                               color: Colors.black,
@@ -169,7 +169,7 @@ class BeforeConnectView extends StatelessWidget {
                                             ),
                                           ),
                                           TextSpan(
-                                            text: 'Connect ',
+                                            text: 'step2_connect'.tr,
                                             style: h4.copyWith(
                                               fontSize: 14,
                                               fontWeight: FontWeight.bold,
@@ -179,7 +179,7 @@ class BeforeConnectView extends StatelessWidget {
                                           ),
                                           TextSpan(
                                             text:
-                                                'the other end to your phone.',
+                                            'step2_to_phone'.tr,
                                             style: h4.copyWith(
                                               fontSize: 14,
                                               color: Colors.black,
@@ -218,14 +218,14 @@ class BeforeConnectView extends StatelessWidget {
                                             ),
                                           ),
                                           TextSpan(
-                                            text: 'Once connected, ',
+                                            text: 'step3_once_connected'.tr,
                                             style: h4.copyWith(
                                               fontSize: 14,
                                               color: Colors.black,
                                             ),
                                           ),
                                           TextSpan(
-                                            text: 'Press Continue.',
+                                            text: 'step3_press_continue'.tr,
                                             style: h4.copyWith(
                                               fontSize: 14,
                                               fontWeight: FontWeight.bold,
@@ -271,7 +271,7 @@ class BeforeConnectView extends StatelessWidget {
                   child: SizedBox(
                     width: double.infinity,
                     child: CustomButton(
-                      text: 'Continue',
+                      text: 'continue'.tr,
                       onPressed: () {
                         connectUsbDevice(context);
                       },

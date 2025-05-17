@@ -44,7 +44,7 @@ class HomeView extends GetView<HomeController> {
                       child: CustomButton(
                         height: 40,
                         fontSize: 12,
-                        text: 'Connect Clevertalk',
+                        text: 'connect_clevertalk'.tr,
                         onPressed: () {
                           Get.to(BeforeConnectView());
                         },
@@ -56,7 +56,7 @@ class HomeView extends GetView<HomeController> {
                       child: CustomButton(
                         height: 40,
                         fontSize: 12,
-                        text: 'Explore Plans',
+                        text: 'explore_plans'.tr,
                         onPressed: () {
                           Get.to(SubscriptionView());
                         },
@@ -114,7 +114,7 @@ class HomeView extends GetView<HomeController> {
                       isBold: true,
                       width: 250,
                       borderRadius: 5,
-                      text: 'START RECORDING',
+                      text:'start_recording'.tr,
                       onPressed: () => Get.to(() => RecordView()),
                     ),
                   );
@@ -176,7 +176,7 @@ class HomeView extends GetView<HomeController> {
                         child: CustomButton(
                           isBold: true,
                           borderRadius: 30,
-                          text: 'START RECORDING',
+                          text: 'start_recording'.tr,
                           onPressed: () => Get.to(() => RecordView()),
                         ),
                       ),

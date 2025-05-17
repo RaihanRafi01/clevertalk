@@ -17,7 +17,6 @@ class SubscriptionView extends GetView<SubscriptionController> {
   Widget build(BuildContext context) {
     Get.put(SubscriptionController());
 
-
     return Scaffold(
       appBar: CustomAppBar(
         title: "CLEVERTALK",
@@ -41,7 +40,7 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
         return Center(child: CircularProgressIndicator());
       }
       if (controller.packages.isEmpty) {
-        return Center(child: Text("No packages available"));
+        return Center(child: Text("no_packages_available".tr));
       }
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -62,70 +61,72 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
 
   Widget _buildBillingButtons() {
     return Obx(() => Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 120, // Set a smaller fixed width for the button
-          child: ElevatedButton(
-            onPressed: () {
-              controller.setYearly(false);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: !controller.isYearly.value
-                  ? AppColors.appColor
-                  : Colors.white,
-              foregroundColor: !controller.isYearly.value
-                  ? Colors.white
-                  : AppColors.appColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-                side: BorderSide(color: AppColors.appColor),
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 120, // Set a smaller fixed width for the button
+              child: ElevatedButton(
+                onPressed: () {
+                  controller.setYearly(false);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: !controller.isYearly.value
+                      ? AppColors.appColor
+                      : Colors.white,
+                  foregroundColor: !controller.isYearly.value
+                      ? Colors.white
+                      : AppColors.appColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: BorderSide(color: AppColors.appColor),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  minimumSize: const Size(0, 48), // Consistent height
+                ),
+                child: Text(
+                  "monthly".tr,
+                  style: TextStyle(fontSize: 16),
+                ),
               ),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              minimumSize: const Size(0, 48), // Consistent height
             ),
-            child: Text(
-              "Monthly",
-              style: TextStyle(fontSize: 16),
-            ),
-          ),
-        ),
-        const SizedBox(width: 16),
-        SizedBox(
-          width: 120, // Same fixed width for the second button
-          child: ElevatedButton(
-            onPressed: () {
-              controller.setYearly(true);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: controller.isYearly.value
-                  ? AppColors.appColor
-                  : Colors.white,
-              foregroundColor: controller.isYearly.value
-                  ? Colors.white
-                  : AppColors.appColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-                side: BorderSide(color: AppColors.appColor),
+            const SizedBox(width: 16),
+            SizedBox(
+              width: 120, // Same fixed width for the second button
+              child: ElevatedButton(
+                onPressed: () {
+                  controller.setYearly(true);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: controller.isYearly.value
+                      ? AppColors.appColor
+                      : Colors.white,
+                  foregroundColor: controller.isYearly.value
+                      ? Colors.white
+                      : AppColors.appColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: BorderSide(color: AppColors.appColor),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  minimumSize: const Size(0, 48), // Consistent height
+                ),
+                child: Text(
+                  "yearly".tr,
+                  style: TextStyle(fontSize: 16),
+                ),
               ),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              minimumSize: const Size(0, 48), // Consistent height
             ),
-            child: Text(
-              "Yearly",
-              style: TextStyle(fontSize: 16),
-            ),
-          ),
-        ),
-      ],
-    ));
+          ],
+        ));
   }
 
   Widget _buildPricingCards() {
     return Obx(() {
       final packages = controller.getFilteredPackages();
-      final basicPackage = packages.firstWhereOrNull((p) => p.packageName.toLowerCase() == 'basic');
-      final premiumPackage = packages.firstWhereOrNull((p) => p.packageName.toLowerCase() == 'premium');
+      final basicPackage = packages
+          .firstWhereOrNull((p) => p.packageName.toLowerCase() == 'basic');
+      final premiumPackage = packages
+          .firstWhereOrNull((p) => p.packageName.toLowerCase() == 'premium');
 
       return Row(
         children: [
@@ -133,35 +134,48 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
             Expanded(
               child: _buildExactPricingCard(
                 title: basicPackage.packageName.toUpperCase(),
-                price: controller.currency.value == 'USD' && basicPackage.packagePriceUsd != null
+                price: controller.currency.value == 'USD' &&
+                        basicPackage.packagePriceUsd != null
                     ? basicPackage.packagePriceUsd!
                     : basicPackage.packagePriceEuro,
-                priceId: controller.currency.value == 'USD' && basicPackage.priceIdUsd != null
+                priceId: controller.currency.value == 'USD' &&
+                        basicPackage.priceIdUsd != null
                     ? basicPackage.priceIdUsd!
                     : basicPackage.priceIdEuro,
                 packageName: basicPackage.packageName,
                 packageType: basicPackage.packageType,
                 billedAnnually: basicPackage.packageType == 'Yearly',
-                savingsPercentage: basicPackage.packageType == 'Yearly' ? _getSavingsPercentage(basicPackage) : null,
-                descriptions: basicPackage.descriptions.map((d) => d.description).toList(),
+                savingsPercentage: basicPackage.packageType == 'Yearly'
+                    ? _getSavingsPercentage(basicPackage)
+                    : null,
+                descriptions: basicPackage.descriptions
+                    .map((d) => d.description)
+                    .toList(),
               ),
             ),
-          if (basicPackage != null && premiumPackage != null) const SizedBox(width: 16),
+          if (basicPackage != null && premiumPackage != null)
+            const SizedBox(width: 16),
           if (premiumPackage != null)
             Expanded(
               child: _buildExactPricingCard(
                 title: premiumPackage.packageName.toUpperCase(),
-                price: controller.currency.value == 'USD' && premiumPackage.packagePriceUsd != null
+                price: controller.currency.value == 'USD' &&
+                        premiumPackage.packagePriceUsd != null
                     ? premiumPackage.packagePriceUsd!
                     : premiumPackage.packagePriceEuro,
-                priceId: controller.currency.value == 'USD' && premiumPackage.priceIdUsd != null
+                priceId: controller.currency.value == 'USD' &&
+                        premiumPackage.priceIdUsd != null
                     ? premiumPackage.priceIdUsd!
                     : premiumPackage.priceIdEuro,
                 packageName: premiumPackage.packageName,
                 packageType: premiumPackage.packageType,
                 billedAnnually: premiumPackage.packageType == 'Yearly',
-                savingsPercentage: premiumPackage.packageType == 'Yearly' ? _getSavingsPercentage(premiumPackage) : null,
-                descriptions: premiumPackage.descriptions.map((d) => d.description).toList(),
+                savingsPercentage: premiumPackage.packageType == 'Yearly'
+                    ? _getSavingsPercentage(premiumPackage)
+                    : null,
+                descriptions: premiumPackage.descriptions
+                    .map((d) => d.description)
+                    .toList(),
               ),
             ),
         ],
@@ -170,7 +184,8 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
   }
 
   int? _getSavingsPercentage(Package package) {
-    final description = package.descriptions.firstWhereOrNull((d) => d.description.contains('save'));
+    final description = package.descriptions
+        .firstWhereOrNull((d) => d.description.contains('save'));
     if (description != null) {
       final match = RegExp(r'\d+').firstMatch(description.description);
       return match != null ? int.tryParse(match.group(0)!) : null;
@@ -179,8 +194,10 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
   }
 
   String determineAction(String packageName, String packageType) {
-    final currentPlan = controller.homeController.package_name.value.toLowerCase();
-    final currentType = controller.homeController.package_type.value.toLowerCase();
+    final currentPlan =
+        controller.homeController.package_name.value.toLowerCase();
+    final currentType =
+        controller.homeController.package_type.value.toLowerCase();
     final selectedPlan = packageName.toLowerCase();
     final selectedType = packageType.toLowerCase();
 
@@ -230,11 +247,11 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
 
     String buttonText;
     if (isUnsubscribed) {
-      buttonText = 'Buy Now';
+      buttonText = 'buy_now'.tr;
     } else if (isSamePlan) {
-      buttonText = 'Current Plan';
+      buttonText = 'current_plan'.tr;
     } else {
-      buttonText = action == 'upgrade' ? 'Upgrade' : 'Downgrade';
+      buttonText = action == 'upgrade' ? 'upgrade'.tr : 'downgrade'.tr;
     }
 
     return Container(
@@ -258,7 +275,8 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Row(
-                    mainAxisSize: MainAxisSize.min, // Minimize row size to keep content tight
+                    mainAxisSize: MainAxisSize.min,
+                    // Minimize row size to keep content tight
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.baseline,
                     textBaseline: TextBaseline.alphabetic,
@@ -272,7 +290,7 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
                       ),
                       Flexible(
                         child: Text(
-                          " per month",
+                          "per_month".tr,
                           style: h1.copyWith(fontSize: 10),
                           softWrap: false, // Prevent text from wrapping
                           overflow: TextOverflow.visible,
@@ -290,20 +308,21 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
                       children: [
                         Flexible(
                           child: Text(
-                            "Billed Annually",
+                            "billed_annually".tr,
                             style: h4.copyWith(fontSize: 10),
                           ),
                         ),
                         const SizedBox(width: 4),
                         if (savingsPercentage != null)
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 1),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(4),
                               border: Border.all(color: Colors.green),
                             ),
                             child: Text(
-                              "Save $savingsPercentage%",
+                              "save_percentage".trParams({'s': savingsPercentage.toString()}), // Localized dynamic text
                               style: h2.copyWith(
                                 color: Colors.green,
                                 fontSize: 12,
@@ -315,15 +334,17 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
                   ),
                 const SizedBox(height: 8),
                 ...descriptions
-                    .where((desc) => !desc.contains('save') && !desc.contains('fas fa-tachometer-alt'))
+                    .where((desc) =>
+                        !desc.contains('save') &&
+                        !desc.contains('fas fa-tachometer-alt'))
                     .map((desc) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2),
-                  child: Text(
-                    desc,
-                    textAlign: TextAlign.center,
-                    style: h1.copyWith(fontSize: 11),
-                  ),
-                )),
+                          padding: const EdgeInsets.symmetric(vertical: 2),
+                          child: Text(
+                            desc,
+                            textAlign: TextAlign.center,
+                            style: h1.copyWith(fontSize: 11),
+                          ),
+                        )),
               ],
             ),
           ),
@@ -336,35 +357,36 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
                 onPressed: isSamePlan || !isActionAllowed
                     ? null
                     : () async {
-                  print("Action: $action ${title.toLowerCase()} Plan");
-                  String successMessage;
-                  if (action == 'buy') {
-                    controller.buySubscription(
-                      priceId: priceId,
-                      packageName: packageName,
-                      packageType: packageType,
-                    );
-                    successMessage = 'Successfully purchased ${title.toLowerCase()} plan!';
-                  } else if (action == 'upgrade') {
-                    controller.upgradeSubscription(
-                      priceId: priceId,
-                      packageName: packageName,
-                      packageType: packageType,
-                    );
-                    successMessage = 'Successfully upgraded to ${title.toLowerCase()} plan!';
-                  } else {
-                    controller.downgradeSubscription(
-                      priceId: priceId,
-                      packageName: packageName,
-                      packageType: packageType,
-                    );
-                    successMessage = 'Successfully downgraded to ${title.toLowerCase()} plan!';
-                  }
-                  Get.snackbar('Success!', successMessage);
-                  controller.getAllowedActions();
-                  final HomeController homeController = Get.find<HomeController>();
-                  await homeController.fetchProfileData();
-                },
+                        print("Action: $action ${title.toLowerCase()} Plan");
+                        String successMessage;
+                        if (action == 'buy') {
+                          controller.buySubscription(
+                            priceId: priceId,
+                            packageName: packageName,
+                            packageType: packageType,
+                          );
+                          successMessage = "${'success_purchased'.tr} $title";
+                        } else if (action == 'upgrade') {
+                          controller.upgradeSubscription(
+                            priceId: priceId,
+                            packageName: packageName,
+                            packageType: packageType,
+                          );
+                          successMessage = "${'success_upgraded'.tr} $title";
+                        } else {
+                          controller.downgradeSubscription(
+                            priceId: priceId,
+                            packageName: packageName,
+                            packageType: packageType,
+                          );
+                          successMessage = "${'success_downgraded'.tr} $title";
+                        }
+                        Get.snackbar('success'.tr, successMessage);
+                        controller.getAllowedActions();
+                        final HomeController homeController =
+                            Get.find<HomeController>();
+                        await homeController.fetchProfileData();
+                      },
                 isDisabled: isSamePlan || !isActionAllowed,
               ),
             ),
@@ -376,15 +398,15 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
 
   Widget _buildFeaturesList() {
     final features = [
-      "Unlimited in-app recording",
-      "Smart time-stamped transcripts with audio syncing",
-      "Transcription supports more than 36 languages",
-      "Translation to more than 60 languages",
-      "Automatic speaker identification (diarization)",
-      "Unlimited summaries and Clevertalk IA interaction",
-      "Combine recordings with photo-based notes",
-      "Download transcripts, summaries, and other reports",
-      "Easily share results with colleagues or collaborators",
+      "feature_unlimited_recording".tr, // Localized feature
+      "feature_transcripts".tr, // Localized feature
+      "feature_transcription_languages".tr, // Localized feature
+      "feature_translation_languages".tr, // Localized feature
+      "feature_speaker_identification".tr, // Localized feature
+      "feature_summaries".tr, // Localized feature
+      "feature_photo_notes".tr, // Localized feature
+      "feature_download_reports".tr, // Localized feature
+      "feature_share_results".tr, // Localized feature
     ];
 
     return Container(
@@ -393,7 +415,7 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Both plans include:",
+            "both_plans_include".tr,
             style: h2.copyWith(fontWeight: FontWeight.bold, fontSize: 14),
           ),
           const SizedBox(height: 16),
@@ -403,7 +425,10 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.check,size: 20,),
+                  Icon(
+                    Icons.check,
+                    size: 20,
+                  ),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(feature, style: h2.copyWith(fontSize: 12)),

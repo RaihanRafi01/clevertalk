@@ -34,9 +34,9 @@ class NotificationSubscriptionView
           Expanded(
             child: Obx(() {
               if (controller.notifications.isEmpty) {
-                return const Center(
+                return Center(
                   child: Text(
-                    "No new notifications",
+                    'no_new_notifications'.tr,
                     style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                 );
@@ -81,7 +81,7 @@ class NotificationSubscriptionView
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  Text('Swipe to Delete'),
+                                  Text('swipe_to_delete'.tr),
                                   SizedBox(width: 10),
                                   const Icon(Icons.delete, color: Colors.red),
                                 ],
@@ -139,7 +139,7 @@ class NotificationSubscriptionView
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: CustomButton(
-              text: 'Read All',
+              text: 'read_all'.tr,
               onPressed: () => controller.markAllAsRead(),
             ),
           ),
@@ -153,19 +153,18 @@ class NotificationSubscriptionView
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Notification'),
-        content:
-            const Text('Are you sure you want to delete this notification?'),
+        title: Text('delete_notification'.tr),
+        content: Text('confirm_delete_notification'.tr),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false), // Cancel
-            child: const Text('Cancel'),
+            child: Text('cancel'.tr),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(context).pop(true); // Confirm
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text('delete'.tr, style: TextStyle(color: Colors.red)),
           ),
         ],
       ),

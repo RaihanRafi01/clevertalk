@@ -109,13 +109,11 @@ class ConvertToTextController extends GetxController {
             );
             _updateMessages(data);
           } else {
-            Get.snackbar(
-                'Error', 'Failed to fetch data: ${response.reasonPhrase}');
+            Get.snackbar('error'.tr, 'failed_to_fetch_data'.tr);
           }
         }
       } else {
-        Get.snackbar('Error',
-            'File not found in the database. Please add the file first.');
+        Get.snackbar('error'.tr, 'file_not_found'.tr);
       }
     } catch (e) {
       Get.snackbar('Error', 'Error fetching messages: $e');
@@ -233,7 +231,9 @@ class ConvertToTextController extends GetxController {
       whereArgs: [filePath],
     );
     if (snackBar) {
-      Get.snackbar("Success", "Transcription saved!");
+      if (snackBar) {
+        Get.snackbar('success'.tr, 'transcription_saved'.tr);
+      }
     }
     isEditing.value = false;
   }
@@ -241,8 +241,8 @@ class ConvertToTextController extends GetxController {
   Future<void> translateText(String filePath, String fileName) async {
     Get.snackbar(
       duration: const Duration(seconds: 4),
-      'Translation in progress...',
-      'This may take some time, but don\'t worry! We\'ll notify you as soon as it\'s ready.',
+      'translation_in_progress'.tr,
+      'translation_notification'.tr,
     );
 
     try {
@@ -304,7 +304,7 @@ class ConvertToTextController extends GetxController {
           final chunkData = json.decode(translatedText) as List;
           translatedData.addAll(chunkData.cast<Map<String, dynamic>>());
         } else {
-          Get.snackbar('Error', 'Translation failed: ${response.statusCode}');
+          Get.snackbar('error'.tr, 'translation_failed'.tr);
           return;
         }
       }
@@ -313,15 +313,15 @@ class ConvertToTextController extends GetxController {
       currentLanguage.value = selectedLanguage.value;
       await saveTranscription(filePath, false);
       NotificationService.showNotification(
-        title: "Translation Ready!",
-        body: "Click to view Translation",
+        title: 'translation_ready'.tr,
+        body: 'click_to_view_translation'.tr,
         payload: "Conversion",
         keyPoints: filePath,
         fileName: fileName,
         filePath: filePath,
       );
     } catch (e) {
-      Get.snackbar('Error', 'Translation error: $e');
+      Get.snackbar('error'.tr, 'translation_error'.tr);
       print('Error: $e');
     }
   }
@@ -372,7 +372,7 @@ class ConvertToTextController extends GetxController {
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
                   pw.Text(
-                    'Transcription of ${title.value}',
+                    '${'transcription_of'.tr} ${title.value}',
                     style: pw.TextStyle(
                       fontSize: 24,
                       fontWeight: pw.FontWeight.bold,
@@ -385,7 +385,7 @@ class ConvertToTextController extends GetxController {
                     mainAxisAlignment: pw.MainAxisAlignment.start,
                     children: [
                       pw.Text(
-                        'Date: $date',
+                        '${'date'.tr}: $date',
                         style: pw.TextStyle(
                           fontSize: 16,
                           fontWeight: pw.FontWeight.bold,
@@ -398,7 +398,7 @@ class ConvertToTextController extends GetxController {
                       ),
                       pw.SizedBox(width: 20),
                       pw.Text(
-                        'Time: $time',
+                        '${'time'.tr}: $time',
                         style: pw.TextStyle(
                           fontSize: 16,
                           fontWeight: pw.FontWeight.bold,
@@ -523,7 +523,7 @@ class ConvertToTextController extends GetxController {
 
     Get.dialog(
       AlertDialog(
-        title: const Text('Edit Speaker Name'),
+        title: Text('edit_speaker_name'.tr),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -535,19 +535,19 @@ class ConvertToTextController extends GetxController {
               onChanged: (value) {
                 selectedSpeaker = value ?? '';
               },
-              decoration: const InputDecoration(labelText: "Select Speaker"),
+              decoration: InputDecoration(labelText: 'select_speaker'.tr),
             ),
             const SizedBox(height: 10),
             TextField(
               controller: speakerNameController,
-              decoration: const InputDecoration(labelText: 'New Speaker Name'),
+              decoration: InputDecoration(labelText: 'new_speaker_name'.tr),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: const Text('Cancel'),
+            child: Text('cancel'.tr),
           ),
           TextButton(
             onPressed: () async {
@@ -595,7 +595,7 @@ class ConvertToTextController extends GetxController {
 
               Get.back();
             },
-            child: const Text('Save'),
+            child: Text('save'.tr),
           ),
         ],
       ),

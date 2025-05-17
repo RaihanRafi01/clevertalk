@@ -171,7 +171,7 @@ class SummaryKeyPointView extends StatelessWidget {
                               )),
                               const Spacer(),
                               CustomButton(
-                                text: 'Translate',
+                                text: 'translate'.tr,
                                 onPressed: () => controller.translateText(filePath, fileName),
                                 height: 40,
                                 width: 80,
@@ -189,8 +189,8 @@ class SummaryKeyPointView extends StatelessWidget {
                       ? TextField(
                     controller: controller.titleController,
                     style: h4.copyWith(fontSize: 18, fontWeight: FontWeight.bold),
-                    decoration: const InputDecoration(
-                      labelText: "Title",
+                    decoration: InputDecoration(
+                      labelText: 'title'.tr,
                       border: OutlineInputBorder(),
                     ),
                   )
@@ -204,7 +204,7 @@ class SummaryKeyPointView extends StatelessWidget {
                     controller: controller.dateController,
                     style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                     decoration: InputDecoration(
-                      labelText: "Date",
+                      labelText: 'date'.tr,
                       border: const OutlineInputBorder(),
                       suffixIcon: IconButton(
                         icon: const Icon(Icons.calendar_month_outlined),
@@ -276,8 +276,8 @@ class SummaryKeyPointView extends StatelessWidget {
               TextField(
                 controller: titleControllers[index],
                 style: h4.copyWith(fontSize: 15, fontWeight: FontWeight.bold),
-                decoration: const InputDecoration(
-                  labelText: "Key Point Title",
+                decoration: InputDecoration(
+                  labelText: 'key_point_title'.tr,
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -286,8 +286,8 @@ class SummaryKeyPointView extends StatelessWidget {
                 controller: valueControllers[index],
                 style: h4.copyWith(fontSize: 15),
                 maxLines: 2,
-                decoration: const InputDecoration(
-                  labelText: "Description",
+                decoration: InputDecoration(
+                  labelText: 'description'.tr,
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -321,7 +321,7 @@ class SummaryKeyPointView extends StatelessWidget {
 
   String _formatDate(String dateString) {
     DateTime dateTime = DateTime.parse(dateString);
-    return "Date: ${DateFormat('d MMMM y').format(dateTime)} time: ${DateFormat('h:mm a').format(dateTime)}";
+    return "${'date'.tr}: ${DateFormat('d MMMM y').format(dateTime)} ${'time'.tr}: ${DateFormat('h:mm a').format(dateTime)}";
   }
 
   void _showSearchBottomSheet(BuildContext context, SummaryKeyPointController controller) {
@@ -358,7 +358,7 @@ class SummaryKeyPointView extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Select Language',
+                        'select_language'.tr,
                         style: h4.copyWith(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -375,7 +375,7 @@ class SummaryKeyPointView extends StatelessWidget {
                   TextField(
                     controller: searchController,
                     decoration: InputDecoration(
-                      hintText: 'Search language...',
+                      hintText: 'search_language'.tr,
                       hintStyle: TextStyle(
                         color: Colors.grey.shade500,
                         fontStyle: FontStyle.italic,
@@ -432,7 +432,7 @@ class SummaryKeyPointView extends StatelessWidget {
                     child: filteredLanguages.isEmpty
                         ? Center(
                       child: Text(
-                        'No languages found',
+                        'no_languages_found'.tr,
                         style: h4.copyWith(
                           fontSize: 16,
                           color: Colors.grey.shade600,

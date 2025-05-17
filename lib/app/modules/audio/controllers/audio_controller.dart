@@ -78,7 +78,7 @@ class AudioPlayerController extends GetxController {
       print('Playback event: $event');
     }, onError: (Object e, StackTrace st) {
       print('Playback error: $e');
-      Get.snackbar('Error', 'Failed to play audio: $e');
+      Get.snackbar('error'.tr, 'failed_to_play_audio'.tr);
       isPlaying.value = false;
     });
   }
@@ -138,7 +138,7 @@ class AudioPlayerController extends GetxController {
     try {
       if (filePath == null) {
         if (audioFiles.isEmpty || currentIndex.value < 0 || currentIndex.value >= audioFiles.length) {
-          Get.snackbar('Error', 'No file to play');
+          Get.snackbar('error'.tr, 'no_file_to_play'.tr);
           return;
         }
         filePath = audioFiles[currentIndex.value]['file_path'];
@@ -147,7 +147,7 @@ class AudioPlayerController extends GetxController {
       final file = File(filePath!);
       if (!await file.exists()) {
         print('File does not exist: $filePath');
-        Get.snackbar('Error', 'File does not exist: $filePath');
+        Get.snackbar('error'.tr, 'file_not_exist'.tr);
         return;
       }
 
@@ -156,7 +156,7 @@ class AudioPlayerController extends GetxController {
         print('File is readable: $canRead');
       } catch (e) {
         print('Cannot read file: $e');
-        Get.snackbar('Error', 'Cannot read file: $e');
+        Get.snackbar('error'.tr, 'cannot_read_file'.tr);
         return;
       }
 
@@ -200,7 +200,7 @@ class AudioPlayerController extends GetxController {
           if (audioFiles.isNotEmpty && currentIndex.value >= 0) {
             filePath = audioFiles[currentIndex.value]['file_path'];
           } else {
-            Get.snackbar('Error', 'No audio file available to resume');
+            Get.snackbar('error'.tr, 'no_audio_file_available'.tr);
             return;
           }
         }
@@ -215,7 +215,7 @@ class AudioPlayerController extends GetxController {
       print('Resume completed. Position: ${currentPosition.value}');
     } catch (e) {
       print('Error in resumeAudio: $e');
-      Get.snackbar('Error', 'Failed to resume audio: $e');
+      Get.snackbar('error'.tr, 'failed_to_resume_audio'.tr);
       isPlaying.value = false;
     }
   }
@@ -225,7 +225,7 @@ class AudioPlayerController extends GetxController {
       currentIndex.value--;
       playAudio();
     } else {
-      Get.snackbar('Error', 'This is the first track');
+      Get.snackbar('error'.tr, 'first_track'.tr);
     }
   }
 
@@ -234,7 +234,7 @@ class AudioPlayerController extends GetxController {
       currentIndex.value++;
       playAudio();
     } else {
-      Get.snackbar('Error', 'This is the last track');
+      Get.snackbar('error'.tr, 'last_track'.tr);
     }
   }
 
@@ -352,8 +352,8 @@ class AudioPlayerController extends GetxController {
           Get.to(() => SummaryKeyPointView(fileName: fileName, filePath: filePath));
         } else {
           Get.snackbar(
-            'Summarization in progress...',
-            'This may take some time, but don\'t worry! We\'ll notify you as soon as it\'s ready. Feel free to use the app while you wait.',
+            'summarization_in_progress'.tr,
+            'summarization_notification'.tr,
             duration: Duration(seconds: 4),
           );
           final response = await _apiService.fetchKeyPoints(filePath, fileName);
@@ -373,15 +373,15 @@ class AudioPlayerController extends GetxController {
             );
 
             NotificationService.showNotification(
-              title: "Summary Ready!",
-              body: "Click to view Summary",
+              title: 'summary_ready'.tr,
+              body: 'click_to_view_summary'.tr,
               payload: "Summary",
               keyPoints: keyPointText,
               fileName: fileName,
               filePath: filePath,
             );
           } else {
-            Get.snackbar('Error', 'Failed to fetch keyPoint: ${response.body}');
+            Get.snackbar('error'.tr, 'failed_to_fetch_keypoint'.tr);
           }
         }
       } else {

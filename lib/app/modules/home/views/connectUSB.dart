@@ -137,7 +137,7 @@ Future<void> _processFiles(BuildContext context, String usbPath, DialogStateCont
             snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));*/
         dialogController.updateDialog(
           title: "Error",
-          message: "Failed to access directory after $maxRetriesStep3 attempts.",
+          message: '${'failed_to_access_directory'.tr} ${maxRetriesStep3.toString()} ${'attempts'.tr}',
           icon: Icons.error,
           iconColor: Colors.red.shade700,
           isLoading: false,
@@ -162,8 +162,8 @@ Future<void> _processFiles(BuildContext context, String usbPath, DialogStateCont
   }).toList();
 
   dialogController.updateDialog(
-    title: "Transferring",
-    message: "Please wait for file transfer from CleverTalk recorder\n\nFiles remaining: ${newFiles.length}",
+    title: 'transferring'.tr,
+    message: '${'wait_for_transfer'.tr} ${newFiles.length}',
     progress: 0.0,
     isLoading: true,
   );
@@ -186,16 +186,16 @@ Future<void> _processFiles(BuildContext context, String usbPath, DialogStateCont
 
     final progress = (i + 1) / newFiles.length;
     dialogController.updateDialog(
-      title: "Transferring",
-      message: "Please wait for file transfer from CleverTalk recorder\n\nFiles remaining: ${newFiles.length - (i + 1)}",
+      title: 'transferring'.tr,
+      message: '${'wait_for_transfer_remaining'.tr} ${(newFiles.length - (i + 1)).toString()})}',
       progress: progress,
       isLoading: true,
     );
   }
 
   dialogController.updateDialog(
-    title: "Completed",
-    message: "All files have been downloaded!\n${newFiles.length} files transferred successfully",
+    title: 'completed'.tr,
+    message: '${'all_files_have_been_downloaded'.tr}\n${newFiles.length} ${'files_transferred_successfully'.tr}',   // All files have been downloaded!\n${newFiles.length} files transferred successfully
     icon: Icons.check_circle,
     iconColor: AppColors.appColor,
     isLoading: false,
@@ -231,8 +231,8 @@ Future<void> connectUsbDevice(BuildContext context) async {
     isUsbConnected = false;
 
     dialogController.updateDialog(
-      title: "Connecting",
-      message: "Connecting to CleverTalk recorder...",
+      title: 'connecting'.tr,
+      message: 'connecting_to_recorder'.tr,
       isLoading: true,
       showTryAgain: false,
       showContinue: false,
@@ -244,8 +244,8 @@ Future<void> connectUsbDevice(BuildContext context) async {
         final permissionStatus = await _requestStoragePermission();
         if (permissionStatus != PermissionStatus.granted) {
           dialogController.updateDialog(
-            title: "Permission Required",
-            message: "This app needs access to external storage to read files from the CleverTalk recorder. Please grant the permission.",
+            title: 'permission_required'.tr,
+            message: 'storage_permission_message'.tr,
             icon: Icons.error,
             iconColor: Colors.red.shade700,
             isLoading: false,
@@ -271,8 +271,8 @@ Future<void> connectUsbDevice(BuildContext context) async {
           /*Get.snackbar('Debug', 'USB connected at path: $usbPath',
               snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));*/
           dialogController.updateDialog(
-            title: "Success",
-            message: "Successfully connected to the recorder\nPlease wait for file transfer from CleverTalk recorder",
+            title: 'success'.tr,
+            message: 'connected_to_recorder'.tr,
             icon: Icons.check_circle,
             iconColor: AppColors.appColor,
             isLoading: true,
@@ -297,8 +297,8 @@ Future<void> connectUsbDevice(BuildContext context) async {
 
     if (!isUsbConnected || usbPath == null) {
       dialogController.updateDialog(
-        title: "Error",
-        message: "Failed to connect USB device after $maxRetries attempts",
+        title: 'error'.tr,
+        message: '${'failed_to_connect_usb'.tr} ${maxRetries.toString()} ${'attempts'.tr}',
         icon: Icons.error,
         iconColor: Colors.red.shade700,
         isLoading: false,

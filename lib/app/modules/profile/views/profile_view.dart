@@ -136,7 +136,7 @@ class _EditProfileViewState extends State<ProfileView> {
                         isGem: true,
                         width: 180,
                         fontSize: 12,
-                        text: 'Standard Account',
+                        text: 'standard_account'.tr,
                         onPressed: () {},
                       ),
                     ],
@@ -146,42 +146,42 @@ class _EditProfileViewState extends State<ProfileView> {
             ),
             const SizedBox(height: 20),
             CustomTextField(
-              label: 'Full Name',
+              label: 'full_name'.tr, // Localized label
               controller: _nameController,
               prefixIcon: Icons.person_outline_rounded,
               onChanged: (value) {
                 profileController.updateName(value);
               },
-              hint: 'Enter Your Name',
+              hint: 'enter_your_name'.tr, // Localized hint
             ),
             SizedBox(height: 20),
             CustomTextField(
               readOnly: true,
-              label: 'Email',
+              label: 'email'.tr, // Localized label
               controller: _emailController,
               prefixIcon: Icons.email_outlined,
               keyboardType: TextInputType.emailAddress,
-              hint: 'Enter Your Email',
+              hint: 'enter_your_email'.tr, // Localized hint
             ),
             SizedBox(height: 20),
             CustomTextField(
               phone: true,
               prefixIcon: Icons.phone,
-              label: 'Phone Number',
+              label: 'phone_number'.tr, // Localized label
               controller: _phoneController,
               keyboardType: TextInputType.phone,
-              hint: 'Enter Phone Number',
+              hint: 'enter_phone_number'.tr, // Localized hint
               onChanged: (value) {
                 profileController.updatePhone(value);
               },
             ),
             SizedBox(height: 20),
             CustomTextField(
-              label: 'Address',
+              label: 'address'.tr, // Localized label
               controller: _addressController,
               prefixIcon: Icons.location_on_outlined,
               keyboardType: TextInputType.emailAddress,
-              hint: 'Enter Your Address',
+              hint: 'enter_your_address'.tr, // Localized hint
               onChanged: (value) {
                 profileController.updateAddress(value);
               },
@@ -193,7 +193,7 @@ class _EditProfileViewState extends State<ProfileView> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: Text(
-                    'Gender',
+                    'gender'.tr, // Localized label
                     style: h4.copyWith(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -228,19 +228,22 @@ class _EditProfileViewState extends State<ProfileView> {
                           Expanded(
                             child: DropdownButton<String>(
                               hint: Text(
-                                'Select Your Gender',
+                                'select_your_gender'.tr, // Localized hint
                                 style: h4.copyWith(
-                                  fontSize: 12, // Desired font size
-                                  color: AppColors.gray1, // Desired color
-                                  //fontWeight: FontWeight.normal,
+                                  fontSize: 12,
+                                  color: AppColors.gray1,
                                 ),
                               ),
                               value: homeController.gender.value.isNotEmpty ? homeController.gender.value : null,
-                              items: ['Male', 'Female', 'Other'].map((gender) => DropdownMenuItem<String>(
-                                value: gender,
+                              items: [
+                                {'value': 'Male', 'label': 'male'.tr},
+                                {'value': 'Female', 'label': 'female'.tr},
+                                {'value': 'Other', 'label': 'other'.tr},
+                              ].map((gender) => DropdownMenuItem<String>(
+                                value: gender['value'], // Use English value
                                 child: Text(
-                                  gender,
-                                  style: h4.copyWith(fontSize: 12), // Match CustomTextField text size
+                                  gender['label']!, // Use translated label
+                                  style: h4.copyWith(fontSize: 12),
                                 ),
                               )).toList(),
                               onChanged: (value) {
@@ -264,7 +267,7 @@ class _EditProfileViewState extends State<ProfileView> {
             ),
             const SizedBox(height: 40),
             CustomButton(
-              text: 'Save',
+              text: 'save'.tr,
               onPressed: () async {
                 print('::::::::edit:::::::::::::NAME:::::::::::${homeController.name.value}');
                // print('::::::::::edit:::::::::::aboutYou:::::::::::${homeController.aboutYou.value}');

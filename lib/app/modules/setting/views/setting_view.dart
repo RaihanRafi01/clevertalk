@@ -1,6 +1,7 @@
 import 'package:clevertalk/app/modules/notification_subscription/views/subscription_view.dart';
 import 'package:clevertalk/app/modules/notification_subscription/views/subscribed_view.dart';
 import 'package:clevertalk/app/modules/setting/views/terms_privacy_view.dart';
+import 'package:clevertalk/common/localization/localization_controller.dart';
 import 'package:clevertalk/common/widgets/settings/settingsList.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -25,6 +26,7 @@ class SettingView extends GetView<SettingController> {
   Widget build(BuildContext context) {
     Get.put(SettingController());
     final HomeController homeController = Get.find<HomeController>();
+    final LocalizationController localizationController = Get.find<LocalizationController>();
 
     final FlutterSecureStorage _storage = FlutterSecureStorage();
     Future<void> logout() async {
@@ -54,14 +56,13 @@ class SettingView extends GetView<SettingController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Settings', style: h1.copyWith(fontSize: 24)),
+              Text('settings'.tr, style: h1.copyWith(fontSize: 24)),
               SizedBox(height: 30),
-              Text('Account', style: h1.copyWith(fontSize: 16)),
+              Text('account'.tr, style: h1.copyWith(fontSize: 16)),
               SizedBox(height: 10),
-              // Removed Obx for Manage subscription
               SettingsList(
                 svgPath: 'assets/images/settings/subscription_icon.svg',
-                text: 'Manage subscription',
+                text: 'manage_subscription'.tr,
                 onTap: () {
                   if (homeController.package_name.value.isNotEmpty &&
                       homeController.package_type.value.isNotEmpty) {
@@ -73,14 +74,14 @@ class SettingView extends GetView<SettingController> {
               ),
               SettingsList(
                   svgPath: 'assets/images/settings/delete_icon.svg',
-                  text: 'Delete Account',
+                  text: 'delete_account'.tr,
                   onTap: () {
                     showDialog(
                       context: context,
                       barrierDismissible: true,
                       builder: (BuildContext context) {
                         return CustomDeletePopup(
-                          title: 'Do you want to delete your account ?\nIt will permanently delete your al user data.',
+                          title: 'delete_account_confirm'.tr,
                           onButtonPressed1: () {
                             // Delete
                           },
@@ -93,43 +94,41 @@ class SettingView extends GetView<SettingController> {
                   }),
               SettingsList(
                   svgPath: 'assets/images/settings/terms_icon.svg',
-                  text: 'Terms and condition',
+                  text: 'terms_and_condition'.tr,
                   onTap: () => Get.to(() => TermsPrivacyView(isTerms: true))),
               SettingsList(
                   svgPath: 'assets/images/settings/privacy_icon.svg',
-                  text: 'Privacy policy',
+                  text: 'privacy_policy'.tr,
                   onTap: () => Get.to(() => TermsPrivacyView(isTerms: false))),
               SettingsList(
-                  svgPath: 'assets/images/settings/refer_icon.svg',
-                  text: 'Refer a friend',
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      barrierDismissible: true,
-                      builder: (BuildContext context) {
-                        return CustomReferPopup(
-                          onSendPressed: () {
-                            // Add your referral sending logic here (e.g., API call)
-                            print('Send referral button pressed');
-                          },
-                        );
-                      },
-                    );
-                  },),
-
-              Text('Help', style: h1.copyWith(fontSize: 16)),
+                svgPath: 'assets/images/settings/refer_icon.svg',
+                text: 'refer_a_friend'.tr,
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    barrierDismissible: true,
+                    builder: (BuildContext context) {
+                      return CustomReferPopup(
+                        onSendPressed: () {
+                          print('Send referral button pressed');
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
+              Text('help'.tr, style: h1.copyWith(fontSize: 16)),
               SizedBox(height: 10),
               SettingsList(
                   svgPath: 'assets/images/settings/email_icon.svg',
-                  text: 'Email Support',
+                  text: 'email_support'.tr,
                   onTap: () => Get.to(() => HelpSupportView())),
-
-              Text('Notification', style: h1.copyWith(fontSize: 16)),
+              Text('notification'.tr, style: h1.copyWith(fontSize: 16)),
               SizedBox(height: 10),
               Obx(() {
                 return SettingsList(
                   svgPath: 'assets/images/settings/notification_icon.svg',
-                  text: 'Writing Reminder',
+                  text: 'writing_reminder'.tr,
                   isTogol: true,
                   isToggled: controller.isWritingReminderOn.value,
                   onToggleChanged: (value) {
@@ -143,7 +142,7 @@ class SettingView extends GetView<SettingController> {
                   onTap: () {},
                 );
               }),
-              Text('Language', style: h1.copyWith(fontSize: 16)),
+              Text('language'.tr, style: h1.copyWith(fontSize: 16)),
               SizedBox(height: 10),
               Obx(() {
                 return Container(
@@ -154,10 +153,10 @@ class SettingView extends GetView<SettingController> {
                   ),
                   child: DropdownButton<String>(
                     isExpanded: true,
-                    value: controller.selectedLanguage.value,
+                    value: localizationController.selectedLanguage.value,
                     onChanged: (newValue) {
                       if (newValue != null) {
-                        controller.changeLanguage(newValue);
+                        localizationController.changeLanguage(newValue);
                         print('Language changed to: $newValue');
                       }
                     },
@@ -166,25 +165,34 @@ class SettingView extends GetView<SettingController> {
                         value: 'English',
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Text('English', style: h4.copyWith(fontSize: 14)),
+                          child: Text(
+                            'english'.tr,
+                            style: h4.copyWith(fontSize: 14),
+                          ),
                         ),
                       ),
                       DropdownMenuItem(
                         value: 'Spanish',
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Text('Spanish', style: h4.copyWith(fontSize: 14)),
+                          child: Text(
+                            'spanish'.tr,
+                            style: h4.copyWith(fontSize: 14),
+                          ),
                         ),
                       ),
                       DropdownMenuItem(
                         value: 'French',
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Text('French', style: h4.copyWith(fontSize: 14)),
+                          child: Text(
+                            'french'.tr,
+                            style: h4.copyWith(fontSize: 14),
+                          ),
                         ),
                       ),
                     ],
-                    underline: SizedBox(),
+                    underline: const SizedBox(),
                   ),
                 );
               }),
@@ -193,26 +201,30 @@ class SettingView extends GetView<SettingController> {
                   onTap: () {
                     showDialog(
                       context: context,
-                      builder: (context) => AlertDialog(
-                        title: Text('Log Out', style: h2),
-                        content: Text('Are you sure you want to log out?', style: h3),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: Text('Cancel', style: h2.copyWith(color: AppColors.appColor)),
+                      builder: (context) =>
+                          AlertDialog(
+                            title: Text('log_out'.tr, style: h2),
+                            content: Text('log_out_confirm'.tr, style: h3),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: Text('cancel'.tr, style: h2.copyWith(
+                                    color: AppColors.appColor)),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  logout();
+                                },
+                                child: Text('log_out'.tr,
+                                    style: h2.copyWith(color: Colors.red)),
+                              ),
+                            ],
                           ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                              logout();
-                            },
-                            child: Text('Log Out', style: h2.copyWith(color: Colors.red)),
-                          ),
-                        ],
-                      ),
                     );
                   },
-                  child: SvgPicture.asset('assets/images/auth/logout_logo.svg')),
+                  child: SvgPicture.asset(
+                      'assets/images/auth/logout_logo.svg')),
               SizedBox(height: 70),
             ],
           ),
