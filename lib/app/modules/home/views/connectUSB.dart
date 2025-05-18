@@ -136,7 +136,7 @@ Future<void> _processFiles(BuildContext context, String usbPath, DialogStateCont
         /*Get.snackbar('Debug', 'All attempts failed: $e',
             snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));*/
         dialogController.updateDialog(
-          title: "Error",
+          title: "error".tr,
           message: '${'failed_to_access_directory'.tr} ${maxRetriesStep3.toString()} ${'attempts'.tr}',
           icon: Icons.error,
           iconColor: Colors.red.shade700,
@@ -163,7 +163,7 @@ Future<void> _processFiles(BuildContext context, String usbPath, DialogStateCont
 
   dialogController.updateDialog(
     title: 'transferring'.tr,
-    message: '${'wait_for_transfer'.tr} ${newFiles.length}',
+    message: '${'wait_for_transfer_remaining'.tr} ${newFiles.length}',
     progress: 0.0,
     isLoading: true,
   );
