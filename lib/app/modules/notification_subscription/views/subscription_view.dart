@@ -322,7 +322,7 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
                               border: Border.all(color: Colors.green),
                             ),
                             child: Text(
-                              "save_percentage".trParams({'s': savingsPercentage.toString()}), // Localized dynamic text
+                              '${"save_percentage:".tr} ${savingsPercentage.toString()}%', // Localized dynamic text
                               style: h2.copyWith(
                                 color: Colors.green,
                                 fontSize: 12,

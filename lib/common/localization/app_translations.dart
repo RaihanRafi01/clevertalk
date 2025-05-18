@@ -4,7 +4,6 @@ class AppTranslations extends Translations {
   @override
   Map<String, Map<String, String>> get keys => {
         'en_US': {
-          // Settings View (existing)
           'settings': 'Settings',
           'account': 'Account',
           'manage_subscription': 'Manage subscription',
@@ -24,18 +23,16 @@ class AppTranslations extends Translations {
           'log_out_confirm': 'Are you sure you want to log out?',
           'cancel': 'Cancel',
           'delete_account_confirm':
-              'Do you want to delete your account?\nIt will permanently delete all your user data.',
-          // Home View (previously added)
+          'Do you want to delete your account?\nIt will permanently delete all your user data.',
           'clevertalk': 'CLEVERTALK',
           'connect_clevertalk': 'Connect Clevertalk',
           'explore_plans': 'Explore Plans',
           'minutes_remaining': 'minutes remaining',
           'start_recording': 'START RECORDING',
-          // BeforeConnectView (previously added)
           'connect_your_clevertalk_recorder':
-              'Connect Your Clevertalk Recorder',
+          'Connect Your Clevertalk Recorder',
           'connect_description':
-              'If you already a CleverTalk Recorder, connect it here! Otherwise, go back and continue recording with your phone as usual.',
+          'If you already a CleverTalk Recorder, connect it here! Otherwise, go back and continue recording with your phone as usual.',
           'how_to_connect': 'How to connect',
           'step1_plug': 'Plug',
           'step1_usb_cable': 'the USB cable into your Clevertalk Recorder.',
@@ -44,13 +41,12 @@ class AppTranslations extends Translations {
           'step3_once_connected': 'Once connected',
           'step3_press_continue': 'Press Continue.',
           'continue': 'Continue',
-          // SubscriptionView (new)
           'no_packages_available': 'No packages available',
           'monthly': 'Monthly',
           'yearly': 'Yearly',
           'per_month': 'per month',
           'billed_annually': 'Billed Annually',
-          'save_percentage': 'Save %s%%', // %s for percentage
+          'save_percentage': 'Save',
           'buy_now': 'Buy Now',
           'current_plan': 'Current Plan',
           'upgrade': 'Upgrade',
@@ -62,29 +58,29 @@ class AppTranslations extends Translations {
           'both_plans_include': 'Both plans include:',
           'feature_unlimited_recording': 'Unlimited in-app recording',
           'feature_transcripts':
-              'Smart time-stamped transcripts with audio syncing',
+          'Smart time-stamped transcripts with audio syncing',
           'feature_transcription_languages':
-              'Transcription supports more than 36 languages',
+          'Transcription supports more than 36 languages',
           'feature_translation_languages':
-              'Translation to more than 60 languages',
+          'Translation to more than 60 languages',
           'feature_speaker_identification':
-              'Automatic speaker identification (diarization)',
+          'Automatic speaker identification (diarization)',
           'feature_summaries':
-              'Unlimited summaries and Clevertalk IA interaction',
+          'Unlimited summaries and Clevertalk IA interaction',
           'feature_photo_notes': 'Combine recordings with photo-based notes',
           'feature_download_reports':
-              'Download transcripts, summaries, and other reports',
+          'Download transcripts, summaries, and other reports',
           'feature_share_results':
-              'Easily share results with colleagues or collaborators',
+          'Easily share results with colleagues or collaborators',
           'your_subscription': 'Your Subscription',
           'plan': 'Plan: ',
           'type': 'Type: ',
           'details_label': 'Details:',
           'subscription_details':
-              'Enjoy all premium features including unlimited recording, transcription in 36+ languages, and more.',
+          'Enjoy all premium features including unlimited recording, transcription in 36+ languages, and more.',
           'cancel_subscription': 'Cancel Subscription',
           'cancel_subscription_confirm':
-              'Are you sure you want to cancel your subscription?',
+          'Are you sure you want to cancel your subscription?',
           'no': 'No',
           'yes': 'Yes',
           'standard_account': 'Standard Account',
@@ -109,7 +105,6 @@ class AppTranslations extends Translations {
           'title': 'Title',
           'date': 'Date',
           'time': 'time',
-          'date_time_format': 'Date: %s time: %s',
           'key_point_title': 'Key Point Title',
           'description': 'Description',
           'select_language': 'Select Language',
@@ -118,15 +113,13 @@ class AppTranslations extends Translations {
           'no_file_selected': 'No File Selected',
           'speaker_name': 'Speaker Name',
           'transcription': 'Transcription',
-
           'error': 'Error',
-          'file_not_found':
-              'File not found in the database. Please add the file first.',
+          'file_not_found': 'File not found in the database. Please add the file first.',
           'failed_to_fetch_data': 'Failed to fetch data',
           'transcription_saved': 'Transcription saved!',
           'translation_in_progress': 'Translation in progress...',
           'translation_notification':
-              'This may take some time, but don\'t worry! We\'ll notify you as soon as it\'s ready.',
+          'This may take some time, but don\'t worry! We\'ll notify you as soon as it\'s ready.',
           'translation_failed': 'Translation failed',
           'translation_error': 'Translation error',
           'translation_ready': 'Translation Ready!',
@@ -176,7 +169,6 @@ class AppTranslations extends Translations {
           'connected_to_recorder': 'Successfully connected to the recorder\nPlease wait for file transfer from CleverTalk recorder',
           'failed_to_connect_usb': 'Failed to connect USB device after',
           'try_again': 'Try Again',
-
         },
 
 
@@ -237,7 +229,7 @@ class AppTranslations extends Translations {
           'yearly': 'Anual',
           'per_month': 'por mes',
           'billed_annually': 'Facturado anualmente',
-          'save_percentage': 'Ahorra %s%%',
+          'save_percentage': 'Ahorra',
           // %s for percentage
           'buy_now': 'Comprar ahora',
           'current_plan': 'Plan actual',
@@ -300,7 +292,6 @@ class AppTranslations extends Translations {
           'title': 'Título',
           'date': 'Fecha',
           'time': 'tiempo',
-          'date_time_format': 'Fecha: %s hora: %s',
           'key_point_title': 'Título del Punto Clave',
           'description': 'Descripción',
           'select_language': 'Seleccionar Idioma',
@@ -415,7 +406,7 @@ class AppTranslations extends Translations {
           'yearly': 'Annuel',
           'per_month': 'par mois',
           'billed_annually': 'Facturé annuellement',
-          'save_percentage': 'Économisez %s%%',
+          'save_percentage': 'Économisez',
           // %s for percentage
           'buy_now': 'Acheter maintenant',
           'current_plan': 'Forfait actuel',
@@ -479,7 +470,6 @@ class AppTranslations extends Translations {
           'title': 'Titre',
           'date': 'Date',
           'time': 'tempo',
-          'date_time_format': 'Date: %s heure: %s',
           'key_point_title': 'Titre du Point Clé',
           'description': 'Description',
           'select_language': 'Sélectionner la Langue',
