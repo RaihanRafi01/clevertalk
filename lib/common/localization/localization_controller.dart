@@ -32,11 +32,35 @@ class LocalizationController extends GetxController {
   void _updateLocale(String language) {
     Locale locale;
     switch (language) {
-      case 'Spanish':
-        locale = const Locale('es', 'ES');
+      case 'German':
+        locale = const Locale('de', 'DE');
+        break;
+      case 'Russian':
+        locale = const Locale('ru', 'RU');
         break;
       case 'French':
         locale = const Locale('fr', 'FR');
+        break;
+      case 'Spanish':
+        locale = const Locale('es', 'ES');
+        break;
+      case 'Italian':
+        locale = const Locale('it', 'IT');
+        break;
+      case 'Portuguese':
+        locale = const Locale('pt', 'PT');
+        break;
+      case 'Chinese':
+        locale = const Locale('zh', 'CN');
+        break;
+      case 'Hindi':
+        locale = const Locale('hi', 'IN');
+        break;
+      case 'Arabic':
+        locale = const Locale('ar', 'AR');
+        break;
+      case 'Japanese':
+        locale = const Locale('ja', 'JP');
         break;
       default:
         locale = const Locale('en', 'US');
@@ -47,10 +71,26 @@ class LocalizationController extends GetxController {
   // Get current locale
   Locale getCurrentLocale() {
     switch (selectedLanguage.value) {
-      case 'Spanish':
-        return const Locale('es', 'ES');
+      case 'German':
+        return const Locale('de', 'DE');
+      case 'Russian':
+        return const Locale('ru', 'RU');
       case 'French':
         return const Locale('fr', 'FR');
+      case 'Spanish':
+        return const Locale('es', 'ES');
+      case 'Italian':
+        return const Locale('it', 'IT');
+      case 'Portuguese':
+        return const Locale('pt', 'PT');
+      case 'Chinese':
+        return const Locale('zh', 'CN');
+      case 'Hindi':
+        return const Locale('hi', 'IN');
+      case 'Arabic':
+        return const Locale('ar', 'AR');
+      case 'Japanese':
+        return const Locale('ja', 'JP');
       default:
         return const Locale('en', 'US');
     }

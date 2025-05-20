@@ -172,11 +172,21 @@ class SettingView extends GetView<SettingController> {
                         ),
                       ),
                       DropdownMenuItem(
-                        value: 'Spanish',
+                        value: 'German',
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Text(
-                            'spanish'.tr,
+                            'german'.tr,
+                            style: h4.copyWith(fontSize: 14),
+                          ),
+                        ),
+                      ),
+                      DropdownMenuItem(
+                        value: 'Russian',
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text(
+                            'russian'.tr,
                             style: h4.copyWith(fontSize: 14),
                           ),
                         ),
@@ -187,6 +197,76 @@ class SettingView extends GetView<SettingController> {
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Text(
                             'french'.tr,
+                            style: h4.copyWith(fontSize: 14),
+                          ),
+                        ),
+                      ),
+                      DropdownMenuItem(
+                        value: 'Spanish',
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text(
+                            'spanish'.tr,
+                            style: h4.copyWith(fontSize: 14),
+                          ),
+                        ),
+                      ),
+                      DropdownMenuItem(
+                        value: 'Italian',
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text(
+                            'italian'.tr,
+                            style: h4.copyWith(fontSize: 14),
+                          ),
+                        ),
+                      ),
+                      DropdownMenuItem(
+                        value: 'Portuguese',
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text(
+                            'portuguese'.tr,
+                            style: h4.copyWith(fontSize: 14),
+                          ),
+                        ),
+                      ),
+                      DropdownMenuItem(
+                        value: 'Chinese',
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text(
+                            'chinese'.tr,
+                            style: h4.copyWith(fontSize: 14),
+                          ),
+                        ),
+                      ),
+                      DropdownMenuItem(
+                        value: 'Hindi',
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text(
+                            'hindi'.tr,
+                            style: h4.copyWith(fontSize: 14),
+                          ),
+                        ),
+                      ),
+                      DropdownMenuItem(
+                        value: 'Arabic',
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text(
+                            'arabic'.tr,
+                            style: h4.copyWith(fontSize: 14),
+                          ),
+                        ),
+                      ),
+                      DropdownMenuItem(
+                        value: 'Japanese',
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text(
+                            'japanese'.tr,
                             style: h4.copyWith(fontSize: 14),
                           ),
                         ),
