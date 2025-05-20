@@ -139,9 +139,9 @@ class AppTranslations extends Translations {
           'select_speaker': 'Select Speaker',
           'new_speaker_name': 'New Speaker Name',
           'speaker_name_empty': 'Speaker name cannot be empty!',
-          'transcription_in_progress': 'Transcripción en progreso...',
+          'transcription_in_progress': 'Transcription in progress...',
           'transcription_notification':
-              'Esto puede tomar algo de tiempo, ¡pero no te preocupes! Te notificaremos tan pronto como esté listo. Siéntete libre de usar la aplicación mientras esperas.',
+              'This may take some time, but don\'t worry! We\'ll notify you as soon as it\'s ready. Feel free to use the app while you wait.',
           'transcription_ready': 'Transcription Ready!',
           'click_to_view_transcription': 'Click to view Transcription',
           'failed_to_play_audio': 'Failed to play audio',

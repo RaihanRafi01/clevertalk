@@ -10,6 +10,7 @@ import 'package:just_audio/just_audio.dart';
 
 import '../../../../common/appColors.dart';
 import '../../../data/database_helper.dart';
+import '../../../data/services/api_services.dart';
 import '../../audio/controllers/audio_controller.dart';
 
 class DialogStateController extends GetxController {
@@ -187,7 +188,7 @@ Future<void> _processFiles(BuildContext context, String usbPath, DialogStateCont
     final progress = (i + 1) / newFiles.length;
     dialogController.updateDialog(
       title: 'transferring'.tr,
-      message: '${'wait_for_transfer_remaining'.tr} ${(newFiles.length - (i + 1)).toString()})}',
+      message: '${'wait_for_transfer_remaining'.tr} ${(newFiles.length - (i + 1)).toString()}',
       progress: progress,
       isLoading: true,
     );
@@ -222,6 +223,8 @@ Future<void> connectUsbDevice(BuildContext context) async {
 
   int retryCount = 0;
   const maxRetries = 3;
+
+  final ApiService _apiService = ApiService();
 
   // Initialize and show persistent dialog
   final dialogController = _showPersistentDialog(context);
@@ -268,9 +271,30 @@ Future<void> connectUsbDevice(BuildContext context) async {
           usbDeviceUUID = usbDeviceDetails['deviceUUID'];
           isUsbConnected = true;
 
+          if(usbVendorId == '32903'){
+            //Get.snackbar('vendor ID', 'Matched!!!');
+
+            ////// api call while connected
+
+            final connectDevice = await _apiService.connectDevice(usbProductId.toString());
+
+           /* Get.snackbar('Matched!!! statusCode', '${connectDevice.statusCode}');
+            Get.snackbar('Matched!!! body', connectDevice.body,duration: Duration(minutes: 1));*/
+
+            dialogController.updateDialog(
+              title: 'success'.tr,
+              message: 'connected_to_recorder'.tr,
+              icon: Icons.check_circle,
+              iconColor: AppColors.appColor,
+              isLoading: true,
+            );
+            await Future.delayed(Duration(seconds: 2));
+            break;
+          }
+
           /*Get.snackbar('Debug', 'USB connected at path: $usbPath',
               snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));*/
-          dialogController.updateDialog(
+          /*dialogController.updateDialog(
             title: 'success'.tr,
             message: 'connected_to_recorder'.tr,
             icon: Icons.check_circle,
@@ -278,7 +302,7 @@ Future<void> connectUsbDevice(BuildContext context) async {
             isLoading: true,
           );
           await Future.delayed(Duration(seconds: 2));
-          break;
+          break;*/
         } else {
           retryCount++;
          /* Get.snackbar('Debug', 'Attempt $retryCount failed: No USB device detected, retrying...',
