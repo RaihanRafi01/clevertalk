@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:sqflite/sqflite.dart';
+import '../../../../common/localization/localization_controller.dart';
 import '../../../../config/secrets.dart';
 import '../../../data/database_helper.dart';
 import '../../../data/services/api_services.dart';
@@ -118,6 +119,12 @@ class SummaryKeyPointController extends GetxController {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final keyPointText = json.decode(response.body)['Data']['content'];
+        //final language_summary = json.decode(response.body)['nil_vai_shakil_vai'];
+
+        String languageCode = json.decode(response.body)['nil_vai_shakil_vai'];
+        String language_summary = LocalizationController.languageMap[languageCode] ?? languageCode;
+
+        print(':::::::::nil_vai_shakil_vai::::::::::::language_summary::::::::::::::::::::: $language_summary');
         await db.update(
           'audio_files',
           {

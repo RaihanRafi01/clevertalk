@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import '../../../../common/localization/localization_controller.dart';
 import '../../../../config/secrets.dart';
 import '../../../data/database_helper.dart';
 import '../../../data/services/api_services.dart';
@@ -95,14 +96,32 @@ class ConvertToTextController extends GetxController {
             print(
                 '::::::::::::::::::r1::::::::::::::::::CODE: ${r1.statusCode}');
             print('::::::::::::::::::r1::::::::::::::::::body: ${r1.body}');
+            final responseBody = utf8.decode(response.bodyBytes);
+            final jsonData = json.decode(responseBody);
 
-            final jsonData = json.decode(response.body);
+
+            //final jsonData = json.decode(response.body);
             final data = jsonData['Data'] as List;
+            //final language_transcription = jsonData['nil_vai_shakil_vai'];
+            String languageCode = jsonData['nil_vai_shakil_vai'];
+            String language_transcription = LocalizationController.languageMap[languageCode] ?? languageCode;
+
+            print(':::::::::nil_vai_shakil_vai::::::::::::language_transcription::::::::::::::::::::: $language_transcription');
+
+
+           /* if(languageCode == 'es'){
+
+              final responseBody = utf8.decode(response.bodyBytes);
+              final jsonData = json.decode(responseBody);
+            }*/
+
+
+
             await db.update(
               'audio_files',
               {
                 'transcription': json.encode(data),
-                'language_transcription': 'English'
+                'language_transcription': language_transcription
               },
               where: 'file_path = ?',
               whereArgs: [filePath],

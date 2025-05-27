@@ -12,6 +12,20 @@ class LocalizationController extends GetxController {
     loadSavedLanguage();
   }
 
+  static const Map<String, String> languageMap = {
+    'en': 'English',
+    'de': 'German',
+    'ru': 'Russian',
+    'fr': 'French',
+    'es': 'Spanish',
+    'it': 'Italian',
+    'pt': 'Portuguese',
+    'zh': 'Chinese',
+    'hi': 'Hindi',
+    'ar': 'Arabic',
+    'ja': 'Japanese',
+  };
+
   // Load saved language from SharedPreferences
   Future<void> loadSavedLanguage() async {
     final prefs = await SharedPreferences.getInstance();

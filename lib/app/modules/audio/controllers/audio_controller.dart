@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart';
 import 'package:sqflite/sqflite.dart';
+import '../../../../common/localization/localization_controller.dart';
 import '../../../data/database_helper.dart';
 import '../../../data/services/api_services.dart';
 import '../../../data/services/notification_services.dart';
@@ -54,7 +55,8 @@ class AudioPlayerController extends GetxController {
 
     _audioPlayer.playerStateStream.listen((state) {
       isPlaying.value = state.playing;
-      print('AudioPlayer state: playing=${state.playing}, processingState=${state.processingState}');
+      print(
+          'AudioPlayer state: playing=${state.playing}, processingState=${state.processingState}');
       if (state.playing) {
         _startWaveformAnimation();
       } else {
@@ -107,7 +109,8 @@ class AudioPlayerController extends GetxController {
 
     if (files.isNotEmpty) {
       if (fileName != null) {
-        currentIndex.value = files.indexWhere((file) => file['file_name'] == fileName);
+        currentIndex.value =
+            files.indexWhere((file) => file['file_name'] == fileName);
       }
       if (currentIndex.value == -1) {
         currentIndex.value = 0; // Fallback to first file if fileName not found
@@ -137,7 +140,9 @@ class AudioPlayerController extends GetxController {
   Future<void> playAudio({String? filePath}) async {
     try {
       if (filePath == null) {
-        if (audioFiles.isEmpty || currentIndex.value < 0 || currentIndex.value >= audioFiles.length) {
+        if (audioFiles.isEmpty ||
+            currentIndex.value < 0 ||
+            currentIndex.value >= audioFiles.length) {
           Get.snackbar('error'.tr, 'no_file_to_play'.tr);
           return;
         }
@@ -164,7 +169,8 @@ class AudioPlayerController extends GetxController {
       _currentFilePath = filePath;
 
       // Ensure the AudioPlayer is in a valid state
-      if (_audioPlayer.playing || _audioPlayer.processingState != ProcessingState.idle) {
+      if (_audioPlayer.playing ||
+          _audioPlayer.processingState != ProcessingState.idle) {
         print('AudioPlayer is not idle, stopping...');
         await _audioPlayer.stop();
       }
@@ -194,8 +200,10 @@ class AudioPlayerController extends GetxController {
 
   Future<void> resumeAudio({String? filePath}) async {
     try {
-      if (_audioPlayer.audioSource == null || (filePath != null && filePath != _currentFilePath)) {
-        print('Audio source not set or file changed. Re-setting file path: $filePath');
+      if (_audioPlayer.audioSource == null ||
+          (filePath != null && filePath != _currentFilePath)) {
+        print(
+            'Audio source not set or file changed. Re-setting file path: $filePath');
         if (filePath == null) {
           if (audioFiles.isNotEmpty && currentIndex.value >= 0) {
             filePath = audioFiles[currentIndex.value]['file_path'];
@@ -347,9 +355,12 @@ class AudioPlayerController extends GetxController {
       if (result.isNotEmpty) {
         final existingKeypoint = result.first['key_point'];
 
-        if (existingKeypoint != null && existingKeypoint.toString().isNotEmpty) {
-          print('::::::::existingKeypoint::::::::::::::::::${existingKeypoint.toString()}');
-          Get.to(() => SummaryKeyPointView(fileName: fileName, filePath: filePath));
+        if (existingKeypoint != null &&
+            existingKeypoint.toString().isNotEmpty) {
+          print(
+              '::::::::existingKeypoint::::::::::::::::::${existingKeypoint.toString()}');
+          Get.to(() =>
+              SummaryKeyPointView(fileName: fileName, filePath: filePath));
         } else {
           Get.snackbar(
             'summarization_in_progress'.tr,
@@ -364,10 +375,18 @@ class AudioPlayerController extends GetxController {
           if (response.statusCode == 200 || response.statusCode == 201) {
             final jsonResponse = json.decode(response.body);
             final keyPointText = jsonResponse['Data']['content'];
+            //final language_summary = jsonResponse['nil_vai_shakil_vai'];
 
+            String languageCode = jsonResponse['nil_vai_shakil_vai'];
+            String language_summary = LocalizationController.languageMap[languageCode] ?? languageCode;
+
+            print(':::::::::nil_vai_shakil_vai::::::::::::language_summary::::::::::::::::::::: $language_summary');
             await db.update(
               'audio_files',
-              {'key_point': keyPointText},
+              {
+                'key_point': keyPointText,
+                //'language_summary': language_summary
+              },
               where: 'file_name = ?',
               whereArgs: [fileName],
             );
@@ -385,7 +404,8 @@ class AudioPlayerController extends GetxController {
           }
         }
       } else {
-        Get.snackbar('Error', 'File not found in the database. Please add the file first.');
+        Get.snackbar('Error',
+            'File not found in the database. Please add the file first.');
       }
     } catch (e) {
       Get.snackbar('Error', 'Error: $e');
