@@ -86,7 +86,7 @@ class CustomNavigationBar extends StatelessWidget {
                           item['label']!,
                           style: const TextStyle(
                             color: Colors.black, // Selected label color
-                            fontSize: 11,
+                            fontSize: 9,
                           ),
                           textAlign: TextAlign.center,
                           maxLines: 2, // Allow up to two lines

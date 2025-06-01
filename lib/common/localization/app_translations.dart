@@ -19,7 +19,7 @@ class AppTranslations extends Translations {
           'account': 'Account',
           'manage_subscription': 'Manage subscription',
           'delete_account': 'Delete Account',
-          'terms_and_condition': 'Terms and condition',
+          'terms_and_condition': 'Terms and conditions',
           'privacy_policy': 'Privacy policy',
           'refer_a_friend': 'Refer a friend',
           'help': 'Help',

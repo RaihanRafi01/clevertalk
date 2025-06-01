@@ -51,7 +51,7 @@ class BeforeConnectView extends StatelessWidget {
                     Text(
                       'connect_your_clevertalk_recorder'.tr,
                       style: h1.copyWith(
-                        fontSize: 21,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
@@ -71,22 +71,22 @@ class BeforeConnectView extends StatelessWidget {
                               Text(
                                 'connect_description'.tr,
                                 style: h4.copyWith(
-                                  fontSize: 13,
+                                  fontSize: 12,
                                   color: Colors.black,
                                 ),
                               ),
-                              const SizedBox(height: 30),
+                              const SizedBox(height: 10),
 
                               // "How to connect" title
                               Text(
                                 'how_to_connect'.tr,
                                 style: h1.copyWith(
-                                  fontSize: 18,
+                                  fontSize: 17,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black,
                                 ),
                               ),
-                              const SizedBox(height: 30),
+                              const SizedBox(height: 20),
 
                               // Steps in transparent containers with gray border
                               Column(
@@ -113,7 +113,7 @@ class BeforeConnectView extends StatelessWidget {
                                           TextSpan(
                                             text: '1. ',
                                             style: h4.copyWith(
-                                              fontSize: 14,
+                                              fontSize: 13,
                                               fontWeight: FontWeight.bold,
                                               color: Colors
                                                   .red, // Red color for numbering
@@ -122,17 +122,18 @@ class BeforeConnectView extends StatelessWidget {
                                           TextSpan(
                                             text: 'step1_plug'.tr,
                                             style: h4.copyWith(
-                                              fontSize: 14,
+                                              fontSize: 13,
                                               fontWeight: FontWeight.bold,
                                               // Bold "Plug"
                                               color: Colors.black,
                                             ),
                                           ),
+                                          TextSpan(text: ' '),
                                           TextSpan(
                                             text:
                                             'step1_usb_cable'.tr,
                                             style: h4.copyWith(
-                                              fontSize: 14,
+                                              fontSize: 13,
                                               color: Colors.black,
                                             ),
                                           ),
@@ -162,7 +163,7 @@ class BeforeConnectView extends StatelessWidget {
                                           TextSpan(
                                             text: '2. ',
                                             style: h4.copyWith(
-                                              fontSize: 14,
+                                              fontSize: 13,
                                               fontWeight: FontWeight.bold,
                                               color: Colors
                                                   .red, // Red color for numbering
@@ -171,17 +172,18 @@ class BeforeConnectView extends StatelessWidget {
                                           TextSpan(
                                             text: 'step2_connect'.tr,
                                             style: h4.copyWith(
-                                              fontSize: 14,
+                                              fontSize: 13,
                                               fontWeight: FontWeight.bold,
                                               // Bold "Connect"
                                               color: Colors.black,
                                             ),
                                           ),
+                                          TextSpan(text: ' '),
                                           TextSpan(
                                             text:
                                             'step2_to_phone'.tr,
                                             style: h4.copyWith(
-                                              fontSize: 14,
+                                              fontSize: 13,
                                               color: Colors.black,
                                             ),
                                           ),
@@ -211,7 +213,7 @@ class BeforeConnectView extends StatelessWidget {
                                           TextSpan(
                                             text: '3. ',
                                             style: h4.copyWith(
-                                              fontSize: 14,
+                                              fontSize: 13,
                                               fontWeight: FontWeight.bold,
                                               color: Colors
                                                   .red, // Red color for numbering
@@ -220,14 +222,15 @@ class BeforeConnectView extends StatelessWidget {
                                           TextSpan(
                                             text: 'step3_once_connected'.tr,
                                             style: h4.copyWith(
-                                              fontSize: 14,
+                                              fontSize: 13,
                                               color: Colors.black,
                                             ),
                                           ),
+                                          TextSpan(text: ' '),
                                           TextSpan(
                                             text: 'step3_press_continue'.tr,
                                             style: h4.copyWith(
-                                              fontSize: 14,
+                                              fontSize: 13,
                                               fontWeight: FontWeight.bold,
                                               // Bold "Press"
                                               color: Colors.black,

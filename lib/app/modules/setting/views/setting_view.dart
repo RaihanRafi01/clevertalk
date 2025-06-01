@@ -166,7 +166,7 @@ class SettingView extends GetView<SettingController> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Text(
-                            'english'.tr,
+                            'English',
                             style: h4.copyWith(fontSize: 14),
                           ),
                         ),
@@ -176,7 +176,7 @@ class SettingView extends GetView<SettingController> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Text(
-                            'german'.tr,
+                            'German',
                             style: h4.copyWith(fontSize: 14),
                           ),
                         ),
@@ -186,7 +186,7 @@ class SettingView extends GetView<SettingController> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Text(
-                            'russian'.tr,
+                            'Russian',
                             style: h4.copyWith(fontSize: 14),
                           ),
                         ),
@@ -196,7 +196,7 @@ class SettingView extends GetView<SettingController> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Text(
-                            'french'.tr,
+                            'French',
                             style: h4.copyWith(fontSize: 14),
                           ),
                         ),
@@ -206,7 +206,7 @@ class SettingView extends GetView<SettingController> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Text(
-                            'spanish'.tr,
+                            'Spanish',
                             style: h4.copyWith(fontSize: 14),
                           ),
                         ),
@@ -216,7 +216,7 @@ class SettingView extends GetView<SettingController> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Text(
-                            'italian'.tr,
+                            'Italian',
                             style: h4.copyWith(fontSize: 14),
                           ),
                         ),
@@ -226,7 +226,7 @@ class SettingView extends GetView<SettingController> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Text(
-                            'portuguese'.tr,
+                            'Portuguese',
                             style: h4.copyWith(fontSize: 14),
                           ),
                         ),
@@ -236,7 +236,7 @@ class SettingView extends GetView<SettingController> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Text(
-                            'chinese'.tr,
+                            'Chinese',
                             style: h4.copyWith(fontSize: 14),
                           ),
                         ),
@@ -246,7 +246,7 @@ class SettingView extends GetView<SettingController> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Text(
-                            'hindi'.tr,
+                            'Hindi',
                             style: h4.copyWith(fontSize: 14),
                           ),
                         ),
@@ -256,7 +256,7 @@ class SettingView extends GetView<SettingController> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Text(
-                            'arabic'.tr,
+                            'Arabic',
                             style: h4.copyWith(fontSize: 14),
                           ),
                         ),
@@ -266,7 +266,7 @@ class SettingView extends GetView<SettingController> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Text(
-                            'japanese'.tr,
+                            'Japanese',
                             style: h4.copyWith(fontSize: 14),
                           ),
                         ),
