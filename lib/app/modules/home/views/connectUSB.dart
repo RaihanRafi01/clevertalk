@@ -7,7 +7,6 @@ import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:just_audio/just_audio.dart';
-
 import '../../../../common/appColors.dart';
 import '../../../data/database_helper.dart';
 import '../../../data/services/api_services.dart';
@@ -22,6 +21,49 @@ class DialogStateController extends GetxController {
   var isLoading = false.obs;
   var showContinue = false.obs;
   var showTryAgain = false.obs;
+  var isUsbAttached = false.obs;
+
+  static const platform = MethodChannel('usb_path_reader/usb');
+
+  @override
+  void onInit() {
+    super.onInit();
+    _setupUsbListener();
+  }
+
+  void _setupUsbListener() {
+    platform.invokeMethod('startUsbListener');
+    platform.setMethodCallHandler((call) async {
+      switch (call.method) {
+        case 'onUsbAttached':
+          print('USB Attached received in Flutter');
+          isUsbAttached.value = true;
+          updateDialog(
+            title: 'usb_detected'.tr,
+            message: 'usb_device_detected'.tr,
+            icon: Icons.usb,
+            iconColor: Colors.blue.shade700,
+            isLoading: false,
+            showTryAgain: false,
+            showContinue: false,
+          );
+          break;
+        case 'onUsbDetached':
+          print('USB Detached received in Flutter');
+          isUsbAttached.value = false;
+          updateDialog(
+            title: 'usb_disconnected'.tr,
+            message: 'please_reconnect_usb_device'.tr,
+            icon: Icons.usb_off,
+            iconColor: Colors.red.shade700,
+            isLoading: false,
+            showContinue: false,
+            showTryAgain: true,
+          );
+          break;
+      }
+    });
+  }
 
   void updateDialog({
     String? title,
@@ -44,33 +86,24 @@ class DialogStateController extends GetxController {
   }
 }
 
-// Declare helper functions before use
 Future<PermissionStatus> _requestStoragePermission() async {
   PermissionStatus status;
 
-  // For Android 10 (API 29), request READ_EXTERNAL_STORAGE
   if (Platform.isAndroid && Platform.version.startsWith('29')) {
     status = await Permission.storage.status;
     if (!status.isGranted) {
       status = await Permission.storage.request();
       if (status.isPermanentlyDenied) {
-        /*Get.snackbar('Debug', 'Storage permission permanently denied, opening settings',
-            snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));*/
         await openAppSettings();
-        // Recheck status after opening settings
         status = await Permission.storage.status;
       }
     }
   } else {
-    // For Android 11+ (API 30+), request MANAGE_EXTERNAL_STORAGE
     status = await Permission.manageExternalStorage.status;
     if (!status.isGranted) {
       status = await Permission.manageExternalStorage.request();
       if (status.isPermanentlyDenied) {
-       /* Get.snackbar('Debug', 'Manage External Storage permission permanently denied, opening settings',
-            snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));*/
         await openAppSettings();
-        // Recheck status after opening settings
         status = await Permission.manageExternalStorage.status;
       }
     }
@@ -80,21 +113,17 @@ Future<PermissionStatus> _requestStoragePermission() async {
 }
 
 Future<void> _processFiles(BuildContext context, String usbPath, DialogStateController dialogController, DatabaseHelper dbHelper) async {
-  String combinedPath = '$usbPath/RECORD'; // Fixed selectedPath to be part of the path
+  String combinedPath = '$usbPath/RECORD';
   var directory = Directory(combinedPath);
 
-  /*Get.snackbar('Debug', 'Attempting to access directory: $combinedPath',
-      snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));*/
+  await Future.delayed(Duration(seconds: 15));
 
-  // Try multiple variations of the path
   final possiblePaths = [
     combinedPath,
     '/storage$combinedPath',
     '/mnt/media_rw$combinedPath',
   ];
   bool directoryFound = false;
-
-  await Future.delayed(Duration(seconds: 15));
 
   for (final path in possiblePaths) {
     final dir = Directory(path);
@@ -104,16 +133,12 @@ Future<void> _processFiles(BuildContext context, String usbPath, DialogStateCont
         combinedPath = path;
         directory = dir;
         directoryFound = true;
-        /*Get.snackbar('Debug', 'Found valid directory: $combinedPath',
-            snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2));*/
         break;
       }
     }
   }
 
   if (!directoryFound) {
-   /* Get.snackbar('Debug', 'No valid directory found in: $possiblePaths',
-        snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));*/
     throw Exception('No valid directory found in: $possiblePaths');
   }
 
@@ -124,20 +149,14 @@ Future<void> _processFiles(BuildContext context, String usbPath, DialogStateCont
   while (retryCountStep3 < maxRetriesStep3) {
     try {
       files = directory.listSync(recursive: true, followLinks: false);
-      /*Get.snackbar('Debug', 'Successfully listed files in $combinedPath',
-          snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2));*/
       break;
     } catch (e) {
       retryCountStep3++;
       if (retryCountStep3 < maxRetriesStep3) {
-        /*Get.snackbar('Debug', 'Attempt $retryCountStep3 failed: $e, retrying...',
-            snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2));*/
         await Future.delayed(Duration(seconds: 15));
       } else {
-        /*Get.snackbar('Debug', 'All attempts failed: $e',
-            snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));*/
         dialogController.updateDialog(
-          title: "error".tr,
+          title: 'error'.tr,
           message: '${'failed_to_access_directory'.tr} ${maxRetriesStep3.toString()} ${'attempts'.tr}',
           icon: Icons.error,
           iconColor: Colors.red.shade700,
@@ -196,22 +215,18 @@ Future<void> _processFiles(BuildContext context, String usbPath, DialogStateCont
 
   dialogController.updateDialog(
     title: 'completed'.tr,
-    message: '${'all_files_have_been_downloaded'.tr}\n${newFiles.length} ${'files_transferred_successfully'.tr}',   // All files have been downloaded!\n${newFiles.length} files transferred successfully
+    message: '${'all_files_have_been_downloaded'.tr}\n${newFiles.length} ${'files_transferred_successfully'.tr}',
     icon: Icons.check_circle,
     iconColor: AppColors.appColor,
     isLoading: false,
     showContinue: true,
   );
 
-  /*Get.snackbar('Debug', 'Transfer completed: ${newFiles.length} files',
-      snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));*/
-
   final AudioPlayerController audioController = Get.put(AudioPlayerController());
   audioController.fetchAudioFiles();
 }
 
 Future<void> connectUsbDevice(BuildContext context) async {
-  const platform = MethodChannel('usb_path_reader/usb');
   final dbHelper = DatabaseHelper();
   String selectedPath = '/RECORD';
   String? usbPath;
@@ -225,9 +240,28 @@ Future<void> connectUsbDevice(BuildContext context) async {
   const maxRetries = 3;
 
   final ApiService _apiService = ApiService();
-
-  // Initialize and show persistent dialog
   final dialogController = _showPersistentDialog(context);
+
+  // Check for existing USB device on initialization
+  try {
+    final Map<dynamic, dynamic>? usbDeviceDetails =
+    await DialogStateController.platform.invokeMethod('getUsbDeviceDetails');
+    if (usbDeviceDetails != null) {
+      print('USB device already connected on init');
+      dialogController.isUsbAttached.value = true;
+      dialogController.updateDialog(
+        title: 'usb_detected'.tr,
+        message: 'usb_device_detected'.tr,
+        icon: Icons.usb,
+        iconColor: Colors.blue.shade700,
+        isLoading: false,
+        showTryAgain: false,
+        showContinue: false,
+      );
+    }
+  } catch (e) {
+    print('Error checking USB on init: $e');
+  }
 
   Future<void> tryConnect() async {
     retryCount = 0;
@@ -243,7 +277,6 @@ Future<void> connectUsbDevice(BuildContext context) async {
 
     while (retryCount < maxRetries) {
       try {
-        // Request storage permissions
         final permissionStatus = await _requestStoragePermission();
         if (permissionStatus != PermissionStatus.granted) {
           dialogController.updateDialog(
@@ -258,11 +291,11 @@ Future<void> connectUsbDevice(BuildContext context) async {
         }
 
         final Map<dynamic, dynamic>? usbDeviceDetails =
-        await platform.invokeMethod('getUsbDeviceDetails');
+        await DialogStateController.platform.invokeMethod('getUsbDeviceDetails');
 
         if (usbDeviceDetails != null) {
-          usbPath = await platform.invokeMethod<String>('getUsbPath');
-          if (usbPath == null || (usbPath?.isEmpty ?? true)) { // Null-safe check for isEmpty
+          usbPath = await DialogStateController.platform.invokeMethod<String>('getUsbPath');
+          if (usbPath == null || usbPath!.isEmpty) {
             throw Exception('USB path not detected');
           }
           usbDeviceName = usbDeviceDetails['deviceName'];
@@ -271,16 +304,8 @@ Future<void> connectUsbDevice(BuildContext context) async {
           usbDeviceUUID = usbDeviceDetails['deviceUUID'];
           isUsbConnected = true;
 
-          if(usbVendorId == '32903'){
-            //Get.snackbar('vendor ID', 'Matched!!!');
-
-            ////// api call while connected
-
+          if (usbVendorId == '32903') {
             final connectDevice = await _apiService.connectDevice(usbProductId.toString());
-
-           /* Get.snackbar('Matched!!! statusCode', '${connectDevice.statusCode}');
-            Get.snackbar('Matched!!! body', connectDevice.body,duration: Duration(minutes: 1));*/
-
             dialogController.updateDialog(
               title: 'success'.tr,
               message: 'connected_to_recorder'.tr,
@@ -291,22 +316,8 @@ Future<void> connectUsbDevice(BuildContext context) async {
             await Future.delayed(Duration(seconds: 2));
             break;
           }
-
-          /*Get.snackbar('Debug', 'USB connected at path: $usbPath',
-              snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 3));*/
-          /*dialogController.updateDialog(
-            title: 'success'.tr,
-            message: 'connected_to_recorder'.tr,
-            icon: Icons.check_circle,
-            iconColor: AppColors.appColor,
-            isLoading: true,
-          );
-          await Future.delayed(Duration(seconds: 2));
-          break;*/
         } else {
           retryCount++;
-         /* Get.snackbar('Debug', 'Attempt $retryCount failed: No USB device detected, retrying...',
-              snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2));*/
           await Future.delayed(Duration(seconds: 15));
         }
       } catch (e) {
@@ -334,8 +345,19 @@ Future<void> connectUsbDevice(BuildContext context) async {
     await _processFiles(context, usbPath!, dialogController, dbHelper);
   }
 
-  // Initial call to start the connection process
-  await tryConnect();
+  if (dialogController.isUsbAttached.value) {
+    await tryConnect();
+  } else {
+    dialogController.updateDialog(
+      title: 'waiting_for_usb'.tr,
+      message: 'please_connect_usb_device'.tr,
+      icon: Icons.usb,
+      iconColor: Colors.blue.shade700,
+      isLoading: false,
+      showTryAgain: false,
+      showContinue: false,
+    );
+  }
 }
 
 Future<String> _copyFileToLocal(String filePath) async {
@@ -396,9 +418,11 @@ DialogStateController _showPersistentDialog(BuildContext context) {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                controller.iconColor.value == Colors.red.shade700 ? Colors.red.shade100 :
-                controller.iconColor.value == AppColors.appColor ? AppColors.appColor2 :
-                Colors.blue.shade100,
+                controller.iconColor.value == Colors.red.shade700
+                    ? Colors.red.shade100
+                    : controller.iconColor.value == AppColors.appColor
+                    ? AppColors.appColor2
+                    : Colors.blue.shade100,
                 Colors.white
               ],
               begin: Alignment.topLeft,
@@ -440,7 +464,9 @@ DialogStateController _showPersistentDialog(BuildContext context) {
                   valueColor: AlwaysStoppedAnimation<Color>(AppColors.appColor),
                 ),
               ],
-              if (controller.progress.value != null && !controller.showContinue.value && !controller.showTryAgain.value) ...[
+              if (controller.progress.value != null &&
+                  !controller.showContinue.value &&
+                  !controller.showTryAgain.value) ...[
                 SizedBox(height: 20),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
@@ -469,6 +495,8 @@ DialogStateController _showPersistentDialog(BuildContext context) {
                   onPressed: () {
                     Get.back();
                   },
+                  backgroundColor: AppColors.appColor,
+                  textColor: Colors.white,
                 ),
               ],
               if (controller.showTryAgain.value) ...[
@@ -482,6 +510,34 @@ DialogStateController _showPersistentDialog(BuildContext context) {
                     Get.back();
                     await connectUsbDevice(context);
                   },
+                  backgroundColor: AppColors.appColor,
+                  textColor: Colors.white,
+                ),
+              ],
+              if (!controller.isLoading.value &&
+                  !controller.showContinue.value &&
+                  !controller.showTryAgain.value) ...[
+                SizedBox(height: 20),
+                CustomButton(
+                  borderRadius: 30,
+                  width: 160,
+                  text: 'Connect',
+                  onPressed: controller.isUsbAttached.value
+                      ? () async {
+                    controller.updateDialog(
+                      showTryAgain: false,
+                      showContinue: false,
+                    );
+                    Get.back();
+                    await connectUsbDevice(context);
+                  }
+                      : null,
+                  backgroundColor: controller.isUsbAttached.value
+                      ? AppColors.appColor
+                      : Colors.grey.shade400,
+                  textColor: controller.isUsbAttached.value
+                      ? Colors.white
+                      : Colors.grey.shade600,
                 ),
               ],
             ],

@@ -4,6 +4,15 @@ class AppTranslations extends Translations {
   @override
   Map<String, Map<String, String>> get keys => {
         'en_US': {
+          "usb_detected": "USB Device Detected",
+          "usb_device_detected":
+              "USB device detected. Click Connect to proceed.",
+          "usb_disconnected": "USB Disconnected",
+          "please_reconnect_usb_device":
+              "Please reconnect the USB device to continue.",
+          "waiting_for_usb": "Waiting for USB",
+          "please_connect_usb_device":
+              "Please connect a USB device to proceed.",
           'english': 'English',
           'german': 'German',
           'russian': 'Russian',
@@ -192,6 +201,15 @@ class AppTranslations extends Translations {
 //////////////////////////////////////// Spanish  //////////////////////////////////////
 
         'es_ES': {
+          "usb_detected": "Dispositivo USB detectado",
+          "usb_device_detected":
+              "Dispositivo USB detectado. Haz clic en Conectar para continuar.",
+          "usb_disconnected": "USB desconectado",
+          "please_reconnect_usb_device":
+              "Por favor, reconecta el dispositivo USB para continuar.",
+          "waiting_for_usb": "Esperando USB",
+          "please_connect_usb_device":
+              "Por favor, conecta un dispositivo USB para continuar.",
           'english': 'Inglés',
           'german': 'Alemán',
           'russian': 'Ruso',
@@ -380,6 +398,15 @@ class AppTranslations extends Translations {
 
         //////////////////////////////////////////////////////////////// French //////////////////////////////////
         'fr_FR': {
+          "usb_detected": "Périphérique USB détecté",
+          "usb_device_detected":
+              "Périphérique USB détecté. Cliquez sur Connecter pour continuer.",
+          "usb_disconnected": "USB déconnecté",
+          "please_reconnect_usb_device":
+              "Veuillez reconnecter le périphérique USB pour continuer.",
+          "waiting_for_usb": "En attente d'USB",
+          "please_connect_usb_device":
+              "Veuillez connecter un périphérique USB pour continuer.",
           'english': 'Anglais',
           'german': 'Allemand',
           'russian': 'Russe',
@@ -570,6 +597,15 @@ class AppTranslations extends Translations {
 
         ////////////////////////////////// GERMAN ///////////////////////
         'de_DE': {
+          "usb_detected": "USB-Gerät erkannt",
+          "usb_device_detected":
+              "USB-Gerät erkannt. Klicken Sie auf Verbinden, um fortzufahren.",
+          "usb_disconnected": "USB getrennt",
+          "please_reconnect_usb_device":
+              "Bitte schließen Sie das USB-Gerät wieder an, um fortzufahren.",
+          "waiting_for_usb": "Warten auf USB",
+          "please_connect_usb_device":
+              "Bitte schließen Sie ein USB-Gerät an, um fortzufahren.",
           'english': 'Englisch',
           'german': 'Deutsch',
           'russian': 'Russisch',
@@ -766,6 +802,15 @@ class AppTranslations extends Translations {
         ////////////////////////////////// Russian //////////////////////////////////////
 
         'ru_RU': {
+          "usb_detected": "USB-устройство обнаружено",
+          "usb_device_detected":
+              "USB-устройство обнаружено. Нажмите «Подключить», чтобы продолжить.",
+          "usb_disconnected": "USB отключен",
+          "please_reconnect_usb_device":
+              "Пожалуйста, повторно подключите USB-устройство, чтобы продолжить.",
+          "waiting_for_usb": "Ожидание USB",
+          "please_connect_usb_device":
+              "Пожалуйста, подключите USB-устройство, чтобы продолжить.",
           'english': 'Английский',
           'german': 'Немецкий',
           'russian': 'Русский',
@@ -956,6 +1001,15 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Italian  /////////////////////////////////
 
         'it_IT': {
+          "usb_detected": "Dispositivo USB rilevato",
+          "usb_device_detected":
+              "Dispositivo USB rilevato. Clicca su Connetti per procedere.",
+          "usb_disconnected": "USB disconnesso",
+          "please_reconnect_usb_device":
+              "Ricollega il dispositivo USB per continuare.",
+          "waiting_for_usb": "In attesa di USB",
+          "please_connect_usb_device":
+              "Collega un dispositivo USB per procedere.",
           'english': 'Inglese',
           'german': 'Tedesco',
           'russian': 'Russo',
@@ -1147,6 +1201,15 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Portuguese   /////////////////////////////////
 
         'pt_PT': {
+          "usb_detected": "Dispositivo USB detectado",
+          "usb_device_detected":
+              "Dispositivo USB detectado. Clique em Conectar para prosseguir.",
+          "usb_disconnected": "USB desconectado",
+          "please_reconnect_usb_device":
+              "Por favor, reconecte o dispositivo USB para continuar.",
+          "waiting_for_usb": "Aguardando USB",
+          "please_connect_usb_device":
+              "Por favor, conecte um dispositivo USB para prosseguir.",
           'english': 'Inglês',
           'german': 'Alemão',
           'russian': 'Russo',
@@ -1336,6 +1399,12 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Chinese   /////////////////////////////////
 
         'zh_CN': {
+          "usb_detected": "检测到USB设备",
+          "usb_device_detected": "检测到USB设备。点击连接以继续。",
+          "usb_disconnected": "USB已断开",
+          "please_reconnect_usb_device": "请重新连接USB设备以继续。",
+          "waiting_for_usb": "等待USB",
+          "please_connect_usb_device": "请连接USB设备以继续。",
           'english': '英语',
           'german': '德语',
           'russian': '俄语',
@@ -1506,6 +1575,14 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Hindi   /////////////////////////////////
 
         'hi_IN': {
+          "usb_detected": "यूएसबी डिवाइस डिटेक्टेड",
+          "usb_device_detected":
+              "यूएसबी डिवाइस डिटेक्टेड। कनेक्ट करने के लिए क्लिक करें।",
+          "usb_disconnected": "यूएसबी डिस्कनेक्टेड",
+          "please_reconnect_usb_device":
+              "कृपया यूएसबी डिवाइस को पुनः कनेक्ट करें।",
+          "waiting_for_usb": "यूएसबी की प्रतीक्षा",
+          "please_connect_usb_device": "कृपया यूएसबी डिवाइस कनेक्ट करें।",
           'english': 'अंग्रेजी',
           'german': 'जर्मन',
           'russian': 'रूसी',
@@ -1695,6 +1772,12 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Arabic  /////////////////////////////////
 
         'ar_AR': {
+          "usb_detected": "تم اكتشاف جهاز USB",
+          "usb_device_detected": "تم اكتشاف جهاز USB. انقر على اتصال للمتابعة.",
+          "usb_disconnected": "تم قطع اتصال USB",
+          "please_reconnect_usb_device": "يرجى إعادة توصيل جهاز USB للمتابعة.",
+          "waiting_for_usb": "في انتظار USB",
+          "please_connect_usb_device": "يرجى توصيل جهاز USB للمتابعة.",
           'english': 'الإنجليزية',
           'german': 'الألمانية',
           'russian': 'الروسية',
@@ -1877,6 +1960,12 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Italian  /////////////////////////////////
 
         'ja_JP': {
+          "usb_detected": "USBデバイスが検出されました",
+          "usb_device_detected": "USBデバイスが検出されました。接続をクリックして続行してください。",
+          "usb_disconnected": "USBが切断されました",
+          "please_reconnect_usb_device": "続行するにはUSBデバイスを再接続してください。",
+          "waiting_for_usb": "USBを待機中",
+          "please_connect_usb_device": "USBデバイスを接続してください。",
           'english': '英語',
           'german': 'ドイツ語',
           'russian': 'ロシア語',
