@@ -322,8 +322,7 @@ Future<void> connectUsbDevice(BuildContext context) async {
         }
       } catch (e) {
         retryCount++;
-        Get.snackbar('Debug', 'Attempt $retryCount failed: $e, retrying...',
-            snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2));
+        //Get.snackbar('Debug', 'Attempt $retryCount failed: $e, retrying...', snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2));
         if (retryCount < maxRetries) {
           await Future.delayed(Duration(seconds: 15));
         }
