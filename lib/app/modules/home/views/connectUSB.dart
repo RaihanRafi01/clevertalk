@@ -7,6 +7,8 @@ import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../common/appColors.dart';
 import '../../../data/database_helper.dart';
 import '../../../data/services/api_services.dart';
@@ -32,11 +34,15 @@ class DialogStateController extends GetxController {
   }
 
   void _setupUsbListener() {
-    platform.invokeMethod('startUsbListener');
+    platform.invokeMethod('startUsbListener').then((_) {
+      print('USB listener started successfully');
+    }).catchError((e) {
+      print('Error starting USB listener: $e');
+    });
     platform.setMethodCallHandler((call) async {
       switch (call.method) {
         case 'onUsbAttached':
-          print('USB Attached received in Flutter');
+          print('USB Attached received in Flutter: ${call.arguments}');
           isUsbAttached.value = true;
           updateDialog(
             title: 'usb_detected'.tr,
@@ -47,6 +53,7 @@ class DialogStateController extends GetxController {
             showTryAgain: false,
             showContinue: false,
           );
+          await connectUsbDevice(Get.context!);
           break;
         case 'onUsbDetached':
           print('USB Detached received in Flutter');
@@ -60,6 +67,12 @@ class DialogStateController extends GetxController {
             showContinue: false,
             showTryAgain: true,
           );
+          break;
+        case 'onUsbPermissionGranted':
+          print('USB Permission granted for: ${call.arguments['deviceName']}');
+          if (isUsbAttached.value) {
+            await connectUsbDevice(Get.context!);
+          }
           break;
       }
     });
@@ -110,6 +123,16 @@ Future<PermissionStatus> _requestStoragePermission() async {
   }
 
   return status;
+}
+
+Future<bool> _waitForMount(String usbPath, {int maxRetries = 5, int delaySeconds = 5}) async {
+  for (int i = 0; i < maxRetries; i++) {
+    if (Directory(usbPath).existsSync()) {
+      return true;
+    }
+    await Future.delayed(Duration(seconds: delaySeconds));
+  }
+  return false;
 }
 
 Future<void> _processFiles(BuildContext context, String usbPath, DialogStateController dialogController, DatabaseHelper dbHelper) async {
@@ -226,6 +249,25 @@ Future<void> _processFiles(BuildContext context, String usbPath, DialogStateCont
   audioController.fetchAudioFiles();
 }
 
+Future<void> _processFilesFromSaf(BuildContext context, String uri, DialogStateController dialogController, DatabaseHelper dbHelper) async {
+  dialogController.updateDialog(
+    title: 'processing_saf'.tr,
+    message: 'accessing_saf_directory'.tr,
+    isLoading: true,
+  );
+
+  await Future.delayed(Duration(seconds: 2)); // Placeholder for SAF processing
+
+  dialogController.updateDialog(
+    title: 'completed'.tr,
+    message: 'saf_files_processed'.tr,
+    icon: Icons.check_circle,
+    iconColor: AppColors.appColor,
+    isLoading: false,
+    showContinue: true,
+  );
+}
+
 Future<void> connectUsbDevice(BuildContext context) async {
   final dbHelper = DatabaseHelper();
   String selectedPath = '/RECORD';
@@ -304,6 +346,11 @@ Future<void> connectUsbDevice(BuildContext context) async {
           usbDeviceUUID = usbDeviceDetails['deviceUUID'];
           isUsbConnected = true;
 
+          final isMounted = await _waitForMount(usbPath!);
+          if (!isMounted) {
+            throw Exception('USB mount point not accessible');
+          }
+
           if (usbVendorId == '32903') {
             final connectDevice = await _apiService.connectDevice(usbProductId.toString());
             dialogController.updateDialog(
@@ -322,7 +369,6 @@ Future<void> connectUsbDevice(BuildContext context) async {
         }
       } catch (e) {
         retryCount++;
-        //Get.snackbar('Debug', 'Attempt $retryCount failed: $e, retrying...', snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2));
         if (retryCount < maxRetries) {
           await Future.delayed(Duration(seconds: 15));
         }
@@ -330,6 +376,39 @@ Future<void> connectUsbDevice(BuildContext context) async {
     }
 
     if (!isUsbConnected || usbPath == null) {
+      /*if (retryCount >= maxRetries) {
+        try {
+          final uri = await FilePicker.platform.getDirectoryPath(
+            dialogTitle: 'select_clevertalk_storage'.tr,
+          );
+          if (uri != null) {
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString('saf_usb_path', uri);
+
+            dialogController.updateDialog(
+              title: 'success'.tr,
+              message: 'directory_selected'.tr,
+              icon: Icons.check_circle,
+              iconColor: AppColors.appColor,
+              isLoading: true,
+            );
+
+            await _processFilesFromSaf(context, uri, dialogController, dbHelper);
+            return;
+          }
+        } catch (e) {
+          dialogController.updateDialog(
+            title: 'error'.tr,
+            message: 'saf_selection_failed'.tr,
+            icon: Icons.error,
+            iconColor: Colors.red.shade700,
+            isLoading: false,
+            showTryAgain: true,
+          );
+          return;
+        }
+      }*/
+
       dialogController.updateDialog(
         title: 'error'.tr,
         message: '${'failed_to_connect_usb'.tr} ${maxRetries.toString()} ${'attempts'.tr}',
@@ -404,7 +483,13 @@ Future<String> _getAudioDuration(String filePath) async {
 }
 
 DialogStateController _showPersistentDialog(BuildContext context) {
-  final controller = Get.put(DialogStateController());
+  Get.put<DialogStateController>(DialogStateController(), tag: 'usbDialogController');
+  final controller = Get.find<DialogStateController>(tag: 'usbDialogController');
+
+  // Close any existing dialog to prevent stacking
+  if (Get.isDialogOpen ?? false) {
+    Get.back();
+  }
 
   Get.dialog(
     WillPopScope(
@@ -492,7 +577,10 @@ DialogStateController _showPersistentDialog(BuildContext context) {
                   width: 160,
                   text: 'Continue',
                   onPressed: () {
-                    Get.back();
+                    // Ensure all dialogs are closed
+                    while (Get.isDialogOpen ?? false) {
+                      Get.back();
+                    }
                   },
                   backgroundColor: AppColors.appColor,
                   textColor: Colors.white,
@@ -506,7 +594,10 @@ DialogStateController _showPersistentDialog(BuildContext context) {
                   text: 'Try Again',
                   onPressed: () async {
                     controller.updateDialog(showTryAgain: false);
-                    Get.back();
+                    // Close current dialog before retrying
+                    if (Get.isDialogOpen ?? false) {
+                      Get.back();
+                    }
                     await connectUsbDevice(context);
                   },
                   backgroundColor: AppColors.appColor,
@@ -527,7 +618,9 @@ DialogStateController _showPersistentDialog(BuildContext context) {
                       showTryAgain: false,
                       showContinue: false,
                     );
-                    Get.back();
+                    if (Get.isDialogOpen ?? false) {
+                      Get.back();
+                    }
                     await connectUsbDevice(context);
                   }
                       : null,
