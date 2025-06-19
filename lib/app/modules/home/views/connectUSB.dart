@@ -541,7 +541,7 @@ DialogStateController _showPersistentDialog(BuildContext context) {
                   ),
                 ),
               ],
-              if (!controller.showRestart.value) ...[
+              if (controller.showRestart.value) ...[
                 SizedBox(height: 20),
                 CustomButton(
                   borderRadius: 30,
