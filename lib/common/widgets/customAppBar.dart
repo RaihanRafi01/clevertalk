@@ -6,7 +6,9 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 
 import '../../app/data/services/notification_services.dart';
+import '../../app/modules/audio/controllers/audio_controller.dart';
 import '../../app/modules/authentication/views/forgot_password_view.dart';
+import '../../app/modules/text/controllers/text_controller.dart';
 import '../customFont.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -60,6 +62,17 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 GestureDetector(
                   onTap: () async {
                     print('notification pressed!');
+                    if (Get.isRegistered<AudioPlayerController>()) {
+                      final audioController = Get.find<AudioPlayerController>();
+                      // Avoid disposing controllers to preserve state
+                      await audioController.stopAudio();
+                    }
+                    if (Get.isRegistered<ConvertToTextController>()) {
+                      final convertToTextController = Get.find<ConvertToTextController>();
+                      // Avoid disposing controllers to preserve state
+                      convertToTextController.itemScrollController = null;
+                      convertToTextController.isEditing.value = false; // Reset editing state
+                    }
                     Get.to(() => NotificationSubscriptionView());
                   },
                   child: Padding(

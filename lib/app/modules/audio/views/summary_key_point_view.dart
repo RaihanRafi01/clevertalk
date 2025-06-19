@@ -320,8 +320,17 @@ class SummaryKeyPointView extends StatelessWidget {
   }
 
   String _formatDate(String dateString) {
-    DateTime dateTime = DateTime.parse(dateString);
-    return "${'date'.tr}: ${DateFormat('d MMMM y').format(dateTime)} ${'time'.tr}: ${DateFormat('h:mm a').format(dateTime)}";
+    if (dateString.isEmpty) {
+      return "${'date'.tr}: ${'unknown'.tr}"; // Fallback for empty string
+    }
+
+    try {
+      DateTime dateTime = DateTime.parse(dateString);
+      return "${'date'.tr}: ${DateFormat('d MMMM y').format(dateTime)} ${'time'.tr}: ${DateFormat('h:mm a').format(dateTime)}";
+    } catch (e) {
+      print("Error parsing date: $e");
+      return "${'date'.tr}: ${'invalid'.tr}"; // Fallback for invalid format
+    }
   }
 
   void _showSearchBottomSheet(BuildContext context, SummaryKeyPointController controller) {

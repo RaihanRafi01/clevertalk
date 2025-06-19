@@ -98,10 +98,10 @@ class NotificationSubscriptionView
                                     ':::::::::::::::: check filePath: ${notification.filePath}');
                                 print(
                                     ':::::::::::::::: type: ${notification.type}');
+                                String cleanFileName = notification.fileName
+                                    ?.replaceFirst('of ', '') ??
+                                    'Unknown File';
                                 if (notification.type == 'Conversion') {
-                                  String cleanFileName = notification.fileName
-                                          ?.replaceFirst('of ', '') ??
-                                      'Unknown File';
                                   Get.to(() => ConvertToTextView(
                                         filePath: notification.filePath ??
                                             "No file path",
@@ -109,8 +109,7 @@ class NotificationSubscriptionView
                                       ));
                                 } else if (notification.type == 'Summary') {
                                   Get.to(() => SummaryKeyPointView(
-                                        fileName: notification.fileName ??
-                                            "Unknown File",
+                                        fileName: cleanFileName,
                                         filePath: notification.filePath ??
                                             'Unknown FilePath',
                                       ));

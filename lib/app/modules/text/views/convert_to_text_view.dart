@@ -19,7 +19,10 @@ class ConvertToTextView extends StatelessWidget {
   final String fileName;
   final String filePath;
 
-  const ConvertToTextView({super.key, required this.fileName, required this.filePath});
+  ConvertToTextView({super.key, required this.fileName, required this.filePath});
+
+  final audioController = Get.put(AudioPlayerController(), permanent: true);
+  final textController = Get.put(ConvertToTextController(), permanent: true);
 
   Widget _buildEditableList(ConvertToTextController controller, int index) {
     final msg = controller.messages[index];
@@ -256,8 +259,8 @@ class ConvertToTextView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Ensure the AudioPlayerController is truly permanent
-    final audioController = Get.put(AudioPlayerController(), permanent: true);
-    final textController = Get.put(ConvertToTextController());
+    /*final audioController = Get.put(AudioPlayerController(), permanent: true);
+    final textController = Get.put(ConvertToTextController());*/
 
     /*// Fetch messages and initialize audio playback only if not already initialized
     if (audioController.currentIndex.value == -1) {
@@ -331,6 +334,7 @@ class ConvertToTextView extends StatelessWidget {
                 top: textController.isTranslate.value ? 310 : 260,
                 bottom: 60,
                 child: ScrollablePositionedList.builder(
+                  key: ValueKey(filePath),
                   itemScrollController: textController.itemScrollController,
                   itemCount: textController.messages.length,
                   padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -624,4 +628,5 @@ class ConvertToTextView extends StatelessWidget {
       ),
     );
   }
+
 }

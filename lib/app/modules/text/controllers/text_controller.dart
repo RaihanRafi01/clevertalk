@@ -31,12 +31,14 @@ class ConvertToTextController extends GetxController {
   String parsedDate = "Unknown Date";
   var title = ''.obs;
   var duration = ''.obs;
-  final ItemScrollController itemScrollController = ItemScrollController();
+  //final ItemScrollController itemScrollController = ItemScrollController();
+  ItemScrollController? itemScrollController; // Make nullable to allow cleanup
   List<TextEditingController> nameControllers = [];
   List<TextEditingController> descControllers = [];
 
   @override
   void onInit() {
+    itemScrollController = ItemScrollController(); // Initialize controller
     super.onInit();
   }
 
@@ -649,9 +651,9 @@ class ConvertToTextController extends GetxController {
       currentHighlightedIndex.value = newHighlightIndex;
       messages.refresh();
 
-      if (itemScrollController.isAttached) {
+      if (itemScrollController!.isAttached) {
         // If the user is seeking, instantly jump to the new position
-        itemScrollController.jumpTo(index: newHighlightIndex);
+        itemScrollController!.jumpTo(index: newHighlightIndex);
       }
     }
 
@@ -663,13 +665,13 @@ class ConvertToTextController extends GetxController {
   }
 
   void _smoothAutoScroll() {
-    if (!itemScrollController.isAttached) return;
+    if (!itemScrollController!.isAttached) return;
 
     int nextIndex = currentHighlightedIndex.value + 1;
 
     // ✅ Ensure we do not scroll unnecessarily when at the first message
     if (nextIndex > 0 && nextIndex < messages.length) {
-      itemScrollController.scrollTo(
+      itemScrollController!.scrollTo(
         index: nextIndex,
         alignment: 0.7, // Moves downward slightly each time
         duration: const Duration(milliseconds: 10000),
@@ -699,6 +701,11 @@ class ConvertToTextController extends GetxController {
     nameControllers.forEach((c) => c.dispose());
     descControllers.forEach((c) => c.dispose());
     super.onClose();
+  }
+  @override
+  void dispose() {
+    itemScrollController = null; // Nullify to prevent reuse
+    super.dispose();
   }
 }
 
