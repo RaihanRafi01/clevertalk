@@ -1,5 +1,7 @@
 package com.jvai.clevertalk
-
+import android.os.Bundle
+import android.view.WindowManager
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -13,15 +15,74 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import android.os.Build
 import android.util.Log
-import android.app.PendingIntent
+import android.os.Handler
+import android.os.Looper
 import java.io.File
+import androidx.core.app.NotificationCompat
+import com.jvai.clevertalk.services.RestartService
 
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "usb_path_reader/usb"
     private val TAG = "MainActivity"
     private val USB_PERMISSION = "com.jvai.clevertalk.USB_PERMISSION"
+    private val NOTIFICATION_CHANNEL_ID = "clevertalk_restart_channel"
+    private val NOTIFICATION_ID = 1
     private var usbReceiver: BroadcastReceiver? = null
     private var methodChannel: MethodChannel? = null
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // Force fullscreen
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_FULLSCREEN,
+            WindowManager.LayoutParams.FLAG_FULLSCREEN
+        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            window.attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+        }
+        Log.d(TAG, "MainActivity onCreate called")
+        // Existing onCreate code
+    }
+
+    private fun restartApp() {
+        Log.d(TAG, "Attempting to restart app")
+        try {
+            // Use CLEAR_TOP for API < 11
+            val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NO_ANIMATION
+            } else {
+                Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NO_ANIMATION
+            }
+            val restartIntent = packageManager.getLaunchIntentForPackage(packageName)?.apply {
+                addFlags(flags)
+            }
+            if (restartIntent != null) {
+                Log.d(TAG, "Launching restart intent: $restartIntent")
+                startActivity(restartIntent)
+            } else {
+                Log.e(TAG, "Failed to get launch intent for package: $packageName")
+            }
+
+            // Start RestartService
+            val serviceIntent = Intent(this, RestartService::class.java)
+            startService(serviceIntent)
+            Log.d(TAG, "RestartService started")
+
+            // Use finish() for API < 16
+            Handler(Looper.getMainLooper()).postDelayed({
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    finishAffinity()
+                    Log.d(TAG, "finishAffinity called")
+                } else {
+                    finish()
+                    Log.d(TAG, "finish called")
+                }
+            }, 100)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to restart app: $e")
+        }
+    }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -49,6 +110,11 @@ class MainActivity : FlutterActivity() {
                 "startUsbListener" -> {
                     Log.d(TAG, "Method call: startUsbListener")
                     startUsbListener()
+                    result.success(true)
+                }
+                "restartApp" -> {
+                    Log.d(TAG, "Method call: restartApp")
+                    restartApp()
                     result.success(true)
                 }
                 else -> {

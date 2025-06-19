@@ -23,6 +23,7 @@ class DialogStateController extends GetxController {
   var isLoading = false.obs;
   var showContinue = false.obs;
   var showTryAgain = false.obs;
+  var showRestart = false.obs;
   var isUsbAttached = false.obs;
 
   static const platform = MethodChannel('usb_path_reader/usb');
@@ -87,6 +88,7 @@ class DialogStateController extends GetxController {
     bool? isLoading,
     bool? showContinue,
     bool? showTryAgain,
+    bool? showRestart,
   }) {
     if (title != null) this.title.value = title;
     if (message != null) this.message.value = message;
@@ -96,6 +98,7 @@ class DialogStateController extends GetxController {
     if (isLoading != null) this.isLoading.value = isLoading;
     if (showContinue != null) this.showContinue.value = showContinue;
     if (showTryAgain != null) this.showTryAgain.value = showTryAgain;
+    if (showRestart != null) this.showRestart.value = showRestart;
   }
 }
 
@@ -376,46 +379,13 @@ Future<void> connectUsbDevice(BuildContext context) async {
     }
 
     if (!isUsbConnected || usbPath == null) {
-      /*if (retryCount >= maxRetries) {
-        try {
-          final uri = await FilePicker.platform.getDirectoryPath(
-            dialogTitle: 'select_clevertalk_storage'.tr,
-          );
-          if (uri != null) {
-            final prefs = await SharedPreferences.getInstance();
-            await prefs.setString('saf_usb_path', uri);
-
-            dialogController.updateDialog(
-              title: 'success'.tr,
-              message: 'directory_selected'.tr,
-              icon: Icons.check_circle,
-              iconColor: AppColors.appColor,
-              isLoading: true,
-            );
-
-            await _processFilesFromSaf(context, uri, dialogController, dbHelper);
-            return;
-          }
-        } catch (e) {
-          dialogController.updateDialog(
-            title: 'error'.tr,
-            message: 'saf_selection_failed'.tr,
-            icon: Icons.error,
-            iconColor: Colors.red.shade700,
-            isLoading: false,
-            showTryAgain: true,
-          );
-          return;
-        }
-      }*/
-
       dialogController.updateDialog(
         title: 'error'.tr,
-        message: '${'failed_to_connect_usb'.tr} ${maxRetries.toString()} ${'attempts'.tr}',
+        message: '${'failed_to_connect_usb'.tr} ${maxRetries.toString()} ${'attempts'.tr}\n${'please_restart_app'.tr}',
         icon: Icons.error,
         iconColor: Colors.red.shade700,
         isLoading: false,
-        showTryAgain: true,
+        showRestart: true,
       );
       return;
     }
@@ -550,7 +520,8 @@ DialogStateController _showPersistentDialog(BuildContext context) {
               ],
               if (controller.progress.value != null &&
                   !controller.showContinue.value &&
-                  !controller.showTryAgain.value) ...[
+                  !controller.showTryAgain.value &&
+                  !controller.showRestart.value) ...[
                 SizedBox(height: 20),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
@@ -570,7 +541,19 @@ DialogStateController _showPersistentDialog(BuildContext context) {
                   ),
                 ),
               ],
-              if (controller.showContinue.value) ...[
+              if (!controller.showRestart.value) ...[
+                SizedBox(height: 20),
+                CustomButton(
+                  borderRadius: 30,
+                  width: 160,
+                  text: 'Restart App',
+                  onPressed: () async {
+                    await DialogStateController.platform.invokeMethod('restartApp');
+                  },
+                  backgroundColor: AppColors.appColor,
+                  textColor: Colors.white,
+                ),
+              ] else if (controller.showContinue.value) ...[
                 SizedBox(height: 20),
                 CustomButton(
                   borderRadius: 30,
@@ -585,8 +568,7 @@ DialogStateController _showPersistentDialog(BuildContext context) {
                   backgroundColor: AppColors.appColor,
                   textColor: Colors.white,
                 ),
-              ],
-              if (controller.showTryAgain.value) ...[
+              ] else if (controller.showTryAgain.value) ...[
                 SizedBox(height: 20),
                 CustomButton(
                   borderRadius: 30,
@@ -603,10 +585,7 @@ DialogStateController _showPersistentDialog(BuildContext context) {
                   backgroundColor: AppColors.appColor,
                   textColor: Colors.white,
                 ),
-              ],
-              if (!controller.isLoading.value &&
-                  !controller.showContinue.value &&
-                  !controller.showTryAgain.value) ...[
+              ] else if (!controller.isLoading.value) ...[
                 SizedBox(height: 20),
                 CustomButton(
                   borderRadius: 30,

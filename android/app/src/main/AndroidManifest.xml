@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
@@ -11,8 +12,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-feature android:name="android.hardware.usb.host" />
-    <uses-permission android:name="android.permission.USB_PERMISSION"
-        android:minSdkVersion="30"/>
+    <uses-permission android:name="android.permission.USB_PERMISSION" android:minSdkVersion="30"/>
     <application
         android:usesCleartextTraffic="true"
         android:requestLegacyExternalStorage="true"
@@ -42,6 +42,7 @@
 
         <activity
             android:name=".MainActivity"
+            android:resizeableActivity="false"
             android:exported="true"
             android:launchMode="singleTop"
             android:taskAffinity=""
@@ -71,8 +72,10 @@
                 android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
                 android:resource="@xml/device_filter"/>
         </activity>
-        <!-- Don't delete the meta-data below.
-             This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
+        <service
+            android:name="com.jvai.clevertalk.services.RestartService"
+            android:exported="false"
+            android:foregroundServiceType="shortService" />
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
