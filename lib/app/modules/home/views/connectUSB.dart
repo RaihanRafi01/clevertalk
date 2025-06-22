@@ -534,7 +534,7 @@ DialogStateController _showPersistentDialog(BuildContext context) {
                 ),
                 SizedBox(height: 8),
                 Text(
-                  "${(controller.progress.value! * 100).toStringAsFixed(1)}% complete",
+                  "${(controller.progress.value! * 100).toStringAsFixed(1)}% ${'complete'.tr}",
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.blue.shade700,
@@ -546,7 +546,7 @@ DialogStateController _showPersistentDialog(BuildContext context) {
                 CustomButton(
                   borderRadius: 30,
                   width: 160,
-                  text: 'Restart App',
+                  text: 'restart_app'.tr,
                   onPressed: () async {
                     await DialogStateController.platform.invokeMethod('restartApp');
                   },
@@ -558,7 +558,7 @@ DialogStateController _showPersistentDialog(BuildContext context) {
                 CustomButton(
                   borderRadius: 30,
                   width: 160,
-                  text: 'Continue',
+                  text: 'continue'.tr,
                   onPressed: () {
                     // Ensure all dialogs are closed
                     while (Get.isDialogOpen ?? false) {
@@ -573,7 +573,7 @@ DialogStateController _showPersistentDialog(BuildContext context) {
                 CustomButton(
                   borderRadius: 30,
                   width: 160,
-                  text: 'Try Again',
+                  text: 'try_again'.tr,
                   onPressed: () async {
                     controller.updateDialog(showTryAgain: false);
                     // Close current dialog before retrying
@@ -590,7 +590,7 @@ DialogStateController _showPersistentDialog(BuildContext context) {
                 CustomButton(
                   borderRadius: 30,
                   width: 160,
-                  text: 'Connect',
+                  text: 'connect'.tr,
                   onPressed: controller.isUsbAttached.value
                       ? () async {
                     controller.updateDialog(

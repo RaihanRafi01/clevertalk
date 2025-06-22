@@ -197,11 +197,18 @@ class AppTranslations extends Translations {
               'Successfully connected to the recorder\nPlease wait for file transfer from CleverTalk recorder',
           'failed_to_connect_usb': 'Failed to connect USB device after',
           'try_again': 'Try Again',
+          'complete': 'Complete',
+          'restart_app': 'Restart App',
+          'connect': 'Connect',
+
         },
 
 //////////////////////////////////////// Spanish  //////////////////////////////////////
 
         'es_ES': {
+          'complete': 'Completar',
+          'restart_app': 'Reiniciar la aplicación',
+          'connect': 'Conectar',
           'of': 'de',
           "usb_detected": "Dispositivo USB detectado",
           "usb_device_detected":
@@ -398,8 +405,14 @@ class AppTranslations extends Translations {
           'try_again': 'Intentar de nuevo'
         },
 
+
         //////////////////////////////////////////////////////////////// French //////////////////////////////////
+
+
         'fr_FR': {
+          'complete': 'Terminer',
+          'restart_app': 'Redémarrer l\'application',
+          'connect': 'Connecter',
           'of': 'de',
           "usb_detected": "Périphérique USB détecté",
           "usb_device_detected":
@@ -598,8 +611,14 @@ class AppTranslations extends Translations {
           'try_again': 'Réessayer'
         },
 
+
         ////////////////////////////////// GERMAN ///////////////////////
+
+
         'de_DE': {
+          'complete': 'Fertig',
+          'restart_app': 'App neu starten',
+          'connect': 'Verbinden',
           'of': 'von',
           "usb_detected": "USB-Gerät erkannt",
           "usb_device_detected":
@@ -806,6 +825,9 @@ class AppTranslations extends Translations {
         ////////////////////////////////// Russian //////////////////////////////////////
 
         'ru_RU': {
+          'complete': 'Завершить',
+          'restart_app': 'Перезапустить приложение',
+          'connect': 'Подключиться',
           'of': 'из',
           "usb_detected": "USB-устройство обнаружено",
           "usb_device_detected":
@@ -1006,6 +1028,9 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Italian  /////////////////////////////////
 
         'it_IT': {
+          'complete': 'Completa',
+          'restart_app': 'Riavvia l\'app',
+          'connect': 'Connetti',
           'of': 'Di',
           "usb_detected": "Dispositivo USB rilevato",
           "usb_device_detected":
@@ -1207,6 +1232,9 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Portuguese   /////////////////////////////////
 
         'pt_PT': {
+          'complete': 'Concluir',
+          'restart_app': 'Reiniciar o aplicativo',
+          'connect': 'Conectar',
           'of': 'de',
           "usb_detected": "Dispositivo USB detectado",
           "usb_device_detected":
@@ -1406,6 +1434,9 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Chinese   /////////////////////////////////
 
         'zh_CN': {
+          'complete': '完成',
+          'restart_app': '重新启动应用程序',
+          'connect': '连接',
           'of': '的',
           "usb_detected": "检测到USB设备",
           "usb_device_detected": "检测到USB设备。点击连接以继续。",
@@ -1583,6 +1614,9 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Hindi   /////////////////////////////////
 
         'hi_IN': {
+          'complete': 'पूरा',
+          'restart_app': 'ऐप पुनरारंभ करें',
+          'connect': 'कनेक्ट करें',
           'of': 'का',
           "usb_detected": "यूएसबी डिवाइस डिटेक्टेड",
           "usb_device_detected":
@@ -1781,6 +1815,9 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Arabic  /////////////////////////////////
 
         'ar_AR': {
+          'complete': 'اكتمال',
+          'restart_app': 'إعادة تشغيل التطبيق',
+          'connect': 'الاتصال',
           'of': 'ل',
           "usb_detected": "تم اكتشاف جهاز USB",
           "usb_device_detected": "تم اكتشاف جهاز USB. انقر على اتصال للمتابعة.",
@@ -1970,6 +2007,9 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Japanese  /////////////////////////////////
 
         'ja_JP': {
+          'complete': '完了',
+          'restart_app': 'アプリを再起動',
+          'connect': '接続',
           'of': 'の',
           "usb_detected": "USBデバイスが検出されました",
           "usb_device_detected": "USBデバイスが検出されました。接続をクリックして続行してください。",
