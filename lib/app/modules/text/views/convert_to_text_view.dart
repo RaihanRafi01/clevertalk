@@ -19,7 +19,8 @@ class ConvertToTextView extends StatelessWidget {
   final String fileName;
   final String filePath;
 
-  ConvertToTextView({super.key, required this.fileName, required this.filePath});
+  ConvertToTextView(
+      {super.key, required this.fileName, required this.filePath});
 
   final audioController = Get.put(AudioPlayerController(), permanent: true);
   final textController = Get.put(ConvertToTextController(), permanent: true);
@@ -76,7 +77,8 @@ class ConvertToTextView extends StatelessWidget {
     return hours != "00" ? '$hours:$minutes:$secs' : '$minutes:$secs';
   }
 
-  void _showSearchBottomSheet(BuildContext context, ConvertToTextController controller) {
+  void _showSearchBottomSheet(
+      BuildContext context, ConvertToTextController controller) {
     TextEditingController searchController = TextEditingController();
     List<Language> filteredLanguages = List.from(languages);
     bool isCleared = false;
@@ -95,7 +97,8 @@ class ConvertToTextView extends StatelessWidget {
               height: MediaQuery.of(context).size.height * 0.7,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(20)),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),
@@ -164,7 +167,8 @@ class ConvertToTextView extends StatelessWidget {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: AppColors.appColor, width: 2),
+                        borderSide:
+                            BorderSide(color: AppColors.appColor, width: 2),
                       ),
                     ),
                     style: h4.copyWith(fontSize: 16, color: Colors.black87),
@@ -183,69 +187,71 @@ class ConvertToTextView extends StatelessWidget {
                   Expanded(
                     child: filteredLanguages.isEmpty
                         ? Center(
-                      child: Text(
-                        'no_languages_found'.tr,
-                        style: h4.copyWith(
-                          fontSize: 16,
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
-                    )
-                        : ListView.separated(
-                      itemCount: filteredLanguages.length,
-                      separatorBuilder: (context, index) => Divider(
-                        color: Colors.grey.shade300,
-                        height: 1,
-                      ),
-                      itemBuilder: (context, index) {
-                        final lang = filteredLanguages[index];
-                        return AnimatedOpacity(
-                          opacity: 1.0,
-                          duration: const Duration(milliseconds: 200),
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              radius: 16,
-                              backgroundColor: AppColors.appColor3.withOpacity(0.1),
-                              child: Text(
-                                lang.name[0],
-                                style: TextStyle(
-                                  color: AppColors.appColor3,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            title: Text(
-                              lang.name,
+                            child: Text(
+                              'no_languages_found'.tr,
                               style: h4.copyWith(
                                 fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black87,
-                              ),
-                            ),
-                            subtitle: Text(
-                              lang.region,
-                              style: TextStyle(
-                                fontSize: 14,
                                 color: Colors.grey.shade600,
                               ),
                             ),
-                            trailing: const Icon(
-                              Icons.check,
-                              color: Colors.transparent,
+                          )
+                        : ListView.separated(
+                            itemCount: filteredLanguages.length,
+                            separatorBuilder: (context, index) => Divider(
+                              color: Colors.grey.shade300,
+                              height: 1,
                             ),
-                            onTap: () {
-                              controller.selectedLanguage.value = lang.name;
-                              Navigator.pop(context);
+                            itemBuilder: (context, index) {
+                              final lang = filteredLanguages[index];
+                              return AnimatedOpacity(
+                                opacity: 1.0,
+                                duration: const Duration(milliseconds: 200),
+                                child: ListTile(
+                                  leading: CircleAvatar(
+                                    radius: 16,
+                                    backgroundColor:
+                                        AppColors.appColor3.withOpacity(0.1),
+                                    child: Text(
+                                      lang.name[0],
+                                      style: TextStyle(
+                                        color: AppColors.appColor3,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  title: Text(
+                                    lang.name,
+                                    style: h4.copyWith(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    lang.region,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                  ),
+                                  trailing: const Icon(
+                                    Icons.check,
+                                    color: Colors.transparent,
+                                  ),
+                                  onTap: () {
+                                    controller.selectedLanguage.value =
+                                        lang.name;
+                                    Navigator.pop(context);
+                                  },
+                                  tileColor: Colors.white,
+                                  hoverColor: Colors.grey.shade100,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                              );
                             },
-                            tileColor: Colors.white,
-                            hoverColor: Colors.grey.shade100,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
                           ),
-                        );
-                      },
-                    ),
                   ),
                 ],
               ),
@@ -258,37 +264,12 @@ class ConvertToTextView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Ensure the AudioPlayerController is truly permanent
-    /*final audioController = Get.put(AudioPlayerController(), permanent: true);
-    final textController = Get.put(ConvertToTextController());*/
-
-    /*// Fetch messages and initialize audio playback only if not already initialized
-    if (audioController.currentIndex.value == -1) {
-      textController.fetchMessages(filePath);
-      audioController.fetchAudioFiles().then((_) {
-        final index = audioController.audioFiles.indexWhere((file) => file['file_name'] == fileName);
-        if (index != -1) {
-          audioController.currentIndex.value = index;
-          textController.fetchMessages(filePath).then((_) {
-            audioController.playAudio(filePath: filePath);
-            textController.syncScrollingWithAudio(audioController);
-          });
-        } else {
-          Get.snackbar('Error', 'Audio file not found: $fileName');
-        }
-      });
-    } else {
-      // If already initialized, just resume or play the audio
-      audioController.playAudio(filePath: filePath);
-      textController.fetchMessages(filePath);
-      textController.syncScrollingWithAudio(audioController);
-    }*/
-
     print(':::::::::::::::: check Audio file ---->: $fileName');
 
     // Fetch audio files and set the current index based on fileName
     audioController.fetchAudioFiles(fileName: fileName).then((_) {
-      final index = audioController.audioFiles.indexWhere((file) => file['file_name'] == fileName);
+      final index = audioController.audioFiles
+          .indexWhere((file) => file['file_name'] == fileName);
       if (index != -1) {
         audioController.currentIndex.value = index;
         textController.fetchMessages(filePath).then((_) {
@@ -357,22 +338,25 @@ class ConvertToTextView extends StatelessWidget {
                       borderRadius: BorderRadius.circular(5),
                       border: Border.all(color: AppColors.gray1),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 20),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 5, vertical: 20),
                     child: Obx(
-                          () => Column(
+                      () => Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Align(
                             alignment: Alignment.centerLeft,
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10),
                               child: Text(
                                 audioController.audioFiles.isNotEmpty &&
-                                    audioController.currentIndex.value >= 0
-                                    ? audioController.audioFiles[audioController.currentIndex.value]
-                                ['file_name']
+                                        audioController.currentIndex.value >= 0
+                                    ? audioController.audioFiles[audioController
+                                        .currentIndex.value]['file_name']
                                     : 'no_file_selected'.tr,
-                                style: h1.copyWith(fontSize: 18, color: AppColors.gray2),
+                                style: h1.copyWith(
+                                    fontSize: 18, color: AppColors.gray2),
                               ),
                             ),
                           ),
@@ -386,7 +370,8 @@ class ConvertToTextView extends StatelessWidget {
                               textController.updateHighlightAndScroll(value);
                             },
                             onChangeEnd: (value) async {
-                              await audioController.seekAudio(Duration(seconds: value.toInt()));
+                              await audioController
+                                  .seekAudio(Duration(seconds: value.toInt()));
                             },
                             activeColor: AppColors.appColor,
                             inactiveColor: Colors.grey,
@@ -396,16 +381,24 @@ class ConvertToTextView extends StatelessWidget {
                             children: [
                               SvgIcon(
                                 height: 22,
-                                svgPath: 'assets/images/audio/previous_icon.svg',
+                                svgPath:
+                                    'assets/images/audio/previous_icon.svg',
                                 onTap: audioController.playPrevious,
                               ),
                               SvgIcon(
                                 height: 22,
-                                svgPath: 'assets/images/audio/previous_10_icon.svg',
+                                svgPath:
+                                    'assets/images/audio/previous_10_icon.svg',
                                 onTap: () async {
-                                  final newPosition = (audioController.currentAudioPosition.inSeconds - 10)
-                                      .clamp(0, audioController.totalDuration.value.toInt());
-                                  await audioController.seekAudio(Duration(seconds: newPosition));
+                                  final newPosition = (audioController
+                                              .currentAudioPosition.inSeconds -
+                                          10)
+                                      .clamp(
+                                          0,
+                                          audioController.totalDuration.value
+                                              .toInt());
+                                  await audioController.seekAudio(
+                                      Duration(seconds: newPosition));
                                 },
                               ),
                               SvgIcon(
@@ -413,20 +406,27 @@ class ConvertToTextView extends StatelessWidget {
                                 svgPath: audioController.isPlaying.value
                                     ? 'assets/images/audio/pause_icon.svg'
                                     : 'assets/images/audio/play_icon.svg',
-                                color: audioController.isPlaying.value ? null : AppColors.appColor,
+                                color: audioController.isPlaying.value
+                                    ? null
+                                    : AppColors.appColor,
                                 onTap: () async {
                                   try {
                                     if (audioController.isPlaying.value) {
                                       await audioController.pauseAudio();
                                     } else {
-                                      if (audioController.currentPosition.value > 0) {
-                                        await audioController.resumeAudio(filePath: filePath);
+                                      if (audioController
+                                              .currentPosition.value >
+                                          0) {
+                                        await audioController.resumeAudio(
+                                            filePath: filePath);
                                       } else {
-                                        await audioController.playAudio(filePath: filePath);
+                                        await audioController.playAudio(
+                                            filePath: filePath);
                                       }
                                     }
                                   } catch (e) {
-                                    Get.snackbar('Error', 'Failed to toggle audio: $e');
+                                    Get.snackbar(
+                                        'Error', 'Failed to toggle audio: $e');
                                   }
                                 },
                               ),
@@ -434,9 +434,15 @@ class ConvertToTextView extends StatelessWidget {
                                 height: 22,
                                 svgPath: 'assets/images/audio/next_10_icon.svg',
                                 onTap: () async {
-                                  final newPosition = (audioController.currentAudioPosition.inSeconds + 10)
-                                      .clamp(0, audioController.totalDuration.value.toInt());
-                                  await audioController.seekAudio(Duration(seconds: newPosition));
+                                  final newPosition = (audioController
+                                              .currentAudioPosition.inSeconds +
+                                          10)
+                                      .clamp(
+                                          0,
+                                          audioController.totalDuration.value
+                                              .toInt());
+                                  await audioController.seekAudio(
+                                      Duration(seconds: newPosition));
                                 },
                               ),
                               SvgIcon(
@@ -455,12 +461,13 @@ class ConvertToTextView extends StatelessWidget {
                     children: [
                       const Spacer(),
                       Obx(
-                            () => Text(
+                        () => Text(
                           textController.messages.isNotEmpty
-                              ? audioController.audioFiles[audioController.currentIndex.value]
-                          ['file_name']
+                              ? audioController.audioFiles[audioController
+                                  .currentIndex.value]['file_name']
                               : 'please_wait_for_a_while'.tr,
-                          style: h1.copyWith(fontSize: 16, color: AppColors.gray2),
+                          style:
+                              h1.copyWith(fontSize: 16, color: AppColors.gray2),
                         ),
                       ),
                       const Spacer(),
@@ -468,126 +475,151 @@ class ConvertToTextView extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   Obx(() => Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      if (!textController.isEditing.value) ...[
-                        GestureDetector(
-                          onTap: () async {
-                            await textController.generateAndSharePdf();
-                          },
-                          child: SvgPicture.asset(
-                            'assets/images/summary/share_icon.svg',
-                            color: AppColors.gray1,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        GestureDetector(
-                          onTap: () => textController.editSpeakerName(context, filePath),
-                          child: SvgPicture.asset(
-                            'assets/images/summary/speaker_edit_icon.svg',
-                            color: AppColors.gray1,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        GestureDetector(
-                          onTap: () {
-                            textController.isTranslate.toggle();
-                          },
-                          child: SvgPicture.asset(
-                            'assets/images/summary/translate_icon.svg',
-                            color: AppColors.gray1,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                      ],
-                      GestureDetector(
-                        onTap: () {
-                          if (textController.isEditing.value) {
-                            textController.saveTranscription(filePath, true);
-                          }
-                          textController.isTranslate.value = false;
-                          textController.isEditing.toggle();
-                        },
-                        child: SvgPicture.asset(
-                          textController.isEditing.value
-                              ? 'assets/images/summary/save_icon.svg'
-                              : 'assets/images/summary/edit_icon.svg',
-                          color: AppColors.gray1,
-                        ),
-                      ),
-                    ],
-                  )),
-                  Obx(() => AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    transitionBuilder: (Widget child, Animation<double> animation) {
-                      final offsetAnimation = Tween<Offset>(
-                        begin: const Offset(0.0, -0.5),
-                        end: const Offset(0.0, 0.0),
-                      ).animate(animation);
-                      return SlideTransition(position: offsetAnimation, child: child);
-                    },
-                    child: textController.isTranslate.value
-                        ? Container(
-                      key: const ValueKey('translateRow'),
-                      padding: const EdgeInsets.symmetric(vertical: 20),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          CustomButton(
-                            text: textController.currentLanguage.value.isEmpty
-                                ? 'English'
-                                : textController.currentLanguage.value,
-                            onPressed: () {},
-                            height: 30,
-                            width: 80,
-                            fontSize: 11,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: SvgPicture.asset('assets/images/summary/arrow_icon.svg'),
-                          ),
-                          Obx(() => Container(
-                            height: 30,
-                            width: 120,
-                            decoration: BoxDecoration(
-                              color: AppColors.appColor,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: InkWell(
-                              onTap: () => _showSearchBottomSheet(context, textController),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 10),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        textController.selectedLanguage.value.isEmpty
-                                            ? 'select_language'.tr
-                                            : textController.selectedLanguage.value,
-                                        style: h4.copyWith(fontSize: 11, color: Colors.white),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    const Icon(Icons.arrow_drop_down,
-                                        color: Colors.white, size: 20),
-                                  ],
-                                ),
+                          if (!textController.isEditing.value) ...[
+                            GestureDetector(
+                              onTap: () async {
+                                await textController.generateAndSharePdf();
+                              },
+                              child: SvgPicture.asset(
+                                'assets/images/summary/share_icon.svg',
+                                color: AppColors.gray1,
                               ),
                             ),
-                          )),
-                          const Spacer(),
-                          CustomButton(
-                            text: 'translate'.tr,
-                            onPressed: () => textController.translateText(filePath, fileName),
-                            height: 30,
-                            width: 80,
-                            fontSize: 11,
+                            const SizedBox(width: 16),
+                            GestureDetector(
+                              onTap: () => textController.editSpeakerName(
+                                  context, filePath),
+                              child: SvgPicture.asset(
+                                'assets/images/summary/speaker_edit_icon.svg',
+                                color: AppColors.gray1,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            GestureDetector(
+                              onTap: () {
+                                textController.isTranslate.toggle();
+                              },
+                              child: SvgPicture.asset(
+                                'assets/images/summary/translate_icon.svg',
+                                color: AppColors.gray1,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                          ],
+                          GestureDetector(
+                            onTap: () {
+                              if (textController.isEditing.value) {
+                                textController.saveTranscription(
+                                    filePath, true);
+                              }
+                              textController.isTranslate.value = false;
+                              textController.isEditing.toggle();
+                            },
+                            child: SvgPicture.asset(
+                              textController.isEditing.value
+                                  ? 'assets/images/summary/save_icon.svg'
+                                  : 'assets/images/summary/edit_icon.svg',
+                              color: AppColors.gray1,
+                            ),
                           ),
                         ],
-                      ),
-                    )
-                        : const SizedBox(height: 20, key: ValueKey('empty')),
-                  )),
+                      )),
+                  Obx(() => AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        transitionBuilder:
+                            (Widget child, Animation<double> animation) {
+                          final offsetAnimation = Tween<Offset>(
+                            begin: const Offset(0.0, -0.5),
+                            end: const Offset(0.0, 0.0),
+                          ).animate(animation);
+                          return SlideTransition(
+                              position: offsetAnimation, child: child);
+                        },
+                        child: textController.isTranslate.value
+                            ? Container(
+                                key: const ValueKey('translateRow'),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 20),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    CustomButton(
+                                      text: textController
+                                              .currentLanguage.value.isEmpty
+                                          ? 'English'
+                                          : textController
+                                              .currentLanguage.value,
+                                      onPressed: () {},
+                                      height: 30,
+                                      width: 80,
+                                      fontSize: 11,
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16),
+                                      child: SvgPicture.asset(
+                                          'assets/images/summary/arrow_icon.svg'),
+                                    ),
+                                    Obx(() => Container(
+                                          height: 30,
+                                          width: 120,
+                                          decoration: BoxDecoration(
+                                            color: AppColors.appColor,
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                          ),
+                                          child: InkWell(
+                                            onTap: () => _showSearchBottomSheet(
+                                                context, textController),
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 10),
+                                              child: Row(
+                                                children: [
+                                                  Expanded(
+                                                    child: Text(
+                                                      textController
+                                                              .selectedLanguage
+                                                              .value
+                                                              .isEmpty
+                                                          ? 'select_language'.tr
+                                                          : textController
+                                                              .selectedLanguage
+                                                              .value,
+                                                      style: h4.copyWith(
+                                                          fontSize: 11,
+                                                          color: Colors.white),
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
+                                                  ),
+                                                  const Icon(
+                                                      Icons.arrow_drop_down,
+                                                      color: Colors.white,
+                                                      size: 20),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        )),
+                                    const Spacer(),
+                                    CustomButton(
+                                      text: 'translate'.tr,
+                                      onPressed: () => textController
+                                          .translateText(filePath, fileName),
+                                      height: 30,
+                                      width: 80,
+                                      fontSize: 11,
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : const SizedBox(
+                                height: 20, key: ValueKey('empty')),
+                      )),
                 ],
               ),
             ),
@@ -628,5 +660,4 @@ class ConvertToTextView extends StatelessWidget {
       ),
     );
   }
-
 }

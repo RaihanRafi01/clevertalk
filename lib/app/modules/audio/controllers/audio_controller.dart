@@ -378,9 +378,12 @@ class AudioPlayerController extends GetxController {
             //final language_summary = jsonResponse['nil_vai_shakil_vai'];
 
             String languageCode = jsonResponse['nil_vai_shakil_vai'];
-            String language_summary = LocalizationController.languageMap[languageCode] ?? languageCode;
+            String language_summary =
+                LocalizationController.languageMap[languageCode] ??
+                    languageCode;
 
-            print(':::::::::nil_vai_shakil_vai::::::::::::language_summary::::::::::::::::::::: $language_summary');
+            print(
+                ':::::::::nil_vai_shakil_vai::::::::::::language_summary::::::::::::::::::::: $language_summary');
             await db.update(
               'audio_files',
               {
