@@ -98,18 +98,18 @@ class NotificationSubscriptionView
                                     ':::::::::::::::: check filePath: ${notification.filePath}');
                                 print(
                                     ':::::::::::::::: type: ${notification.type}');
-                                String cleanFileName = notification.fileName
+                                /*String cleanFileName = notification.fileName
                                     ?.replaceFirst('of ', '') ??
-                                    'Unknown File';
+                                    'Unknown File';*/
                                 if (notification.type == 'Conversion') {
                                   Get.to(() => ConvertToTextView(
                                         filePath: notification.filePath ??
                                             "No file path",
-                                        fileName: cleanFileName,
+                                        fileName: notification.fileName ?? '',
                                       ));
                                 } else if (notification.type == 'Summary') {
                                   Get.to(() => SummaryKeyPointView(
-                                        fileName: cleanFileName,
+                                        fileName: notification.fileName ?? '',
                                         filePath: notification.filePath ??
                                             'Unknown FilePath',
                                       ));
@@ -120,7 +120,7 @@ class NotificationSubscriptionView
                               },
                               child: NotificationCard(
                                 message:
-                                    '${notification.message} ${notification.fileName}',
+                                    '${notification.message} ${'of'.tr} ${notification.fileName}',
                                 time: notification.time,
                                 isRead: notification.isRead,
                               ),

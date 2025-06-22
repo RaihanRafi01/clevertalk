@@ -165,8 +165,8 @@ class SummaryKeyPointController extends GetxController {
         );
         await _loadData();
         NotificationService.showNotification(
-            title: "Summary Ready!",
-            body: "Click to view Summary",
+            title: "summary_ready".tr,
+            body: "click_to_view_summary".tr,
             payload: "Summary",
             fileName: fileName,
             filePath: filePath);
@@ -439,8 +439,8 @@ class SummaryKeyPointController extends GetxController {
   Future<void> translateText(String filePath, String fileName) async {
     Get.snackbar(
       duration: Duration(seconds: 4),
-      'Translation in progress...',
-      'This may take some time, but don\'t worry! We\'ll notify you as soon as it\'s ready. Feel free to use the app while you wait.',
+      'translation_in_progress'.tr,
+      'translation_notification'.tr,
     );
     try {
       // Ensure data is not empty before translating
@@ -535,8 +535,8 @@ class SummaryKeyPointController extends GetxController {
         await saveKeyPoints(false);
 
         NotificationService.showNotification(
-          title: "Summary Translation Ready!",
-          body: "Click to view Summary",
+          title: "summary_ready".tr,
+          body: "click_to_view_summary".tr,
           payload: "Summary",
           fileName: fileName,
           filePath: filePath,

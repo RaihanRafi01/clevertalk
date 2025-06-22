@@ -4,6 +4,7 @@ class AppTranslations extends Translations {
   @override
   Map<String, Map<String, String>> get keys => {
         'en_US': {
+          'of': 'of',
           "usb_detected": "USB Device Detected",
           "usb_device_detected":
               "USB device detected. Click Connect to proceed.",
@@ -201,6 +202,7 @@ class AppTranslations extends Translations {
 //////////////////////////////////////// Spanish  //////////////////////////////////////
 
         'es_ES': {
+          'of': 'de',
           "usb_detected": "Dispositivo USB detectado",
           "usb_device_detected":
               "Dispositivo USB detectado. Haz clic en Conectar para continuar.",
@@ -398,6 +400,7 @@ class AppTranslations extends Translations {
 
         //////////////////////////////////////////////////////////////// French //////////////////////////////////
         'fr_FR': {
+          'of': 'de',
           "usb_detected": "Périphérique USB détecté",
           "usb_device_detected":
               "Périphérique USB détecté. Cliquez sur Connecter pour continuer.",
@@ -597,6 +600,7 @@ class AppTranslations extends Translations {
 
         ////////////////////////////////// GERMAN ///////////////////////
         'de_DE': {
+          'of': 'von',
           "usb_detected": "USB-Gerät erkannt",
           "usb_device_detected":
               "USB-Gerät erkannt. Klicken Sie auf Verbinden, um fortzufahren.",
@@ -802,6 +806,7 @@ class AppTranslations extends Translations {
         ////////////////////////////////// Russian //////////////////////////////////////
 
         'ru_RU': {
+          'of': 'из',
           "usb_detected": "USB-устройство обнаружено",
           "usb_device_detected":
               "USB-устройство обнаружено. Нажмите «Подключить», чтобы продолжить.",
@@ -1001,6 +1006,7 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Italian  /////////////////////////////////
 
         'it_IT': {
+          'of': 'Di',
           "usb_detected": "Dispositivo USB rilevato",
           "usb_device_detected":
               "Dispositivo USB rilevato. Clicca su Connetti per procedere.",
@@ -1201,6 +1207,7 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Portuguese   /////////////////////////////////
 
         'pt_PT': {
+          'of': 'de',
           "usb_detected": "Dispositivo USB detectado",
           "usb_device_detected":
               "Dispositivo USB detectado. Clique em Conectar para prosseguir.",
@@ -1399,6 +1406,7 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Chinese   /////////////////////////////////
 
         'zh_CN': {
+          'of': '的',
           "usb_detected": "检测到USB设备",
           "usb_device_detected": "检测到USB设备。点击连接以继续。",
           "usb_disconnected": "USB已断开",
@@ -1575,6 +1583,7 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Hindi   /////////////////////////////////
 
         'hi_IN': {
+          'of': 'का',
           "usb_detected": "यूएसबी डिवाइस डिटेक्टेड",
           "usb_device_detected":
               "यूएसबी डिवाइस डिटेक्टेड। कनेक्ट करने के लिए क्लिक करें।",
@@ -1772,6 +1781,7 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Arabic  /////////////////////////////////
 
         'ar_AR': {
+          'of': 'ل',
           "usb_detected": "تم اكتشاف جهاز USB",
           "usb_device_detected": "تم اكتشاف جهاز USB. انقر على اتصال للمتابعة.",
           "usb_disconnected": "تم قطع اتصال USB",
@@ -1957,9 +1967,10 @@ class AppTranslations extends Translations {
           'try_again': 'حاول مرة أخرى'
         },
 
-        ////////////////////////////////////////////// Italian  /////////////////////////////////
+        ////////////////////////////////////////////// Japanese  /////////////////////////////////
 
         'ja_JP': {
+          'of': 'の',
           "usb_detected": "USBデバイスが検出されました",
           "usb_device_detected": "USBデバイスが検出されました。接続をクリックして続行してください。",
           "usb_disconnected": "USBが切断されました",
