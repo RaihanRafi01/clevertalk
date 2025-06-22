@@ -6,12 +6,13 @@ import 'package:intl/intl.dart';
 import '../../../../common/appColors.dart';
 import '../../../../common/customFont.dart';
 import '../../../../common/widgets/customAppBar.dart';
-import '../../../../common/widgets/customNavigationBar.dart'; // Add this import
+import '../../../../common/widgets/customNavigationBar.dart';
 import '../../../data/services/notification_services.dart';
 import '../bindings/language_model.dart';
 import '../controllers/summaryKeyPoint_controller.dart';
-import '../../dashboard/controllers/dashboard_controller.dart'; // Add this import
-import '../../dashboard/views/dashboard_view.dart'; // Add this import
+import '../../dashboard/controllers/dashboard_controller.dart';
+import '../../dashboard/views/dashboard_view.dart';
+import '../../../../common/localization/localization_controller.dart';
 
 class SummaryKeyPointView extends StatelessWidget {
   final String fileName;
@@ -25,15 +26,16 @@ class SummaryKeyPointView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(SummaryKeyPointController(fileName: fileName));
+    // Initialize controller with fileName and filePath
+    final controller = Get.put(SummaryKeyPointController(fileName: fileName, filePath: filePath));
 
     return PopScope(
       onPopInvokedWithResult: (canPop, result) async {
         if (canPop) {
           // Update DashboardController to "Recordings" tab (index 1)
           final dashboardController = Get.find<DashboardController>();
-          dashboardController.updateIndex(1); // Set to "Recordings" tab
-          Get.offAll(() => const DashboardView(), arguments: 1); // Navigate without back icon
+          dashboardController.updateIndex(1);
+          Get.offAll(() => const DashboardView(), arguments: 1);
         }
       },
       child: Scaffold(
@@ -44,18 +46,18 @@ class SummaryKeyPointView extends StatelessWidget {
         ),
         bottomNavigationBar: CustomNavigationBar(
           onItemTapped: (index) {
-            // Update the DashboardController's currentIndex before navigating
             final dashboardController = Get.find<DashboardController>();
-            dashboardController.updateIndex(index); // Set the desired index
-            // Navigate to DashboardView, clear stack, and pass the index
+            dashboardController.updateIndex(index);
             Get.offAll(() => const DashboardView(), arguments: index);
           },
         ),
         body: Obx(() {
+          // Show loading indicator while data is being loaded
           if (controller.isLoading.value) {
             return const Center(child: CircularProgressIndicator());
           }
 
+          // Render content only when data is loaded
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
             child: SingleChildScrollView(
@@ -222,16 +224,18 @@ class SummaryKeyPointView extends StatelessWidget {
                       SvgPicture.asset('assets/images/summary/lan_icon.svg'),
                       const SizedBox(width: 10),
                       Obx(() => Text(
-                          controller.currentLanguage.value.isEmpty
-                              ? 'English'
-                              : controller.currentLanguage.value,
-                          style: h4)),
+                        controller.currentLanguage.value.isEmpty
+                            ? 'English'
+                            : controller.currentLanguage.value,
+                        style: h4,
+                      )),
                     ],
                   ),
                   const SizedBox(height: 16),
                   Obx(() => Text(
-                      controller.keyPointsLabel.value,
-                      style: h4.copyWith(fontSize: 15, fontWeight: FontWeight.bold))),
+                    controller.keyPointsLabel.value,
+                    style: h4.copyWith(fontSize: 15, fontWeight: FontWeight.bold),
+                  )),
                   const SizedBox(height: 10),
                   Obx(() => controller.isEditing.value
                       ? _buildEditableList(
@@ -242,8 +246,9 @@ class SummaryKeyPointView extends StatelessWidget {
                   const SizedBox(height: 20),
                   if (controller.conclusions.isNotEmpty) ...[
                     Obx(() => Text(
-                        controller.conclusionsLabel.value,
-                        style: h4.copyWith(fontSize: 15, fontWeight: FontWeight.bold))),
+                      controller.conclusionsLabel.value,
+                      style: h4.copyWith(fontSize: 15, fontWeight: FontWeight.bold),
+                    )),
                     const SizedBox(height: 10),
                     Obx(() => controller.isEditing.value
                         ? _buildEditableList(
@@ -252,7 +257,7 @@ class SummaryKeyPointView extends StatelessWidget {
                         controller.conclusionValueControllers)
                         : _buildReadOnlyList(controller.conclusions)),
                   ],
-                  const SizedBox(height: 60), // Extra padding for navigation bar
+                  const SizedBox(height: 60),
                 ],
               ),
             ),
@@ -321,7 +326,7 @@ class SummaryKeyPointView extends StatelessWidget {
 
   String _formatDate(String dateString) {
     if (dateString.isEmpty) {
-      return "${'date'.tr}: ${'unknown'.tr}"; // Fallback for empty string
+      return "${'date'.tr}: ${'unknown'.tr}";
     }
 
     try {
@@ -329,7 +334,7 @@ class SummaryKeyPointView extends StatelessWidget {
       return "${'date'.tr}: ${DateFormat('d MMMM y').format(dateTime)} ${'time'.tr}: ${DateFormat('h:mm a').format(dateTime)}";
     } catch (e) {
       print("Error parsing date: $e");
-      return "${'date'.tr}: ${'invalid'.tr}"; // Fallback for invalid format
+      return "${'date'.tr}: ${'invalid'.tr}";
     }
   }
 

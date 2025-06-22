@@ -18,8 +18,9 @@ import '../../../data/services/notification_services.dart';
 
 class SummaryKeyPointController extends GetxController {
   final String fileName;
+  final String filePath;
 
-  SummaryKeyPointController({required this.fileName});
+  SummaryKeyPointController({required this.fileName, required this.filePath});
 
   final ApiService _apiService = ApiService();
   late TextEditingController titleController;
@@ -52,6 +53,19 @@ class SummaryKeyPointController extends GetxController {
   }
 
   Future<void> _loadData() async {
+    // Set loading state and clear existing data to prevent stale data display
+    isLoading.value = true;
+    mainPoints.clear();
+    conclusions.clear();
+    titleController.text = '';
+    dateController.text = '';
+    keyPointsLabel.value = 'Key Points:';
+    conclusionsLabel.value = 'Conclusions:';
+    mainPointTitleControllers.clear();
+    mainPointValueControllers.clear();
+    conclusionTitleControllers.clear();
+    conclusionValueControllers.clear();
+
     try {
       final db = await DatabaseHelper().database;
       final result = await db.query(
@@ -96,11 +110,21 @@ class SummaryKeyPointController extends GetxController {
               .toList() ??
               [];
           print("Loaded Main Points: $mainPoints");
-          print("Loaded Conclusions: $conclusions"); // Debug print
+          print("Loaded Conclusions: $conclusions");
         }
-      }
 
-      _initializeControllers();
+        // Check if currentLanguage matches settings' language
+        final localizationController = Get.find<LocalizationController>();
+        if (currentLanguage.value != localizationController.selectedLanguage.value &&
+            mainPoints.isNotEmpty) {
+          selectedLanguage.value = localizationController.selectedLanguage.value;
+          await translateText(filePath, fileName);
+        }
+
+        _initializeControllers();
+      } else {
+        Get.snackbar("Error", "No data found for file: $fileName");
+      }
     } catch (e) {
       Get.snackbar("Error", "Failed to load data: $e");
       print('Error: $e');
@@ -114,13 +138,14 @@ class SummaryKeyPointController extends GetxController {
     print('REGENERATE ::::: fileName ::::::::: $fileName');
     final db = await DatabaseHelper().database;
     try {
-      Get.snackbar(duration: Duration(seconds: 4),'Regenerating Summary...', 'This may take some time, but don\'t worry! We\'ll notify you as soon as it\'s ready. Feel free to using the app while you wait.');
+      Get.snackbar(
+          duration: Duration(seconds: 4),
+          'Regenerating Summary...',
+          'This may take some time, but don\'t worry! We\'ll notify you as soon as it\'s ready. Feel free to using the app while you wait.');
       final response = await _apiService.fetchKeyPoints(filePath, fileName);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final keyPointText = json.decode(response.body)['Data']['content'];
-        //final language_summary = json.decode(response.body)['nil_vai_shakil_vai'];
-
         String languageCode = json.decode(response.body)['nil_vai_shakil_vai'];
         String language_summary = LocalizationController.languageMap[languageCode] ?? languageCode;
 
@@ -144,8 +169,7 @@ class SummaryKeyPointController extends GetxController {
             body: "Click to view Summary",
             payload: "Summary",
             fileName: fileName,
-            filePath: filePath
-        );
+            filePath: filePath);
       } else {
         Get.snackbar('Error', 'Summary Failed: ${response.body}');
       }
@@ -174,14 +198,12 @@ class SummaryKeyPointController extends GetxController {
     mainPoints.value = List.generate(
         mainPoints.length,
             (i) => {
-          mainPointTitleControllers[i].text:
-          mainPointValueControllers[i].text
+          mainPointTitleControllers[i].text: mainPointValueControllers[i].text
         });
     conclusions.value = List.generate(
         conclusions.length,
             (i) => {
-          conclusionTitleControllers[i].text:
-          conclusionValueControllers[i].text
+          conclusionTitleControllers[i].text: conclusionValueControllers[i].text
         });
 
     final updatedData = {
@@ -421,6 +443,12 @@ class SummaryKeyPointController extends GetxController {
       'This may take some time, but don\'t worry! We\'ll notify you as soon as it\'s ready. Feel free to use the app while you wait.',
     );
     try {
+      // Ensure data is not empty before translating
+      if (mainPoints.isEmpty && conclusions.isEmpty && titleController.text.isEmpty) {
+        Get.snackbar('Error', 'No data available to translate');
+        return;
+      }
+
       // Prepare separate lists for keys and values, tightly trimmed
       List<String> mainPointKeys = mainPoints.map((point) => point.keys.first.trim()).toList();
       List<String> mainPointValues = mainPoints.map((point) => point.values.first.trim()).toList();
