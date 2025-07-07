@@ -102,7 +102,7 @@ class DialogStateController extends GetxController {
   }
 }
 
-Future<PermissionStatus> _requestStoragePermission() async {
+/*Future<PermissionStatus> _requestStoragePermission() async {
   PermissionStatus status;
 
   if (Platform.isAndroid && Platform.version.startsWith('29')) {
@@ -126,7 +126,7 @@ Future<PermissionStatus> _requestStoragePermission() async {
   }
 
   return status;
-}
+}*/
 
 Future<bool> _waitForMount(String usbPath, {int maxRetries = 5, int delaySeconds = 5}) async {
   for (int i = 0; i < maxRetries; i++) {
@@ -322,8 +322,8 @@ Future<void> connectUsbDevice(BuildContext context) async {
 
     while (retryCount < maxRetries) {
       try {
-        final permissionStatus = await _requestStoragePermission();
-        if (permissionStatus != PermissionStatus.granted) {
+        //final permissionStatus = await _requestStoragePermission();
+        /*if (permissionStatus != PermissionStatus.granted) {
           dialogController.updateDialog(
             title: 'permission_required'.tr,
             message: 'storage_permission_message'.tr,
@@ -333,7 +333,7 @@ Future<void> connectUsbDevice(BuildContext context) async {
             showTryAgain: true,
           );
           return;
-        }
+        }*/
 
         final Map<dynamic, dynamic>? usbDeviceDetails =
         await DialogStateController.platform.invokeMethod('getUsbDeviceDetails');
