@@ -320,21 +320,12 @@ Future<void> connectUsbDevice(BuildContext context) async {
       showContinue: false,
     );
 
+    // Check if the dialog has been shown before
+    final prefs = await SharedPreferences.getInstance();
+    final hasSeenErrorBefore = prefs.getBool('hasSeenUsbConnectionError') ?? false;
+
     while (retryCount < maxRetries) {
       try {
-        //final permissionStatus = await _requestStoragePermission();
-        /*if (permissionStatus != PermissionStatus.granted) {
-          dialogController.updateDialog(
-            title: 'permission_required'.tr,
-            message: 'storage_permission_message'.tr,
-            icon: Icons.error,
-            iconColor: Colors.red.shade700,
-            isLoading: false,
-            showTryAgain: true,
-          );
-          return;
-        }*/
-
         final Map<dynamic, dynamic>? usbDeviceDetails =
         await DialogStateController.platform.invokeMethod('getUsbDeviceDetails');
 
@@ -379,9 +370,16 @@ Future<void> connectUsbDevice(BuildContext context) async {
     }
 
     if (!isUsbConnected || usbPath == null) {
+      // Update SharedPreferences to mark that the error has been shown
+      await prefs.setBool('hasSeenUsbConnectionError', true);
+
+      // Show additional text only if seen before
+      String additionalMessage = hasSeenErrorBefore
+          ? '\n${'close_your_app'.tr}'    // Close your app, clean from recent app and reopen
+          : '';
       dialogController.updateDialog(
         title: 'error'.tr,
-        message: '${'failed_to_connect_usb'.tr} ${maxRetries.toString()} ${'attempts'.tr}\n${'please_restart_app'.tr}',
+        message: '${'failed_to_connect_usb'.tr} ${maxRetries.toString()} ${'attempts'.tr}\n${'please_restart_app'.tr}$additionalMessage',
         icon: Icons.error,
         iconColor: Colors.red.shade700,
         isLoading: false,

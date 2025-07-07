@@ -200,12 +200,16 @@ class AppTranslations extends Translations {
           'complete': 'Complete',
           'restart_app': 'Restart App',
           'connect': 'Connect',
+          'close_your_app': 'Close your app, clean from recent app and reopen',
+          'please_restart_app': 'Please restart your app',
 
         },
 
 //////////////////////////////////////// Spanish  //////////////////////////////////////
 
         'es_ES': {
+          'close_your_app': 'Cierre su aplicación, limpie de las aplicaciones recientes y reábrala',
+          'please_restart_app': 'Por favor, reinicie la aplicación',
           'complete': 'Completar',
           'restart_app': 'Reiniciar la aplicación',
           'connect': 'Conectar',
@@ -410,6 +414,8 @@ class AppTranslations extends Translations {
 
 
         'fr_FR': {
+          'close_your_app': 'Fermez votre application, supprimez-la des applications récentes et rouvrez-la',
+          'please_restart_app': 'Veuillez redémarrer l\'application',
           'complete': 'Terminer',
           'restart_app': 'Redémarrer l\'application',
           'connect': 'Connecter',
@@ -616,6 +622,8 @@ class AppTranslations extends Translations {
 
 
         'de_DE': {
+          'close_your_app': 'Schließen Sie Ihre App, löschen Sie sie aus den kürzlichen Apps und öffnen Sie sie erneut',
+          'please_restart_app': 'Bitte starten Sie die App neu',
           'complete': 'Fertig',
           'restart_app': 'App neu starten',
           'connect': 'Verbinden',
@@ -825,6 +833,8 @@ class AppTranslations extends Translations {
         ////////////////////////////////// Russian //////////////////////////////////////
 
         'ru_RU': {
+          'close_your_app': 'Закройте приложение, очистите из недавних приложений и перезапустите',
+          'please_restart_app': 'Пожалуйста, перезапустите приложение',
           'complete': 'Завершить',
           'restart_app': 'Перезапустить приложение',
           'connect': 'Подключиться',
@@ -1028,6 +1038,8 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Italian  /////////////////////////////////
 
         'it_IT': {
+          'close_your_app': 'Chiuda la sua applicazione, pulisca dalle app recenti e riapra',
+          'please_restart_app': 'Si prega di riavviare l\'applicazione',
           'complete': 'Completa',
           'restart_app': 'Riavvia l\'app',
           'connect': 'Connetti',
@@ -1232,6 +1244,8 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Portuguese   /////////////////////////////////
 
         'pt_PT': {
+          'close_your_app': 'Feche seu aplicativo, limpe dos aplicativos recentes e reabra',
+          'please_restart_app': 'Por favor, reinicie o aplicativo',
           'complete': 'Concluir',
           'restart_app': 'Reiniciar o aplicativo',
           'connect': 'Conectar',
@@ -1434,6 +1448,8 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Chinese   /////////////////////////////////
 
         'zh_CN': {
+          'close_your_app': '关闭您的应用程序，从最近使用的应用中清除并重新打开',
+          'please_restart_app': '请重新启动应用程序',
           'complete': '完成',
           'restart_app': '重新启动应用程序',
           'connect': '连接',
@@ -1614,6 +1630,8 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Hindi   /////////////////////////////////
 
         'hi_IN': {
+          'close_your_app': 'अपने ऐप को बंद करें, हाल की ऐप्स से साफ करें और फिर से खोलें',
+          'please_restart_app': 'कृपया ऐप को पुनः प्रारंभ करें',
           'complete': 'पूरा',
           'restart_app': 'ऐप पुनरारंभ करें',
           'connect': 'कनेक्ट करें',
@@ -1815,6 +1833,8 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Arabic  /////////////////////////////////
 
         'ar_AR': {
+          'close_your_app': 'أغلق تطبيقك، نظف من التطبيقات الأخيرة وأعد فتحه',
+          'please_restart_app': 'يرجى إعادة تشغيل التطبيق',
           'complete': 'اكتمال',
           'restart_app': 'إعادة تشغيل التطبيق',
           'connect': 'الاتصال',
@@ -2007,6 +2027,8 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Japanese  /////////////////////////////////
 
         'ja_JP': {
+          'close_your_app': 'アプリを閉じ、最近使用したアプリから削除して再度開いてください',
+          'please_restart_app': 'アプリを再起動してください',
           'complete': '完了',
           'restart_app': 'アプリを再起動',
           'connect': '接続',
