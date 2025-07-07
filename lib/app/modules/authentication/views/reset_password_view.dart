@@ -44,6 +44,7 @@ class ResetPasswordView extends GetView {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white,
         centerTitle: true,
         title: SvgPicture.asset('assets/images/auth/app_logo.svg'),
       ),
