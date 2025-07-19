@@ -1,3 +1,4 @@
+/*
 package com.jvai.clevertalk.services
 
 import android.app.Service
@@ -63,4 +64,4 @@ class RestartService : Service() {
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
-}
+}*/

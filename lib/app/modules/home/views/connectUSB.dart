@@ -5,9 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../common/appColors.dart';
 import '../../../data/database_helper.dart';
@@ -23,7 +21,7 @@ class DialogStateController extends GetxController {
   var isLoading = false.obs;
   var showContinue = false.obs;
   var showTryAgain = false.obs;
-  var showRestart = false.obs;
+  //var showRestart = false.obs;
   var isUsbAttached = false.obs;
 
   static const platform = MethodChannel('usb_path_reader/usb');
@@ -88,7 +86,7 @@ class DialogStateController extends GetxController {
     bool? isLoading,
     bool? showContinue,
     bool? showTryAgain,
-    bool? showRestart,
+   // bool? showRestart,
   }) {
     if (title != null) this.title.value = title;
     if (message != null) this.message.value = message;
@@ -98,7 +96,7 @@ class DialogStateController extends GetxController {
     if (isLoading != null) this.isLoading.value = isLoading;
     if (showContinue != null) this.showContinue.value = showContinue;
     if (showTryAgain != null) this.showTryAgain.value = showTryAgain;
-    if (showRestart != null) this.showRestart.value = showRestart;
+    //if (showRestart != null) this.showRestart.value = showRestart;
   }
 }
 
@@ -379,11 +377,12 @@ Future<void> connectUsbDevice(BuildContext context) async {
           : '';
       dialogController.updateDialog(
         title: 'error'.tr,
-        message: '${'failed_to_connect_usb'.tr} ${maxRetries.toString()} ${'attempts'.tr}\n${'please_restart_app'.tr}$additionalMessage',
+        message: '${'failed_to_connect_usb'.tr} ${maxRetries.toString()} ${'attempts'.tr}',
+       // message: '${'failed_to_connect_usb'.tr} ${maxRetries.toString()} ${'attempts'.tr}\n${'please_restart_app'.tr}$additionalMessage',
         icon: Icons.error,
         iconColor: Colors.red.shade700,
         isLoading: false,
-        showRestart: true,
+        //showRestart: true,
       );
       return;
     }
@@ -518,8 +517,8 @@ DialogStateController _showPersistentDialog(BuildContext context) {
               ],
               if (controller.progress.value != null &&
                   !controller.showContinue.value &&
-                  !controller.showTryAgain.value &&
-                  !controller.showRestart.value) ...[
+                  !controller.showTryAgain.value /*&&
+                  !controller.showRestart.value*/) ...[
                 SizedBox(height: 20),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
@@ -539,7 +538,7 @@ DialogStateController _showPersistentDialog(BuildContext context) {
                   ),
                 ),
               ],
-              if (controller.showRestart.value) ...[
+              /*if (controller.showRestart.value) ...[
                 SizedBox(height: 20),
                 CustomButton(
                   borderRadius: 30,
@@ -551,7 +550,7 @@ DialogStateController _showPersistentDialog(BuildContext context) {
                   backgroundColor: AppColors.appColor,
                   textColor: Colors.white,
                 ),
-              ] else if (controller.showContinue.value) ...[
+              ] else*/ if (controller.showContinue.value) ...[
                 SizedBox(height: 20),
                 CustomButton(
                   borderRadius: 30,

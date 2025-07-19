@@ -1,7 +1,7 @@
 package com.jvai.clevertalk
-import android.os.Bundle
+/*import android.os.Bundle
 import android.view.WindowManager
-import android.app.PendingIntent
+import android.app.PendingIntent*/
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -13,25 +13,26 @@ import android.os.storage.StorageVolume
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import android.app.PendingIntent
 import android.os.Build
 import android.util.Log
-import android.os.Handler
-import android.os.Looper
+/*import android.os.Handler
+import android.os.Looper*/
 import java.io.File
-import androidx.core.app.NotificationCompat
-import com.jvai.clevertalk.services.RestartService
+/*import androidx.core.app.NotificationCompat
+import com.jvai.clevertalk.services.RestartService*/
 
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "usb_path_reader/usb"
     private val TAG = "MainActivity"
     private val USB_PERMISSION = "com.jvai.clevertalk.USB_PERMISSION"
-    private val NOTIFICATION_CHANNEL_ID = "clevertalk_restart_channel"
-    private val NOTIFICATION_ID = 1
+    //private val NOTIFICATION_CHANNEL_ID = "clevertalk_restart_channel"
+    //private val NOTIFICATION_ID = 1
     private var usbReceiver: BroadcastReceiver? = null
     private var methodChannel: MethodChannel? = null
 
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+   /* override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Force fullscreen
         window.setFlags(
@@ -82,7 +83,7 @@ class MainActivity : FlutterActivity() {
         } catch (e: Exception) {
             Log.e(TAG, "Failed to restart app: $e")
         }
-    }
+    }*/
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -112,11 +113,11 @@ class MainActivity : FlutterActivity() {
                     startUsbListener()
                     result.success(true)
                 }
-                "restartApp" -> {
+                /*"restartApp" -> {
                     Log.d(TAG, "Method call: restartApp")
                     restartApp()
                     result.success(true)
-                }
+                }*/
                 else -> {
                     Log.w(TAG, "Method not implemented: ${call.method}")
                     result.notImplemented()
