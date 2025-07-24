@@ -1,7 +1,6 @@
 package com.jvai.clevertalk
-/*import android.os.Bundle
+import android.os.Bundle
 import android.view.WindowManager
-import android.app.PendingIntent*/
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -16,11 +15,10 @@ import io.flutter.plugin.common.MethodChannel
 import android.app.PendingIntent
 import android.os.Build
 import android.util.Log
-/*import android.os.Handler
-import android.os.Looper*/
+import android.os.Handler
+import android.os.Looper
 import java.io.File
-/*import androidx.core.app.NotificationCompat
-import com.jvai.clevertalk.services.RestartService*/
+import androidx.core.app.NotificationCompat
 
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "usb_path_reader/usb"
