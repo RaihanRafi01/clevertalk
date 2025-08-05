@@ -133,10 +133,13 @@ class SubscriptionController extends GetxController {
           Get.off(() => WebViewScreen(
             url: checkoutUrl,
             onUrlMatched: (bool isCancelled) {
-              homeController.package_name.value = packageName;
-              homeController.package_type.value = packageType;
               if (!isCancelled) {
-                Get.snackbar('Success', 'Subscription purchased successfully');
+                homeController.package_name.value = packageName;
+                homeController.package_type.value = packageType;
+                Get.snackbar('Success', '$packageType $packageName package purchased successfully');
+              } else {
+                // Do not update package_name or package_type on cancellation
+                Get.snackbar('Cancelled', '$packageType $packageName package purchase cancelled');
               }
               Get.offAll(() => DashboardView());
             },
@@ -147,9 +150,11 @@ class SubscriptionController extends GetxController {
       } else {
         Get.snackbar(
             'Error', 'Failed to purchase subscription: ${response.statusCode}');
+        // Do not update package_name or package_type on failure
       }
     } catch (e) {
       Get.snackbar('Error', 'An error occurred: $e');
+      // Do not update package_name or package_type on error
     }
   }
 
@@ -160,7 +165,7 @@ class SubscriptionController extends GetxController {
       if (response.statusCode == 200) {
         homeController.package_name.value = '';
         homeController.package_type.value = '';
-        Get.snackbar('Success', 'Subscription canceled successfully');
+        Get.snackbar('Success'.tr, 'Subscription canceled successfully');
         Get.off(() => SubscriptionView());
       } else {
         Get.snackbar(
