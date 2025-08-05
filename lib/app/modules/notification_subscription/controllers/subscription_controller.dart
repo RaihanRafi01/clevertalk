@@ -166,6 +166,7 @@ class SubscriptionController extends GetxController {
         homeController.package_name.value = '';
         homeController.package_type.value = '';
         Get.snackbar('Success'.tr, 'Subscription canceled successfully');
+
         Get.off(() => SubscriptionView());
       } else {
         Get.snackbar(
