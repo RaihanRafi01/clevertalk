@@ -4,6 +4,24 @@ class AppTranslations extends Translations {
   @override
   Map<String, Map<String, String>> get keys => {
         'en_US': {
+          'cancelled' : 'Cancelled',
+          'please_try_again_later': 'Please try again later',
+          'warning': 'Warning',
+          'package_purchased_successfully': 'Package purchased successfully',
+          'package_purchase_cancelled': 'Package purchase cancelled',
+          'unexpected_response_please_try_again':
+              'Unexpected response, please try again',
+          'failed_to_purchase_subscription': 'Failed to purchase subscription',
+          'failed_to_cancel_subscription': 'Failed to cancel subscription',
+          'failed_to_upgrade_subscription': 'Failed to upgrade subscription',
+          'subscription_canceled_successfully':
+              'Subscription canceled successfully',
+          'subscription_upgraded_successfully':
+              'Subscription upgraded successfully',
+          'subscription_downgrade_successfully':
+              'Subscription downgraded successfully',
+          'failed_to_downgrade_subscription':
+              'Failed to downgrade subscription',
           'of': 'of',
           "usb_detected": "USB Device Detected",
           "usb_device_detected":
@@ -202,13 +220,26 @@ class AppTranslations extends Translations {
           'connect': 'Connect',
           'close_your_app': 'Close your app, clean from recent app and reopen',
           'please_restart_app': 'Please restart your app',
-
         },
 
 //////////////////////////////////////// Spanish  //////////////////////////////////////
 
         'es_ES': {
-          'close_your_app': 'Cierre su aplicación, limpie de las aplicaciones recientes y reábrala',
+  'cancelled': 'Cancelado',
+  'please_try_again_later': 'Por favor, intenta de nuevo más tarde',
+  'warning': 'Advertencia',
+  'package_purchased_successfully': 'Paquete comprado exitosamente',
+  'package_purchase_cancelled': 'Compra de paquete cancelada',
+  'unexpected_response_please_try_again': 'Respuesta inesperada, por favor intenta de nuevo',
+  'failed_to_purchase_subscription': 'No se pudo comprar la suscripción',
+  'failed_to_cancel_subscription': 'No se pudo cancelar la suscripción',
+  'failed_to_upgrade_subscription': 'No se pudo actualizar la suscripción',
+  'subscription_canceled_successfully': 'Suscripción cancelada exitosamente',
+  'subscription_upgraded_successfully': 'Suscripción actualizada exitosamente',
+  'subscription_downgrade_successfully': 'Suscripción degradada exitosamente',
+  'failed_to_downgrade_subscription': 'No se pudo degradar la suscripción',
+          'close_your_app':
+              'Cierre su aplicación, limpie de las aplicaciones recientes y reábrala',
           'please_restart_app': 'Por favor, reinicie la aplicación',
           'complete': 'Completar',
           'restart_app': 'Reiniciar la aplicación',
@@ -409,12 +440,24 @@ class AppTranslations extends Translations {
           'try_again': 'Intentar de nuevo'
         },
 
-
         //////////////////////////////////////////////////////////////// French //////////////////////////////////
 
-
         'fr_FR': {
-          'close_your_app': 'Fermez votre application, supprimez-la des applications récentes et rouvrez-la',
+  'cancelled': 'Annulé',
+  'please_try_again_later': 'Veuillez réessayer plus tard',
+  'warning': 'Avertissement',
+  'package_purchased_successfully': 'Forfait acheté avec succès',
+  'package_purchase_cancelled': 'Achat de forfait annulé',
+  'unexpected_response_please_try_again': 'Réponse inattendue, veuillez réessayer',
+  'failed_to_purchase_subscription': 'Échec de l\'achat de l\'abonnement',
+  'failed_to_cancel_subscription': 'Échec de l\'annulation de l\'abonnement',
+  'failed_to_upgrade_subscription': 'Échec de la mise à niveau de l\'abonnement',
+  'subscription_canceled_successfully': 'Abonnement annulé avec succès',
+  'subscription_upgraded_successfully': 'Abonnement mis à niveau avec succès',
+  'subscription_downgrade_successfully': 'Abonnement rétrogradé avec succès',
+  'failed_to_downgrade_subscription': 'Échec de la rétrogradation de l\'abonnement',
+          'close_your_app':
+              'Fermez votre application, supprimez-la des applications récentes et rouvrez-la',
           'please_restart_app': 'Veuillez redémarrer l\'application',
           'complete': 'Terminer',
           'restart_app': 'Redémarrer l\'application',
@@ -617,12 +660,24 @@ class AppTranslations extends Translations {
           'try_again': 'Réessayer'
         },
 
-
         ////////////////////////////////// GERMAN ///////////////////////
 
-
         'de_DE': {
-          'close_your_app': 'Schließen Sie Ihre App, löschen Sie sie aus den kürzlichen Apps und öffnen Sie sie erneut',
+  'cancelled': 'Abgebrochen',
+  'please_try_again_later': 'Bitte versuchen Sie es später erneut',
+  'warning': 'Warnung',
+  'package_purchased_successfully': 'Paket erfolgreich gekauft',
+  'package_purchase_cancelled': 'Paketkauf abgebrochen',
+  'unexpected_response_please_try_again': 'Unerwartete Antwort, bitte versuchen Sie es erneut',
+  'failed_to_purchase_subscription': 'Abonnement konnte nicht gekauft werden',
+  'failed_to_cancel_subscription': 'Abonnement konnte nicht gekündigt werden',
+  'failed_to_upgrade_subscription': 'Abonnement konnte nicht aktualisiert werden',
+  'subscription_canceled_successfully': 'Abonnement erfolgreich gekündigt',
+  'subscription_upgraded_successfully': 'Abonnement erfolgreich aktualisiert',
+  'subscription_downgrade_successfully': 'Abonnement erfolgreich herabgestuft',
+  'failed_to_downgrade_subscription': 'Abonnement konnte nicht herabgestuft werden',
+          'close_your_app':
+              'Schließen Sie Ihre App, löschen Sie sie aus den kürzlichen Apps und öffnen Sie sie erneut',
           'please_restart_app': 'Bitte starten Sie die App neu',
           'complete': 'Fertig',
           'restart_app': 'App neu starten',
@@ -833,7 +888,21 @@ class AppTranslations extends Translations {
         ////////////////////////////////// Russian //////////////////////////////////////
 
         'ru_RU': {
-          'close_your_app': 'Закройте приложение, очистите из недавних приложений и перезапустите',
+  'cancelled': 'Отменено',
+  'please_try_again_later': 'Пожалуйста, попробуйте снова позже',
+  'warning': 'Предупреждение',
+  'package_purchased_successfully': 'Пакет успешно приобретен',
+  'package_purchase_cancelled': 'Покупка пакета отменена',
+  'unexpected_response_please_try_again': 'Непредвиденный ответ, пожалуйста, попробуйте снова',
+  'failed_to_purchase_subscription': 'Не удалось приобрести подписку',
+  'failed_to_cancel_subscription': 'Не удалось отменить подписку',
+  'failed_to_upgrade_subscription': 'Не удалось обновить подписку',
+  'subscription_canceled_successfully': 'Подписка успешно отменена',
+  'subscription_upgraded_successfully': 'Подписка успешно обновлена',
+  'subscription_downgrade_successfully': 'Подписка успешно понижена',
+  'failed_to_downgrade_subscription': 'Не удалось понизить подписку',
+          'close_your_app':
+              'Закройте приложение, очистите из недавних приложений и перезапустите',
           'please_restart_app': 'Пожалуйста, перезапустите приложение',
           'complete': 'Завершить',
           'restart_app': 'Перезапустить приложение',
@@ -1038,7 +1107,21 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Italian  /////////////////////////////////
 
         'it_IT': {
-          'close_your_app': 'Chiuda la sua applicazione, pulisca dalle app recenti e riapra',
+  'cancelled': 'Annullato',
+  'please_try_again_later': 'Per favore, riprova più tardi',
+  'warning': 'Avvertimento',
+  'package_purchased_successfully': 'Pacchetto acquistato con successo',
+  'package_purchase_cancelled': 'Acquisto del pacchetto annullato',
+  'unexpected_response_please_try_again': 'Risposta inaspettata, per favore riprova',
+  'failed_to_purchase_subscription': 'Impossibile acquistare l\'abbonamento',
+  'failed_to_cancel_subscription': 'Impossibile annullare l\'abbonamento',
+  'failed_to_upgrade_subscription': 'Impossibile aggiornare l\'abbonamento',
+  'subscription_canceled_successfully': 'Abbonamento annullato con successo',
+  'subscription_upgraded_successfully': 'Abbonamento aggiornato con successo',
+  'subscription_downgrade_successfully': 'Abbonamento declassato con successo',
+  'failed_to_downgrade_subscription': 'Impossibile declassare l\'abbonamento',
+          'close_your_app':
+              'Chiuda la sua applicazione, pulisca dalle app recenti e riapra',
           'please_restart_app': 'Si prega di riavviare l\'applicazione',
           'complete': 'Completa',
           'restart_app': 'Riavvia l\'app',
@@ -1244,7 +1327,21 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Portuguese   /////////////////////////////////
 
         'pt_PT': {
-          'close_your_app': 'Feche seu aplicativo, limpe dos aplicativos recentes e reabra',
+  'cancelled': 'Cancelado',
+  'please_try_again_later': 'Por favor, tente novamente mais tarde',
+  'warning': 'Aviso',
+  'package_purchased_successfully': 'Pacote comprado com sucesso',
+  'package_purchase_cancelled': 'Compra de pacote cancelada',
+  'unexpected_response_please_try_again': 'Resposta inesperada, por favor tente novamente',
+  'failed_to_purchase_subscription': 'Falha ao comprar a subscrição',
+  'failed_to_cancel_subscription': 'Falha ao cancelar a subscrição',
+  'failed_to_upgrade_subscription': 'Falha ao atualizar a subscrição',
+  'subscription_canceled_successfully': 'Subscrição cancelada com sucesso',
+  'subscription_upgraded_successfully': 'Subscrição atualizada com sucesso',
+  'subscription_downgrade_successfully': 'Subscrição rebaixada com sucesso',
+  'failed_to_downgrade_subscription': 'Falha ao rebaixar a subscrição',
+          'close_your_app':
+              'Feche seu aplicativo, limpe dos aplicativos recentes e reabra',
           'please_restart_app': 'Por favor, reinicie o aplicativo',
           'complete': 'Concluir',
           'restart_app': 'Reiniciar o aplicativo',
@@ -1448,6 +1545,19 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Chinese   /////////////////////////////////
 
         'zh_CN': {
+  'cancelled': '已取消',
+  'please_try_again_later': '请稍后再试',
+  'warning': '警告',
+  'package_purchased_successfully': '套餐购买成功',
+  'package_purchase_cancelled': '套餐购买已取消',
+  'unexpected_response_please_try_again': '意外响应，请重试',
+  'failed_to_purchase_subscription': '无法购买订阅',
+  'failed_to_cancel_subscription': '无法取消订阅',
+  'failed_to_upgrade_subscription': '无法升级订阅',
+  'subscription_canceled_successfully': '订阅取消成功',
+  'subscription_upgraded_successfully': '订阅升级成功',
+  'subscription_downgrade_successfully': '订阅降级成功',
+  'failed_to_downgrade_subscription': '无法降级订阅',
           'close_your_app': '关闭您的应用程序，从最近使用的应用中清除并重新打开',
           'please_restart_app': '请重新启动应用程序',
           'complete': '完成',
@@ -1630,7 +1740,21 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Hindi   /////////////////////////////////
 
         'hi_IN': {
-          'close_your_app': 'अपने ऐप को बंद करें, हाल की ऐप्स से साफ करें और फिर से खोलें',
+  'cancelled': 'रद्द किया गया',
+  'please_try_again_later': 'कृपया बाद में पुनः प्रयास करें',
+  'warning': 'चेतावनी',
+  'package_purchased_successfully': 'पैकेज सफलतापूर्वक खरीदा गया',
+  'package_purchase_cancelled': 'पैकेज खरीद रद्द कर दी गई',
+  'unexpected_response_please_try_again': 'अप्रत्याशित प्रतिक्रिया, कृपया पुनः प्रयास करें',
+  'failed_to_purchase_subscription': 'सदस्यता खरीदने में विफल',
+  'failed_to_cancel_subscription': 'सदस्यता रद्द करने में विफल',
+  'failed_to_upgrade_subscription': 'सदस्यता अपग्रेड करने में विफल',
+  'subscription_canceled_successfully': 'सदस्यता सफलतापूर्वक रद्द की गई',
+  'subscription_upgraded_successfully': 'सदस्यता सफलतापूर्वक अपग्रेड की गई',
+  'subscription_downgrade_successfully': 'सदस्यता सफलतापूर्वक डाउनग्रेड की गई',
+  'failed_to_downgrade_subscription': 'सदस्यता डाउनग्रेड करने में विफल',
+          'close_your_app':
+              'अपने ऐप को बंद करें, हाल की ऐप्स से साफ करें और फिर से खोलें',
           'please_restart_app': 'कृपया ऐप को पुनः प्रारंभ करें',
           'complete': 'पूरा',
           'restart_app': 'ऐप पुनरारंभ करें',
@@ -1833,6 +1957,19 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Arabic  /////////////////////////////////
 
         'ar_AR': {
+  'cancelled': 'تم الإلغاء',
+  'please_try_again_later': 'يرجى المحاولة مرة أخرى لاحقًا',
+  'warning': 'تحذير',
+  'package_purchased_successfully': 'تم شراء الباقة بنجاح',
+  'package_purchase_cancelled': 'تم إلغاء شراء الباقة',
+  'unexpected_response_please_try_again': 'استجابة غير متوقعة، يرجى المحاولة مرة أخرى',
+  'failed_to_purchase_subscription': 'فشل في شراء الاشتراك',
+  'failed_to_cancel_subscription': 'فشل في إلغاء الاشتراك',
+  'failed_to_upgrade_subscription': 'فشل في ترقية الاشتراك',
+  'subscription_canceled_successfully': 'تم إلغاء الاشتراك بنجاح',
+  'subscription_upgraded_successfully': 'تم ترقية الاشتراك بنجاح',
+  'subscription_downgrade_successfully': 'تم تخفيض الاشتراك بنجاح',
+  'failed_to_downgrade_subscription': 'فشل في تخفيض الاشتراك',
           'close_your_app': 'أغلق تطبيقك، نظف من التطبيقات الأخيرة وأعد فتحه',
           'please_restart_app': 'يرجى إعادة تشغيل التطبيق',
           'complete': 'اكتمال',
@@ -2027,6 +2164,19 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Japanese  /////////////////////////////////
 
         'ja_JP': {
+  'cancelled': 'キャンセルされました',
+  'please_try_again_later': '後でもう一度お試しください',
+  'warning': '警告',
+  'package_purchased_successfully': 'パッケージの購入が成功しました',
+  'package_purchase_cancelled': 'パッケージの購入がキャンセルされました',
+  'unexpected_response_please_try_again': '予期しない応答です、もう一度お試しください',
+  'failed_to_purchase_subscription': 'サブスクリプションの購入に失敗しました',
+  'failed_to_cancel_subscription': 'サブスクリプションのキャンセルに失敗しました',
+  'failed_to_upgrade_subscription': 'サブスクリプションのアップグレードに失敗しました',
+  'subscription_canceled_successfully': 'サブスクリプションが正常にキャンセルされました',
+  'subscription_upgraded_successfully': 'サブスクリプションが正常にアップグレードされました',
+  'subscription_downgrade_successfully': 'サブスクリプションが正常にダウングレードされました',
+  'failed_to_downgrade_subscription': 'サブスクリプションのダウングレードに失敗しました',
           'close_your_app': 'アプリを閉じ、最近使用したアプリから削除して再度開いてください',
           'please_restart_app': 'アプリを再起動してください',
           'complete': '完了',

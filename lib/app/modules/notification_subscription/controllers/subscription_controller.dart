@@ -96,11 +96,10 @@ class SubscriptionController extends GetxController {
         final List<dynamic> data = jsonDecode(response.body);
         packages.assignAll(data.map((json) => Package.fromJson(json)).toList());
       } else {
-        Get.snackbar(
-            'Error', 'Failed to fetch packages: ${response.statusCode}');
+        Get.snackbar('warning'.tr, 'please_try_again_later'.tr);
       }
     } catch (e) {
-      Get.snackbar('Error', 'An error occurred: $e');
+      Get.snackbar('warning'.tr, 'please_try_again_later'.tr);
     } finally {
       isLoading.value = false;
     }
@@ -136,24 +135,24 @@ class SubscriptionController extends GetxController {
               if (!isCancelled) {
                 homeController.package_name.value = packageName;
                 homeController.package_type.value = packageType;
-                Get.snackbar('Success', '$packageType $packageName package purchased successfully');
+                Get.snackbar('success'.tr, '$packageType $packageName ${'package_purchased_successfully'.tr}');
               } else {
                 // Do not update package_name or package_type on cancellation
-                Get.snackbar('Cancelled', '$packageType $packageName package purchase cancelled');
+                Get.snackbar('cancelled'.tr, '$packageType $packageName ${'package_purchase_cancelled'.tr}');
               }
               Get.offAll(() => DashboardView());
             },
           ));
         } else {
-          Get.snackbar('Error', 'Unexpected response. Please try again.');
+          Get.snackbar('warning'.tr, 'unexpected_response_please_try_again'.tr);
         }
       } else {
         Get.snackbar(
-            'Error', 'Failed to purchase subscription: ${response.statusCode}');
+            'warning'.tr, 'failed_to_purchase_subscription'.tr);
         // Do not update package_name or package_type on failure
       }
     } catch (e) {
-      Get.snackbar('Error', 'An error occurred: $e');
+      Get.snackbar('warning'.tr, 'please_try_again_later'.tr);
       // Do not update package_name or package_type on error
     }
   }
@@ -165,15 +164,14 @@ class SubscriptionController extends GetxController {
       if (response.statusCode == 200) {
         homeController.package_name.value = '';
         homeController.package_type.value = '';
-        Get.snackbar('Success'.tr, 'Subscription canceled successfully');
+        Get.snackbar('success'.tr, 'subscription_canceled_successfully'.tr);
 
         Get.off(() => SubscriptionView());
       } else {
-        Get.snackbar(
-            'Error', 'Failed to cancel subscription: ${response.statusCode}');
+        Get.snackbar('warning'.tr, 'failed_to_cancel_subscription'.tr);
       }
     } catch (e) {
-      Get.snackbar('Error', 'An error occurred: $e');
+      Get.snackbar('warning'.tr, 'please_try_again_later'.tr);
     }
   }
 
@@ -222,13 +220,12 @@ class SubscriptionController extends GetxController {
       if (response.statusCode == 200) {
         homeController.package_name.value = packageName;
         homeController.package_type.value = packageType;
-        Get.snackbar('Success', 'Subscription upgraded successfully');
+        Get.snackbar('success'.tr, 'subscription_upgraded_successfully'.tr);
       } else {
-        Get.snackbar(
-            'Error', 'Failed to upgrade subscription: ${response.statusCode}');
+        Get.snackbar('warning'.tr, 'failed_to_upgrade_subscription'.tr);
       }
     } catch (e) {
-      Get.snackbar('Error', 'An error occurred: $e');
+      Get.snackbar('warning'.tr, 'please_try_again_later'.tr);
     }
   }
 
@@ -256,13 +253,12 @@ class SubscriptionController extends GetxController {
       if (response.statusCode == 200) {
         homeController.package_name.value = packageName;
         homeController.package_type.value = packageType;
-        Get.snackbar('Success', 'Subscription downgraded successfully');
+        Get.snackbar('success'.tr, 'subscription_downgrade_successfully'.tr);
       } else {
-        Get.snackbar('Error',
-            'Failed to downgrade subscription: ${response.statusCode}');
+        Get.snackbar('warning'.tr, 'failed_to_downgrade_subscription'.tr);
       }
     } catch (e) {
-      Get.snackbar('Error', 'An error occurred: $e');
+      Get.snackbar('warning'.tr, 'please_try_again_later'.tr);
     }
   }
 }
