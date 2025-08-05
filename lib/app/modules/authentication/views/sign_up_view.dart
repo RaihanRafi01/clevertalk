@@ -85,96 +85,102 @@ class _SignUpViewState extends State<SignUpView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-    children: [
-      Padding(
-        padding: const EdgeInsets.all(16),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        child: Stack(
             children: [
-              SizedBox(height: 30,),
-              CustomHeadertext(
-                header1: "Create an account",
-                header2: "Sign up now to get started on your journey.",
-              ),
-              SizedBox(height: 30,),
-              CustomTextField(
-                label: 'User Name',
-                hint: 'Enter Name',
-                prefixIcon: Icons.person_outline_rounded,
-                controller: _usernameController,
-              ),
-              CustomTextField(
-                label: 'Your email',
-                hint: 'Enter Email',
-                prefixIcon: Icons.email_outlined,
-                controller: _emailController,
-              ),
-              CustomTextField(
-                label: 'Password',
-                hint: 'Enter Password',
-                prefixIcon: Icons.lock_outline_rounded,
-                isPassword: true,
-                controller: _passwordController,
-              ),
-              CustomTextField(
-                label: 'Confirm Password',
-                hint: 'Confirm Password',
-                prefixIcon: Icons.lock_outline_rounded,
-                isPassword: true,
-                controller: _confirmPasswordController,
-              ),
-          
-              // Replaced Row with the new TermsAndConditionsCheckbox widget
-              TermsAndConditionsCheckbox(
-                onCheckboxChanged: _onCheckboxChanged,
-              ),
-          
-              SizedBox(height: 20,),
-          
-              // Sign Up button is only enabled if the checkbox is checked
-              CustomButton(
-                text: "Sign Up",
-                onPressed: _isChecked
-                    ? () {
-                  _handleSignUp();
-                }
-                    : () {
-                  Get.snackbar(
-                    'Error',
-                    'Please accept Terms & Conditions & Privacy Policy',
-                  );
-                },
-              ),
-          
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text("Already Have an Account?"),
-                  TextButton(
-                    onPressed: () => Get.to(() => AuthenticationView()),
-                    child: const Text("Log In"),
-                  ),
-                ],
-              ),
-            ],
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 30,),
+                CustomHeadertext(
+                  header1: "Create an account",
+                  header2: "Sign up now to get started on your journey.",
+                ),
+                SizedBox(height: 30,),
+                CustomTextField(
+                  label: 'User Name',
+                  hint: 'Enter Name',
+                  prefixIcon: Icons.person_outline_rounded,
+                  controller: _usernameController,
+                ),
+                SizedBox(height: 16),
+                CustomTextField(
+                  label: 'Your email',
+                  hint: 'Enter Email',
+                  prefixIcon: Icons.email_outlined,
+                  controller: _emailController,
+                ),
+                SizedBox(height: 16),
+                CustomTextField(
+                  label: 'Password',
+                  hint: 'Enter Password',
+                  prefixIcon: Icons.lock_outline_rounded,
+                  isPassword: true,
+                  controller: _passwordController,
+                ),
+                SizedBox(height: 16),
+                CustomTextField(
+                  label: 'Confirm Password',
+                  hint: 'Confirm Password',
+                  prefixIcon: Icons.lock_outline_rounded,
+                  isPassword: true,
+                  controller: _confirmPasswordController,
+                ),
+                SizedBox(height: 16),
+                // Replaced Row with the new TermsAndConditionsCheckbox widget
+                TermsAndConditionsCheckbox(
+                  onCheckboxChanged: _onCheckboxChanged,
+                ),
+            
+                SizedBox(height: 30),
+            
+                // Sign Up button is only enabled if the checkbox is checked
+                CustomButton(
+                  text: "Sign Up",
+                  onPressed: _isChecked
+                      ? () {
+                    _handleSignUp();
+                  }
+                      : () {
+                    Get.snackbar(
+                      'Error',
+                      'Please accept Terms & Conditions & Privacy Policy',
+                    );
+                  },
+                ),
+                SizedBox(height: 16),
+            
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("Already Have an Account?"),
+                    TextButton(
+                      onPressed: () => Get.to(() => AuthenticationView()),
+                      child: const Text("Log In"),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-        // Loading Indicator
-        Obx(() {
-          return _controller.isLoading.value
-              ? Container(
-            color: Colors.black45,
-            child: const Center(
-              child: CircularProgressIndicator(color: AppColors.appColor,),
-            ),
-          )
-              : const SizedBox.shrink();
-        }),
-        ],
+          // Loading Indicator
+          Obx(() {
+            return _controller.isLoading.value
+                ? Container(
+              color: Colors.black45,
+              child: const Center(
+                child: CircularProgressIndicator(color: AppColors.appColor,),
+              ),
+            )
+                : const SizedBox.shrink();
+          }),
+          ],
+        ),
       ),
     );
   }

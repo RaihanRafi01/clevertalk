@@ -30,11 +30,11 @@ class AuthenticationController extends GetxController {
     await _storage.write(key: 'refresh_token', value: refreshToken);
   }
 
-  Future<void> signUpWithOther(String username, String email) async {
+  Future<void> signUpWithOther(String email, String fcm_token) async {
     isLoading.value = true; // Show the loading screen
     try {
       final http.Response response = await _service.signUpWithOther(
-          username, email);
+          email, fcm_token);
 
       print(':::::::::::::::RESPONSE:::::::::::::::::::::${response.body.toString()}');
       print(':::::::::::::::CODE:::::::::::::::::::::${response.statusCode}');
@@ -43,8 +43,8 @@ class AuthenticationController extends GetxController {
       if (response.statusCode == 200 || response.statusCode == 201) {
         // Assuming the server responds with success on code 200 or 201
         final responseBody = jsonDecode(response.body);
-        final accessToken = responseBody['access'];
-        final refreshToken = responseBody['refresh'];
+        final accessToken = responseBody['access_token'];
+        final refreshToken = responseBody['refresh_token'];
 
         // Store the tokens securely
         await storeTokens(accessToken, refreshToken);
@@ -64,13 +64,14 @@ class AuthenticationController extends GetxController {
         await prefs.setBool('isLoggedIn', true); // User is logged in
 
 
+        Get.offAll(DashboardView());
 
       } else {
         final responseBody = jsonDecode(response.body);
         Get.snackbar('Error', responseBody['message'] ?? 'Sign-up failed\nPlease Use Different Username');
       }
     } catch (e) {
-      Get.snackbar('Error', 'An unexpected error occurred');
+      //Get.snackbar('Error', 'An unexpected error occurred');
       print('Error: $e');
     }finally {
       isLoading.value = false; // Hide the loading screen
@@ -110,7 +111,7 @@ class AuthenticationController extends GetxController {
         await prefs.setBool('isLoggedIn', true); // User is logged in
 
         homeController.fetchProfileData();
-        homeController.checkVerified(username);
+        homeController.checkVerified(email);
 
       } else {
         final responseBody = jsonDecode(response.body);

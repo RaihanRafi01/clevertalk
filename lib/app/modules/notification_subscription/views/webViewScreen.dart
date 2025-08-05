@@ -4,9 +4,10 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 class WebViewScreen extends StatefulWidget {
   final String url;
-  final VoidCallback onUrlMatched;
+  final Function(bool isCancelled) onUrlMatched;
+  final bool isCancel;
 
-  const WebViewScreen({super.key, required this.url, required this.onUrlMatched});
+  const WebViewScreen({super.key, required this.url, required this.onUrlMatched, this.isCancel = false});
 
   @override
   State<WebViewScreen> createState() => _WebViewScreenState();
@@ -34,7 +35,12 @@ class _WebViewScreenState extends State<WebViewScreen> {
             if (change.url == '${ApiService().baseUrl}pay/success/') {
               // Navigate back to the previous screen
               Navigator.pop(context);
-              widget.onUrlMatched();
+              widget.onUrlMatched(false);
+            }
+            if (change.url == '${ApiService().baseUrl}pay/cancel/') {
+              // Navigate back to the previous screen
+              Navigator.pop(context);
+              widget.onUrlMatched(true);
             }
           },
           onWebResourceError: (WebResourceError error) {
@@ -47,7 +53,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: WebViewWidget(controller: _controller),
+      body: SafeArea(child: WebViewWidget(controller: _controller)),
     );
   }
 }

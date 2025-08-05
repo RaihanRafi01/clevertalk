@@ -194,14 +194,12 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
   }
 
   String determineAction(String packageName, String packageType) {
-    final currentPlan =
-        controller.homeController.package_name.value.toLowerCase();
-    final currentType =
-        controller.homeController.package_type.value.toLowerCase();
+    final currentPlan = controller.homeController.package_name.value.toLowerCase();
+    final currentType = controller.homeController.package_type.value.toLowerCase();
     final selectedPlan = packageName.toLowerCase();
     final selectedType = packageType.toLowerCase();
 
-    if (currentPlan.isEmpty) {
+    if (currentPlan == 'free trial') {
       return 'buy';
     }
 
@@ -381,7 +379,7 @@ class _SubscriptionContent extends GetView<SubscriptionController> {
                           );
                           successMessage = "${'success_downgraded'.tr} $title";
                         }
-                        Get.snackbar('success'.tr, successMessage);
+                       // Get.snackbar('success'.tr, successMessage);
                         controller.getAllowedActions();
                         final HomeController homeController =
                             Get.find<HomeController>();

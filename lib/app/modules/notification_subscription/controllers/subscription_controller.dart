@@ -131,15 +131,16 @@ class SubscriptionController extends GetxController {
           print(
               ':::::::::checkout_url:::::::::::::::::::::::::::::$checkoutUrl');
           Get.off(() => WebViewScreen(
-                url: checkoutUrl,
-                onUrlMatched: () {
-                  homeController.package_name.value = packageName;
-                  homeController.package_type.value = packageType;
-                  Get.snackbar(
-                      'Success', 'Subscription purchased successfully');
-                  Get.offAll(() => DashboardView());
-                },
-              ));
+            url: checkoutUrl,
+            onUrlMatched: (bool isCancelled) {
+              homeController.package_name.value = packageName;
+              homeController.package_type.value = packageType;
+              if (!isCancelled) {
+                Get.snackbar('Success', 'Subscription purchased successfully');
+              }
+              Get.offAll(() => DashboardView());
+            },
+          ));
         } else {
           Get.snackbar('Error', 'Unexpected response. Please try again.');
         }
@@ -207,6 +208,8 @@ class SubscriptionController extends GetxController {
         packageType: packageType,
       );
       print(':::::::::upgradeSubscription priceId: $priceId');
+      print(':::::::::upgradeSubscription packageName: $packageName');
+      print(':::::::::upgradeSubscription packageType: $packageType');
       print(':::::::::upgradeSubscription CODE: ${response.statusCode}');
       print(':::::::::upgradeSubscription body: ${response.body}');
 

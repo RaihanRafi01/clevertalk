@@ -26,15 +26,15 @@ class _EditProfileViewState extends State<ProfileView> {
 
   // Initialize the TextEditingControllers directly with values
   late final TextEditingController _nameController =
-  TextEditingController(text: homeController.name.value);
+      TextEditingController(text: homeController.name.value);
   late final TextEditingController _emailController =
-  TextEditingController(text: homeController.email.value);
+      TextEditingController(text: homeController.email.value);
   late final TextEditingController _addressController =
-  TextEditingController(text: homeController.address.value);
+      TextEditingController(text: homeController.address.value);
   late final TextEditingController _phoneController =
-  TextEditingController(text: homeController.phone.value);
+      TextEditingController(text: homeController.phone.value);
   late final TextEditingController _genderController =
-  TextEditingController(text: homeController.gender.value);
+      TextEditingController(text: homeController.gender.value);
 
   String baseUrl = ApiService().baseUrl.endsWith('/')
       ? ApiService().baseUrl.substring(0, ApiService().baseUrl.length - 1)
@@ -91,7 +91,7 @@ class _EditProfileViewState extends State<ProfileView> {
         },
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24,vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -105,8 +105,11 @@ class _EditProfileViewState extends State<ProfileView> {
                       backgroundImage: _pickedImage != null
                           ? FileImage(File(_pickedImage!.path))
                           : homeController.profilePicUrl.value.isNotEmpty
-                          ? NetworkImage('$baseUrl${homeController.profilePicUrl.value}')
-                          : const AssetImage('assets/images/profile/profile_avatar.png') as ImageProvider,
+                              ? NetworkImage(
+                                  '$baseUrl${homeController.profilePicUrl.value}')
+                              : const AssetImage(
+                                      'assets/images/profile/profile_avatar.png')
+                                  as ImageProvider,
                     ),
                     Positioned(
                       bottom: 0,
@@ -115,7 +118,8 @@ class _EditProfileViewState extends State<ProfileView> {
                         onTap: _pickImage,
                         child: CircleAvatar(
                           backgroundColor: Colors.transparent,
-                          child: SvgPicture.asset('assets/images/profile/edit_pic.svg'),
+                          child: SvgPicture.asset(
+                              'assets/images/profile/edit_pic.svg'),
                         ),
                       ),
                     ),
@@ -127,18 +131,19 @@ class _EditProfileViewState extends State<ProfileView> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Obx(() => Text(
-                        homeController.username.value,
-                        style: h1.copyWith(fontSize: 18, fontWeight: FontWeight.bold),
-                      )),
+                            homeController.username.value,
+                            style: h1.copyWith(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          )),
                       const SizedBox(height: 10),
-                      CustomButton(
-                        backgroundColor: AppColors.appColor,
-                        isGem: true,
-                        width: 180,
-                        fontSize: 12,
-                        text: 'standard_account'.tr,
-                        onPressed: () {},
-                      ),
+                      Obx(() => CustomButton(
+                            backgroundColor: AppColors.appColor,
+                            isGem: true,
+                            width: 180,
+                            fontSize: 12,
+                            text: homeController.package_name.value == 'Free Trial' ? 'standard_account'.tr : 'premium_account'.tr,
+                            onPressed: () {},
+                          )),
                     ],
                   ),
                 ),
@@ -146,7 +151,8 @@ class _EditProfileViewState extends State<ProfileView> {
             ),
             const SizedBox(height: 20),
             CustomTextField(
-              label: 'full_name'.tr, // Localized label
+              label: 'full_name'.tr,
+              // Localized label
               controller: _nameController,
               prefixIcon: Icons.person_outline_rounded,
               onChanged: (value) {
@@ -157,7 +163,8 @@ class _EditProfileViewState extends State<ProfileView> {
             SizedBox(height: 20),
             CustomTextField(
               readOnly: true,
-              label: 'email'.tr, // Localized label
+              label: 'email'.tr,
+              // Localized label
               controller: _emailController,
               prefixIcon: Icons.email_outlined,
               keyboardType: TextInputType.emailAddress,
@@ -167,21 +174,25 @@ class _EditProfileViewState extends State<ProfileView> {
             CustomTextField(
               phone: true,
               prefixIcon: Icons.phone,
-              label: 'phone_number'.tr, // Localized label
+              label: 'phone_number'.tr,
+              // Localized label
               controller: _phoneController,
               keyboardType: TextInputType.phone,
-              hint: 'enter_phone_number'.tr, // Localized hint
+              hint: 'enter_phone_number'.tr,
+              // Localized hint
               onChanged: (value) {
                 profileController.updatePhone(value);
               },
             ),
             SizedBox(height: 20),
             CustomTextField(
-              label: 'address'.tr, // Localized label
+              label: 'address'.tr,
+              // Localized label
               controller: _addressController,
               prefixIcon: Icons.location_on_outlined,
               keyboardType: TextInputType.emailAddress,
-              hint: 'enter_your_address'.tr, // Localized hint
+              hint: 'enter_your_address'.tr,
+              // Localized hint
               onChanged: (value) {
                 profileController.updateAddress(value);
               },
@@ -210,12 +221,14 @@ class _EditProfileViewState extends State<ProfileView> {
                     return Container(
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: isFocused ? AppColors.appColor : AppColors.gray1,
+                          color:
+                              isFocused ? AppColors.appColor : AppColors.gray1,
                           width: isFocused ? 1 : 1,
                         ),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 10),
                       child: Row(
                         children: [
                           // Prefix icon
@@ -224,7 +237,8 @@ class _EditProfileViewState extends State<ProfileView> {
                             color: Colors.grey.shade600,
                             size: 20, // Match CustomTextField icon size
                           ),
-                          SizedBox(width: 12), // Space between icon and dropdown
+                          SizedBox(width: 12),
+                          // Space between icon and dropdown
                           Expanded(
                             child: DropdownButton<String>(
                               hint: Text(
@@ -234,27 +248,36 @@ class _EditProfileViewState extends State<ProfileView> {
                                   color: AppColors.gray1,
                                 ),
                               ),
-                              value: homeController.gender.value.isNotEmpty ? homeController.gender.value : null,
+                              value: homeController.gender.value.isNotEmpty
+                                  ? homeController.gender.value
+                                  : null,
                               items: [
                                 {'value': 'Male', 'label': 'male'.tr},
                                 {'value': 'Female', 'label': 'female'.tr},
                                 {'value': 'Other', 'label': 'other'.tr},
-                              ].map((gender) => DropdownMenuItem<String>(
-                                value: gender['value'], // Use English value
-                                child: Text(
-                                  gender['label']!, // Use translated label
-                                  style: h4.copyWith(fontSize: 12),
-                                ),
-                              )).toList(),
+                              ]
+                                  .map((gender) => DropdownMenuItem<String>(
+                                        value: gender[
+                                            'value'], // Use English value
+                                        child: Text(
+                                          gender[
+                                              'label']!, // Use translated label
+                                          style: h4.copyWith(fontSize: 12),
+                                        ),
+                                      ))
+                                  .toList(),
                               onChanged: (value) {
                                 if (value != null) {
                                   profileController.updateGender(value);
                                   homeController.gender.value = value;
                                 }
                               },
-                              isExpanded: true, // Make dropdown fill the container
-                              underline: SizedBox(), // Remove default underline
-                              icon: Icon(Icons.arrow_drop_down, color: Colors.grey),
+                              isExpanded: true,
+                              // Make dropdown fill the container
+                              underline: SizedBox(),
+                              // Remove default underline
+                              icon: Icon(Icons.arrow_drop_down,
+                                  color: Colors.grey),
                               dropdownColor: Colors.white,
                             ),
                           ),
@@ -269,8 +292,9 @@ class _EditProfileViewState extends State<ProfileView> {
             CustomButton(
               text: 'save'.tr,
               onPressed: () async {
-                print('::::::::edit:::::::::::::NAME:::::::::::${homeController.name.value}');
-               // print('::::::::::edit:::::::::::aboutYou:::::::::::${homeController.aboutYou.value}');
+                print(
+                    '::::::::edit:::::::::::::NAME:::::::::::${homeController.name.value}');
+                // print('::::::::::edit:::::::::::aboutYou:::::::::::${homeController.aboutYou.value}');
 
                 // Set editing flag to true when saving
                 //homeController.isEditingProfile.value = true;
@@ -298,5 +322,3 @@ class _EditProfileViewState extends State<ProfileView> {
     );
   }
 }
-
-

@@ -1,5 +1,6 @@
 import 'package:clevertalk/app/modules/notification_subscription/views/subscription_view.dart';
 import 'package:clevertalk/app/modules/notification_subscription/views/subscribed_view.dart';
+import 'package:clevertalk/app/modules/setting/views/help_support_web_view.dart';
 import 'package:clevertalk/app/modules/setting/views/terms_privacy_view.dart';
 import 'package:clevertalk/common/localization/localization_controller.dart';
 import 'package:clevertalk/common/widgets/settings/settingsList.dart';
@@ -64,8 +65,7 @@ class SettingView extends GetView<SettingController> {
                 svgPath: 'assets/images/settings/subscription_icon.svg',
                 text: 'manage_subscription'.tr,
                 onTap: () {
-                  if (homeController.package_name.value.isNotEmpty &&
-                      homeController.package_type.value.isNotEmpty) {
+                  if (homeController.package_name.value != 'Free Trial') {
                     Get.to(() => SubscribedView());
                   } else {
                     Get.to(() => SubscriptionView());
@@ -122,7 +122,7 @@ class SettingView extends GetView<SettingController> {
               SettingsList(
                   svgPath: 'assets/images/settings/email_icon.svg',
                   text: 'email_support'.tr,
-                  onTap: () => Get.to(() => HelpSupportView())),
+                  onTap: () => Get.to(() => HelpSupportWebViewScreen())),
               Text('notification'.tr, style: h1.copyWith(fontSize: 16)),
               SizedBox(height: 10),
               Obx(() {

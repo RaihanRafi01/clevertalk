@@ -103,7 +103,7 @@ class HomeController extends GetxController {
 
       total_minutes_left.value = paid_plan_minutes_left.value +
           recorder_plan_minutes_left.value +
-          free_plan_minutes_left.value - 574.6;
+          free_plan_minutes_left.value;
 
       if (total_minutes_left.value < 20.0 && !hasSentLowMinutesNotification.value) {
         await NotificationService.showNotification(

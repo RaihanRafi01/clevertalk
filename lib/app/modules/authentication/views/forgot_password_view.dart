@@ -38,8 +38,8 @@ class ForgotPasswordView extends GetView {
                   const SizedBox(height: 30),
                   CustomTextField(
                     controller: usernameController, // Add the controller
-                    label: "Your UserName",
-                    hint: "Enter UserName",
+                    label: "Your Email",
+                    hint: "Enter Email",
                     prefixIcon: Icons.person_outline,
                   ),
                   const SizedBox(height: 20),

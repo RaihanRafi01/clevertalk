@@ -1,6 +1,9 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:clevertalk/common/appColors.dart';
+import 'package:get/get.dart';
+
+import '../../../app/modules/setting/views/terms_privacy_view.dart';
 
 // New widget class for Checkbox and Terms/Privacy Policy logic
 class TermsAndConditionsCheckbox extends StatefulWidget {
@@ -14,37 +17,6 @@ class TermsAndConditionsCheckbox extends StatefulWidget {
 
 class _TermsAndConditionsCheckboxState extends State<TermsAndConditionsCheckbox> {
   bool _isChecked = false;
-
-  // Method to show BottomSheet with Terms & Conditions or Privacy Policy text
-  void _showBottomSheet(String title, String content) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 10),
-              Text(content),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context); // Close the BottomSheet
-                },
-                child: Text('Close'),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,10 +48,7 @@ class _TermsAndConditionsCheckboxState extends State<TermsAndConditionsCheckbox>
                   style: TextStyle(color: Colors.blue),
                   recognizer: TapGestureRecognizer()
                     ..onTap = () {
-                      _showBottomSheet(
-                        "Terms & Conditions",
-                        "Here are the detailed terms and conditions for the app...",
-                      );
+                      Get.to(TermsPrivacyView(isTerms: true,));
                     },
                 ),
                 TextSpan(
@@ -91,10 +60,7 @@ class _TermsAndConditionsCheckboxState extends State<TermsAndConditionsCheckbox>
                   style: TextStyle(color: Colors.blue),
                   recognizer: TapGestureRecognizer()
                     ..onTap = () {
-                      _showBottomSheet(
-                        "Privacy Policy",
-                        "Here are the privacy policies of the app...",
-                      );
+                      Get.to(TermsPrivacyView(isTerms: false,));
                     },
                 ),
               ],

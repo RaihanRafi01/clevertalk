@@ -86,12 +86,12 @@ class AuthenticationView extends GetView<AuthenticationController> {
                   ),
                   SizedBox(height: 30),
                   CustomTextField(
-                    label: "Your UserName",
-                    hint: "Enter UserName",
+                    label: "Your Email",
+                    hint: "Enter Email",
                     prefixIcon: Icons.person_outline_rounded,
                     controller: _usernameController,
                   ),
-                  SizedBox(height: 30),
+                  SizedBox(height: 16),
                   CustomTextField(
                     label: "Password",
                     hint: "Enter Password",

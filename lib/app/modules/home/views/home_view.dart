@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import '../../../../common/appColors.dart';
 import '../../../../common/widgets/audio_text/customListTile.dart';
 import '../../../../common/widgets/customAppBar.dart';
+import '../../notification_subscription/views/subscribed_view.dart';
 import '../../notification_subscription/views/subscription_view.dart';
 import '../controllers/home_controller.dart';
 import 'before_connect_view.dart';
@@ -58,7 +59,11 @@ class HomeView extends GetView<HomeController> {
                         fontSize: 12,
                         text: 'explore_plans'.tr,
                         onPressed: () {
-                          Get.to(SubscriptionView());
+                          if (controller.package_name.value != 'Free Trial') {
+                            Get.to(() => SubscribedView());
+                          } else {
+                            Get.to(() => SubscriptionView());
+                          }
                         },
                         borderRadius: 30,
                         //backgroundColor: AppColors.appColor2,

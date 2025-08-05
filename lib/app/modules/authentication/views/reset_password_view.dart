@@ -69,6 +69,7 @@ class ResetPasswordView extends GetView {
                     prefixIcon: Icons.lock_outline_rounded,
                     isPassword: true,
                   ),
+                  const SizedBox(height: 16),
                   CustomTextField(
                     controller: confirmPasswordController,
                     label: "Confirm Password",

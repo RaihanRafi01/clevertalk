@@ -91,10 +91,10 @@ class ApiService {
     });
   }
 
-  Future<http.Response> signUpWithOther(String username, String email) async {
+  Future<http.Response> signUpWithOther(String email, String fcm_token) async {
     // Construct the endpoint URL
     final Uri url =
-        Uri.parse('${baseUrl}authentication_app/social_signup_signin/');
+        Uri.parse('${baseUrl}authentication_app/normal_signup_signin/');
 
     // Headers for the HTTP request
     final Map<String, String> headers = {
@@ -102,7 +102,7 @@ class ApiService {
     };
 
     // Request body
-    final Map<String, String> body = {"username": username, "email": email};
+    final Map<String, String> body = {"email": email, "fcm_token": fcm_token};
 
     // Make the POST request
     return await http.post(
@@ -154,7 +154,7 @@ class ApiService {
 
     // Request body
     final Map<String, String> body = {
-      "username": username,
+      "email": username,
       "password": password,
       "fcm_token": fcm_token,
     };

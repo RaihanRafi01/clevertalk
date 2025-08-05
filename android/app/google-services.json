@@ -12,7 +12,28 @@
           "package_name": "com.jvai.clevertalk"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "76832069388-0s638ra26cc3nph1s5mdaf1glmbuug7d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jvai.clevertalk",
+            "certificate_hash": "8c91cc37d28f190727fb68767855fc509157c68c"
+          }
+        },
+        {
+          "client_id": "76832069388-c575r1e8m3sit7o98hfol4qe5ecch4ih.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jvai.clevertalk",
+            "certificate_hash": "f94436d8b8a721db1b6624d5b3e3362b130a7835"
+          }
+        },
+        {
+          "client_id": "76832069388-p4qf9itppmeb2ouki79b41n2vfjshvh4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAV3q5qIqUdV2OIA-eEyIlJm3Po7bfNX08"
@@ -20,7 +41,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "76832069388-p4qf9itppmeb2ouki79b41n2vfjshvh4.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "76832069388-g3vaiftitk35r3r1p5il2jb64bfethjs.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.jvai.clevertalk"
+              }
+            }
+          ]
         }
       }
     }
