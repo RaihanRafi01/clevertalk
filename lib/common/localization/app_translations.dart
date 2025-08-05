@@ -4,6 +4,7 @@ class AppTranslations extends Translations {
   @override
   Map<String, Map<String, String>> get keys => {
         'en_US': {
+  'premium_account': 'Premium Account',
           'cancelled' : 'Cancelled',
           'please_try_again_later': 'Please try again later',
           'warning': 'Warning',
@@ -225,6 +226,7 @@ class AppTranslations extends Translations {
 //////////////////////////////////////// Spanish  //////////////////////////////////////
 
         'es_ES': {
+  'premium_account': 'Cuenta Premium',
   'cancelled': 'Cancelado',
   'please_try_again_later': 'Por favor, intenta de nuevo más tarde',
   'warning': 'Advertencia',
@@ -443,6 +445,7 @@ class AppTranslations extends Translations {
         //////////////////////////////////////////////////////////////// French //////////////////////////////////
 
         'fr_FR': {
+'premium_account': 'Compte Premium',
   'cancelled': 'Annulé',
   'please_try_again_later': 'Veuillez réessayer plus tard',
   'warning': 'Avertissement',
@@ -663,6 +666,7 @@ class AppTranslations extends Translations {
         ////////////////////////////////// GERMAN ///////////////////////
 
         'de_DE': {
+  'premium_account': 'Premium-Konto',
   'cancelled': 'Abgebrochen',
   'please_try_again_later': 'Bitte versuchen Sie es später erneut',
   'warning': 'Warnung',
@@ -888,6 +892,7 @@ class AppTranslations extends Translations {
         ////////////////////////////////// Russian //////////////////////////////////////
 
         'ru_RU': {
+  'premium_account': 'Премиум-аккаунт',
   'cancelled': 'Отменено',
   'please_try_again_later': 'Пожалуйста, попробуйте снова позже',
   'warning': 'Предупреждение',
@@ -1107,6 +1112,7 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Italian  /////////////////////////////////
 
         'it_IT': {
+  'premium_account': 'Account Premium',
   'cancelled': 'Annullato',
   'please_try_again_later': 'Per favore, riprova più tardi',
   'warning': 'Avvertimento',
@@ -1327,6 +1333,7 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Portuguese   /////////////////////////////////
 
         'pt_PT': {
+  'premium_account': 'Conta Premium',
   'cancelled': 'Cancelado',
   'please_try_again_later': 'Por favor, tente novamente mais tarde',
   'warning': 'Aviso',
@@ -1545,6 +1552,7 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Chinese   /////////////////////////////////
 
         'zh_CN': {
+  'premium_account': '高级账户',
   'cancelled': '已取消',
   'please_try_again_later': '请稍后再试',
   'warning': '警告',
@@ -1740,6 +1748,7 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Hindi   /////////////////////////////////
 
         'hi_IN': {
+  'premium_account': 'प्रीमियम खाता',
   'cancelled': 'रद्द किया गया',
   'please_try_again_later': 'कृपया बाद में पुनः प्रयास करें',
   'warning': 'चेतावनी',
@@ -1957,6 +1966,7 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Arabic  /////////////////////////////////
 
         'ar_AR': {
+  'premium_account': 'حساب مميز',
   'cancelled': 'تم الإلغاء',
   'please_try_again_later': 'يرجى المحاولة مرة أخرى لاحقًا',
   'warning': 'تحذير',
@@ -2164,6 +2174,7 @@ class AppTranslations extends Translations {
         ////////////////////////////////////////////// Japanese  /////////////////////////////////
 
         'ja_JP': {
+  'premium_account': 'プレミアムアカウント',
   'cancelled': 'キャンセルされました',
   'please_try_again_later': '後でもう一度お試しください',
   'warning': '警告',
