@@ -59,6 +59,6 @@ class WebViewGetXController extends GetxController {
           },
         ),
       )
-      ..loadRequest(Uri.parse('https://clevertalk.ai/pages/contact')); // Replace with your website URL
+      ..loadRequest(Uri.parse('https://clevertalk.ai/pages/contact-us')); // Replace with your website URL
   }
 }
